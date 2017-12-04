@@ -7,5 +7,7 @@ The gh-pages branch of this repository has starter files for your web page. You 
 **Once you understand the structure listed above, you should replace this readme with something specific to your project.**
 
 `g++ -o test_calibration aruco_test.cpp pkg-config opencv --cflags --libs` 
+
+
 `cv::Mat testImage = cv::imread("/home/ncr/frame.jpg");`
 
