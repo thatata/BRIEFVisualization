@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( ArucoMarkerDetection )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable(aruco_test  aruco_test.cpp )
+target_link_libraries( aruco_test ${OpenCV_LIBS} )
