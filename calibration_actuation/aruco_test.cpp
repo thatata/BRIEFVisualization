@@ -246,20 +246,40 @@
     Ptr<aruco::Dictionary> markerDictionary =
         aruco::getPredefinedDictionary( 0 );
 
-    VideoCapture vid(0);  //TODO: When using on Machine with Kinect change to source 1 if not working!!!!
+    //VideoCapture vid(0);
+
+    // Use for Kinect
+    printf("Initiating VideoCapture\n");
+    VideoCapture vid( CAP_OPENNI );
+    //VideoCapture vid(CAP_OPENNI_GRAY_IMAGE);
 
     if ( !vid.isOpened() ) {
+      printf("Video fails to open\n");
       return -1;
     }
 
+    printf("Video successfully open!\n");
+    printf("Opening window ...\n");
+
     namedWindow("Webcam", CV_WINDOW_AUTOSIZE);  //Makes the GUI
 
+    printf("Successfully built Window\n");
+
+
     vector<Vec3d> rotationVectors, translationVectors;
+    printf("Successfully created rotationVectors and translationVectors...\n");
+
+    //while (true) {}
 
     while(true) {
       if (!vid.read(frame)) {
-        break;
+      //if (!vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE)) {
+        printf("Unable to read current frame. Exiting\n");
+        return -1;
       }
+
+      // Alters image type
+      vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
 
       // Finds them
       aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
@@ -288,6 +308,7 @@
 
     }
     // Perform analysis and determine actual location
+    printf("Desired frame aquired. Continuing to analyse frame...\n");
     analyzeFrame( markerCorners, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors, markerIds );
 
     return 1;

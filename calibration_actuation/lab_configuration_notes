@@ -1,0 +1,49 @@
+480 * 640 // webcam on kinectActual
+
+check size_t
+
+Version problem on Qt
+  + see what is on my laptop
+  + migrate to that VX_VERSION_1_1
+
+
+
+
+
+Story of today (4 December 2017):
++ Pablo needed his other computer so we had to setup a new machine.
++ First tried it again on my Mac and installed OpenNI -- required to use the Kinect as a video source.
+  Did NOT work. Was not reading it as a Camera on my mac so we moved to another machine.
+    + Was able to ge the NiViewer to work though when changing the default of all three in VM Manager to go to the LInux and changing to USB 2.0 NOT 3.0
+    + Yet with the virtualization kept giving poor images and freezing after a frame. Not functional. 
+
++ Lab Machine (SimhaLab2)
+  - First installed OpenNI (Pablo's Link: )
+  - Second installed OpenCV:
+    (https://www.learnopencv.com/install-opencv3-on-ubuntu/)
+    Issues with qt5 when INSTALLING
+    **Modified link instructions to include WITH_OPENNI=ON**
+    Used ccmake GUI for easier use
+    t for more options
+    a for advanced and even more options.
+    Must run atleast twice for c before building make file
+
+  - Ensure that you install java first JRE and JDK
+  - Used Python 2.7 for this
+  - Qt5: use command, NOT GUI to install -- it automatically downloads in the correct location
+    + Do before starting OpenCV in retrospect
+    sudo apt-get install qtdeclarative5-dev
+
+  - Began adding print statements for debugging. Remove from while loop
+  - The image stream type from the kinect was not correct.
+  - VideoCapture vid(0) was replaced with VideoCapture vid(CAP_OPENNI)
+  - vid.read(frame) is required to obtain the frame -- even if it is the wrong type
+  - correct type is CV_8UC1 (error was on line 1520 in thresh.cpp)
+  - vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
+      + Converts the incorrect image type from the Kinect to one that can be handled during processing.
+
+
++ To do: Looking forward to Winter Break:
+  - Make a similar function that saves the frame with imwrite()
+  - Use another function that also does imread() to read in the images
+    + Easier: Mat frame = imread("/home/ncr/frame.jpg");
