@@ -42,7 +42,7 @@ int main(int argv, char **argc)
     printf("Video successfully open!\n");
     printf("Opening window ...\n");
 
-    namedWindow("Webcam", CV_WINDOW_AUTOSIZE);  //Makes the GUI
+    namedWindow(argc[0], CV_WINDOW_AUTOSIZE);  //Makes the GUI
 
     printf("Successfully built Window\n");
 
@@ -67,7 +67,7 @@ int main(int argv, char **argc)
     }
 
     try {
-        imwrite("alpha.png", frame, compression_params);
+        imwrite(argc[0], frame, compression_params);
     }
     catch (runtime_error& ex) {
         fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
