@@ -39,13 +39,7 @@ int main(int argv, char **argc)
       return -1;
     }
 
-    printf("Video successfully open!\n");
-    printf("Opening window ...\n");
-
     namedWindow(argc[1], CV_WINDOW_AUTOSIZE);  //Makes the GUI
-
-    printf("Successfully built Window\n");
-
 
     while(true) {
       if (!vid.read(frame)) {
@@ -75,6 +69,6 @@ int main(int argv, char **argc)
         return 1;
     }
 
-    fprintf(stdout, "Saved PNG file with alpha data.\n");
+    fprintf(stdout, "Successfully saved PNG file as: %s.\n", argc[1]);
     return 0;
 }
