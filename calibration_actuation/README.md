@@ -9,5 +9,6 @@ The gh-pages branch of this repository has starter files for your web page. You 
 Release Update Notes:
 - OpenCV moved to root directory for compilation. No longer stored in git folder.
 
-###Saving images:
-Run `save` within `calibration_actuation/` with command: `$ ./save [fileName.png]`
+**Saving images:**
+Run `save` within `calibration_actuation/` 
+with command: `$ ./save [fileName.png]`
