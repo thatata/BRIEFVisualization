@@ -31,8 +31,8 @@ int main(int argv, char **argc)
 
     // Use for Kinect
     printf("Initiating VideoCapture\n");
-    VideoCapture vid( CAP_OPENNI );
-    //VideoCapture vid(CAP_OPENNI_GRAY_IMAGE);
+    //VideoCapture vid( CAP_OPENNI );
+    VideoCapture vid(0);
 
     if ( !vid.isOpened() ) {
       printf("Video fails to open\n");
@@ -42,7 +42,7 @@ int main(int argv, char **argc)
     printf("Video successfully open!\n");
     printf("Opening window ...\n");
 
-    namedWindow(argc[0], CV_WINDOW_AUTOSIZE);  //Makes the GUI
+    namedWindow(argc[1], CV_WINDOW_AUTOSIZE);  //Makes the GUI
 
     printf("Successfully built Window\n");
 
@@ -55,7 +55,8 @@ int main(int argv, char **argc)
       }
 
       // Alters image type
-      vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
+      //vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
+      imshow(argc[1], frame);
 
       char character;
       if ( character = waitKey(30) >= 0) break;
@@ -67,7 +68,7 @@ int main(int argv, char **argc)
     }
 
     try {
-        imwrite(argc[0], frame, compression_params);
+        imwrite(argc[1], frame, compression_params);
     }
     catch (runtime_error& ex) {
         fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
