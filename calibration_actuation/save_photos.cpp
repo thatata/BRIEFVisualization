@@ -31,8 +31,8 @@ int main(int argv, char **argc)
 
     // Use for Kinect
     printf("Initiating VideoCapture\n");
-    //VideoCapture vid( CAP_OPENNI );
-    VideoCapture vid(0);
+    VideoCapture vid( CAP_OPENNI );
+    //VideoCapture vid(0);
 
     if ( !vid.isOpened() ) {
       printf("Video fails to open\n");
@@ -49,7 +49,7 @@ int main(int argv, char **argc)
       }
 
       // Alters image type
-      //vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
+      vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
       imshow(argc[1], frame);
 
       char character;
