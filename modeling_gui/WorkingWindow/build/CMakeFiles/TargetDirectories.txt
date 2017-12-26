@@ -1,0 +1,3 @@
+/home/thatata/workplace/source/sd/working/WorkingWindow/build/CMakeFiles/rebuild_cache.dir
+/home/thatata/workplace/source/sd/working/WorkingWindow/build/CMakeFiles/edit_cache.dir
+/home/thatata/workplace/source/sd/working/WorkingWindow/build/CMakeFiles/WorkingWindow.dir
