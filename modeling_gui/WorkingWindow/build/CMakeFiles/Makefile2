@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/thatata/workplace/source/sd/working/WorkingWindow
+CMAKE_SOURCE_DIR = /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/thatata/workplace/source/sd/working/WorkingWindow/build
+CMAKE_BINARY_DIR = /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build
 
 #=============================================================================
 # Target rules for target CMakeFiles/WorkingWindow.dir
@@ -66,7 +66,7 @@ CMAKE_BINARY_DIR = /home/thatata/workplace/source/sd/working/WorkingWindow/build
 CMakeFiles/WorkingWindow.dir/all:
 	$(MAKE) -f CMakeFiles/WorkingWindow.dir/build.make CMakeFiles/WorkingWindow.dir/depend
 	$(MAKE) -f CMakeFiles/WorkingWindow.dir/build.make CMakeFiles/WorkingWindow.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/thatata/workplace/source/sd/working/WorkingWindow/build/CMakeFiles --progress-num=1,2 "Built target WorkingWindow"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/CMakeFiles --progress-num=1,2 "Built target WorkingWindow"
 .PHONY : CMakeFiles/WorkingWindow.dir/all
 
 # Include target in all.
@@ -76,9 +76,9 @@ all: CMakeFiles/WorkingWindow.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/WorkingWindow.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/thatata/workplace/source/sd/working/WorkingWindow/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/WorkingWindow.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/thatata/workplace/source/sd/working/WorkingWindow/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/CMakeFiles 0
 .PHONY : CMakeFiles/WorkingWindow.dir/rule
 
 # Convenience name for target.

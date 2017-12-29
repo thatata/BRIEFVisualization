@@ -377,13 +377,7 @@ std::vector<vtkSmartPointer<vtkPNGReader>> GetReaders(int numImages) {
 
         // get filename
         std::stringstream filename;
-
-        // check how many zeroes to add
-        if (i < 10) {
-            filename << "000" << i << ".png";
-        } else {
-            filename << "00" << i << ".png";
-        }
+        filename << i << ".png";
 
         // read image by setting filename
         reader->SetFileName(filename.str().c_str());

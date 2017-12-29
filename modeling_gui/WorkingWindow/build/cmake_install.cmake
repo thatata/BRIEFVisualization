@@ -1,4 +1,4 @@
-# Install script for directory: /home/thatata/workplace/source/sd/working/WorkingWindow
+# Install script for directory: /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/thatata/workplace/source/sd/working/WorkingWindow/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
