@@ -22,17 +22,18 @@
 
  /* (I) INCLUDES + NAMESPAGES */
 
- #include "opencv2/core.hpp"
- #include "opencv2/imgcodecs.hpp"
- #include "opencv2/imgproc.hpp"
- #include "opencv2/highgui.hpp"
- #include "opencv2/aruco.hpp"
- #include "opencv2/calib3d.hpp"
+ //include "opencv2/core.hpp"
+ //include "opencv2/imgcodecs.hpp"
+ //include "opencv2/imgproc.hpp"
+ //include "opencv2/highgui.hpp"
+ //include "opencv2/aruco.hpp"
+ //include "opencv2/calib3d.hpp"
 
- #include <sstream>
- #include <iostream>
- #include <fstream>
- #include <vector>
+ //include <sstream>
+ //include <iostream>
+ //include <fstream>
+ //include <vector>
+ //include <math.h>
 
  using namespace std;
  using namespace cv;
@@ -485,11 +486,82 @@
 
  /* (IX) ACTUATION */
 
- // Socket Communication
+ // Socket Communication - for all actuation
 
- // Move Up
- // Move down
- // Move left
- // Move Right
+ // Conversion functions
+ Vec3d cartesian_to_polar( Vec3d cartesian ) {
+   double r, theta = 0;
+   Vec3d polar ( r, theta, cartesian[2] );
+   r = sqrt( cartesian[0]*cartesian[0] + cartesian[1]*cartesian[1] );
+   theta = atan( cartesian[1]/cartesian[0] );
+
+   return polar;
+ }
+
+ Vec3d polar_to_cartesian( Vec3d polar ) {
+   double x, y = 0;
+   x = polar[0] * cos( polar[1] );
+   y = polar[0] * sin( polar[1] );
+   Vec3d cartesian ( x, y, cartesian[2] );
+   return cartesian;
+ }
+
+ // Basic functions when location isn't specified
+
+ int down() {
+   // open one x2 close the other
+ }
+
+ int up() {
+   // open one x2 close the other - inverse
+ }
+
+ int left() {
+   // Stepper motor
+ }
+
+ int right() {
+   // stepper motor
+ }
+
+ int rotateCamera() {
+   // open one x2 close the other
+ }
+
+ // Error correct
+ int error_correct( Vec3d desired_endpoint ) {
+     //TODO: Get actual location of camera (actual_pt)
+         //TODO: Call upon Arucu & opencv libraries
+     //TODO: Margin of error mesuring
+     //TODO: If within, simply return | else continue
+     //TODO: Not within error, call move function between points
+     //TODO: move( actual_pt, desired_endpoint )
+ }
 
  // Move to location
+ int move( Vec3d old_pt, Vec3d new_pt ) {
+     //TODO: Get differences in theta and move stepper motor
+     double theta_diff = new_pt[1] - old_pt[1];
+
+     //TODO: Get differences in r(radius)
+     double r_diff = new_pt[0] - old_pt[0];
+
+     //TODO: Get differences in z
+     double z_diff = new_pt[2] - old_pt[2];
+
+     //TODO: Determine what the z_diff translates to in stepper movements
+
+     //TODO: Determine the combination of movements of other motors to get to correct r & z
+         // Longer term
+
+     //TODO: Ensure that moves are valid, if not change to valid, or throw error (return -1;)
+      // Within min and maximum of Motor movements
+
+     //TODO: Iniate Socket communication and Call Karl's API to move points
+        // Stepper motor for z
+        // Continued
+
+     //TODO: Call calibration function
+     error_correct( new_pt );
+     return 1;
+ }
