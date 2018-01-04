@@ -58,6 +58,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkVertexGlyphFilter.h>
 #include <vtkIdFilter.h>
+#include <vtkActorCollection.h>
 
 class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
     public:
@@ -69,6 +70,13 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             Cube = false;
             Draw = false;
             Rotate = false;
+            Selected = false;
+            Scale = false;
+            Move = false;
+            Stretch = false;
+
+            // initialize selected actor
+            selectedActor = vtkSmartPointer<vtkActor>::New();
         }
 
         virtual void OnLeftButtonDown() {
@@ -135,9 +143,79 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
                     // re-render
                     this->Interactor->Render();
+
+                    // done, so return
+                    return;
                 }
             }
 
+            // otherwise, check if object was selected
+            if (Selected) {
+                // if so, check if a manipulation tool was selected
+                if (Rotate) {
+
+                } else if (Scale) {
+
+                } else if (Stretch) {
+
+                } else if (Move) {
+
+                } else {
+                    // otherwise, deselect actor
+                    selectedActor->GetProperty()->SetColor(1,1,1); // white
+
+                    // change flag
+                    Selected = false;
+
+                    // re-initialize selectedActor
+                    selectedActor = vtkSmartPointer<vtkActor>::New();
+
+                    // re-render
+                    this->Interactor->Render();
+                }
+
+            } else { // if not, check if user tried to select an object
+
+                // get click position
+                double *click = GetClickPosition();
+
+                // get actors from the renderer
+                vtkSmartPointer<vtkActorCollection> actors = this->CurrentRenderer->GetActors();
+
+                // initialize traversal
+                actors->InitTraversal();
+
+                // loop through each actor to see if it's under the mouse click
+                for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
+                    // get next actor
+                    vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
+
+                    // get the bounds of that actor (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax)
+                    double *bounds = actor->GetBounds();
+
+                    // check if the click position is within the bounds
+                    if ((click[0] >= bounds[0] && click[0] <= bounds[1]) &&
+                            click[1] >= bounds[2] && click[1] <= bounds[3]) {
+                        // if so, actor has been selected
+                        Selected = true;
+
+                        // save address for future use
+                        selectedActor = actor;
+
+                        // change color to red to denote selected
+                        actor->GetProperty()->SetColor(1,0,0); // red
+
+                        // re-render
+                        this->Interactor->Render();
+
+                        // done, so return
+                        return;
+                    }
+
+                }
+
+                // if this is reached, none of the actors were under the mouse click
+            }
             // otherwise, do nothing
         }
 
@@ -174,10 +252,26 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             }
         }
 
+        void RotateSelected() {
+            // change flag depending on selected or not
+            if (Rotate) {
+                // change back to false
+                Rotate = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Rotate = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+
         void ZoomSelected() {}
         void ScaleSelected() {}
         void StretchSelected() {}
-        void RotateSelected() {}
         void MoveSelected() {}
         void RequestSelected() {}
         void OutputSelected() {}
@@ -248,6 +342,13 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         bool Cube;
         bool Draw;
         bool Rotate;
+        bool Selected;
+        bool Scale;
+        bool Move;
+        bool Stretch;
+
+        // selected actor
+        vtkSmartPointer<vtkActor> selectedActor;
 
         // map vtkRenderer addresses to integers for processing
         std::map<int,vtkRenderer*> rendererMap;

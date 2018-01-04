@@ -1183,4 +1183,6 @@ vtkVertexGlyphFilter.h
 -
 vtkIdFilter.h
 -
+vtkActorCollection.h
+-
 
