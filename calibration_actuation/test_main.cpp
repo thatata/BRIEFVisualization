@@ -9,6 +9,7 @@ int main(int argv, char** argc) {
   translationVectorsToOrigin.push_back(mk0);
   translationVectorsToOrigin.push_back(mk1);
   translationVectorsToOrigin.push_back(mk2);
+  translationVectorsToOrigin.push_back(mk3);
 
   Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
   Mat distanceCoefficients;
@@ -19,7 +20,7 @@ int main(int argv, char** argc) {
   // cameraCalibrationProcess( cameraMatrix, distanceCoefficients );
 
   loadCameraCalibration("KinectCalibration", cameraMatrix, distanceCoefficients);
-  obtainSavedImage(argc[1], cameraMatrix, distanceCoefficients, true);
+  obtainSavedImage(argc[1], cameraMatrix, distanceCoefficients, false);
 
   /* TRANSLATION TO ACTUAL IMPLIMENTATION */
   // TODO:
