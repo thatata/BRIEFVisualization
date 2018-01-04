@@ -191,7 +191,7 @@
          double temp = 0.0f;
          inStream >> temp;
          cameraMatrix.at<double>(r,c) = temp;
-         cout << cameraMatrix.at<double>(r,c) << "\n";
+         //cout << cameraMatrix.at<double>(r,c) << "\n";
        }
      }
 
@@ -206,7 +206,7 @@
          double temp = 0.0f;
          inStream >> temp;
          distanceCoefficients.at<double>(r,c) = temp;
-         cout << distanceCoefficients.at<double>(r,c) << "\n";
+         //cout << distanceCoefficients.at<double>(r,c) << "\n";
        }
      }
 
@@ -294,6 +294,7 @@
  /* (VI) CALIBRATION ANALYSIS */
  int analyzeFrame( vector< vector<Point2f> > markerCorners, vector<Vec3d> rotationVectors, vector<Vec3d> translationVectors, vector<int> markerIds ) {
 
+   printf("Successfully enters analyzeFrame\n");
    // Print out rotationVectors and translationVectors
    for ( int r = 0 ; r < rotationVectors.size() ; r++ ) {
      printf("MarkerId: %d\n", markerIds[r]);
@@ -307,6 +308,7 @@
     * to get the actual location of the camera
     * TODO: Math is NOT correct. How to know if to add vs. subtract? or matrix multiplication?
     */
+    printf("%i Markers found, determining location of Kinect using Marker %i\n\n", markerIds.size(), markerIds[0] );
     int firstMarkerFound = markerIds[0];
     kinectActual[0] = translationVectors.at(0)[0] + translationVectorsToOrigin.at(firstMarkerFound)[0];
     kinectActual[1] = translationVectors.at(0)[1] + translationVectorsToOrigin.at(firstMarkerFound)[1];
@@ -324,7 +326,7 @@
  }
 
  /* (VII) IMPORTING SAVED IMAGE FOR ANALYSIS */
- int obtainSavedImage( string name, const Mat& cameraMatrix, const Mat& distanceCoefficients, bool showMarkers) {
+ int obtainSavedImage( string name, const Mat& cameraMatrix, const Mat& distanceCoefficients, bool showWindow) {
 
    // Bring in the file that we are loading image from
    ifstream inStream;
@@ -343,54 +345,55 @@
 
    // Opening Image
    printf("Attempting to open %s\n", name.c_str());
+   string projectPath = "/home/tjmagnan/sd-18-hatata_magnan/calibration_actuation";
+   string fullPath = projectPath + name.c_str();
    try {
-     frame = imread(name.c_str());
+     frame = imread(fullPath);
    }
    catch (runtime_error& ex) {
        fprintf(stderr, "Exception importing image: %s\n", ex.what());
        return 1;
    }
-
    printf("Image successfully opens!\n");
-   printf("Opening window ...\n");
 
-   namedWindow(name.c_str(), CV_WINDOW_AUTOSIZE);  //Makes the GUI
-
-   printf("Successfully built Window\n");
-
+   if (showWindow) {
+     printf("Opening window ...\n");
+     namedWindow(name.c_str(), CV_WINDOW_AUTOSIZE);  //Makes the GUI
+     printf("Successfully built Window\n");
+   }
 
    vector<Vec3d> rotationVectors, translationVectors;
    printf("Successfully created rotationVectors and translationVectors...\n");
 
-   while(true) {  //TODO: When working, remove while loop, and viewing
-     // Alters image type
-     // vid.retrieve(frame, CAP_OPENNI_BGR_IMAGE);
-     // TODO: How to replace if it doesn't work
+   // Finds them
+   aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
 
-     // Finds them
-     aruco::detectMarkers(frame, markerDictionary, markerCorners, markerIds);
+   // Outline the markers and label with ids
+   if ( showWindow ) { aruco::drawDetectedMarkers(frame, markerCorners, markerIds); }
 
-     // Outline the markers and label with ids
-     if (showMarkers) { aruco::drawDetectedMarkers(frame, markerCorners, markerIds); }
+   // Estimate pose
+   aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors );
 
-     // Estimate pose
-     aruco::estimatePoseSingleMarkers(markerCorners, arucoSquareDimension, cameraMatrix, distanceCoefficients, rotationVectors, translationVectors );
-
-     // Continually draw the axis
-     if ( showMarkers ) {
-       for ( int i = 0 ; i < markerIds.size() ; i++ ) {
-         aruco::drawAxis(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], 0.1f);
-         // printf("Marker %i found\n", markerIds[i] ); // Only print once but already shown visually
-       }
-       imshow(name.c_str(), frame);
+   // Continually draw the axis
+   if ( showWindow ) {
+     for ( int i = 0 ; i < markerIds.size() ; i++ ) {
+       aruco::drawAxis(frame, cameraMatrix, distanceCoefficients, rotationVectors[i], translationVectors[i], 0.1f);
+       // printf("Marker %i found\n", markerIds[i] ); // Only print once but already shown visually
      }
+     imshow(name.c_str(), frame);
+   }
 
-     char character;
-     if ( character = waitKey(30) >= 0) break;
+   if ( showWindow ) {
+     while(true) {
+      imshow(name.c_str(), frame);
 
-     // Once a good photo has been taken
-     // press SPACE to exit for analysis
-     if ( character == ' ' ) { break; }
+       char character;
+       if ( character = waitKey(30) >= 0) break;
+
+       // Once a good photo has been taken
+       // press SPACE to exit for analysis
+       if ( character == ' ' ) { break; }
+     }
    }
 
    // Perform analysis and determine actual location
