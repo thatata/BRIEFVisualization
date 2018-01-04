@@ -64,7 +64,12 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         static MyInteractorStyle* New();
         vtkTypeMacro(MyInteractorStyle, vtkInteractorStyleTrackballActor);
 
-        MyInteractorStyle() {}
+        MyInteractorStyle() {
+            // set default values
+            Cube = false;
+            Draw = false;
+            Rotate = false;
+        }
 
         virtual void OnLeftButtonDown() {
             // get position of the click
@@ -72,15 +77,10 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             int y = this->Interactor->GetEventPosition()[1];
 
             // set the appropriate renderer based on the click position
-            this->FindPokedRenderer(x,y);
+            this->FindPokedRenderer(x, y);
 
             // perform operation based on the renderer selected
             PerformAction();
-
-            this->CurrentRenderer->SetBackground(0,0,0);
-
-            this->CurrentRenderer->ResetCamera();
-            this->Interactor->Render();
 
             // forward events
             //vtkInteractorStyleTrackballActor::OnLeftButtonDown();
@@ -125,9 +125,55 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             // otherwise, perform no action
         }
 
-        void SceneSelected() {}
-        void CubeSelected() {}
-        void DrawSelected() {}
+        void SceneSelected() {
+            // check if draw is selected
+            if (Draw) {
+                // check if cube is selected, if so draw cube
+                if (Cube) {
+                    // if so, draw cube
+                    DrawCubeOntoImage();
+
+                    // re-render
+                    this->Interactor->Render();
+                }
+            }
+
+            // otherwise, do nothing
+        }
+
+        void CubeSelected() {
+            // change flag depending on selected or not
+            if (Cube) {
+                // change back to false
+                Cube = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Cube = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+        void DrawSelected() {
+            // change flag depending on selected or not
+            if (Draw) {
+                // change back to false
+                Draw = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Draw = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+
         void ZoomSelected() {}
         void ScaleSelected() {}
         void StretchSelected() {}
@@ -136,11 +182,72 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         void RequestSelected() {}
         void OutputSelected() {}
 
+        void ChangeRenderer(double r, double g, double b) {
+            // based on rgb values, set background of current renderer
+            this->CurrentRenderer->SetBackground(r, g, b);
+
+            // reset camera
+            this->CurrentRenderer->ResetCamera();
+
+            // render the window to reflect this change
+            this->Interactor->Render();
+        }
+
+        double *GetClickPosition() {
+            // get x and y from mouse event
+            int x = this->Interactor->GetEventPosition()[0];
+            int y = this->Interactor->GetEventPosition()[1];
+
+            // use picker to select correct pixel location
+            this->Interactor->GetPicker()->Pick(x,
+                                                y,
+                                                0, // always zero
+                                                this->CurrentRenderer);
+
+            // get the pick position
+            double *position = this->Interactor->GetPicker()->GetPickPosition();
+
+            return position;
+        }
+
+        void DrawCubeOntoImage() {
+            // get click position (x,y)
+            double *position = GetClickPosition();
+
+            // Create a cube
+            vtkSmartPointer<vtkCubeSource> cubeSource =
+              vtkSmartPointer<vtkCubeSource>::New();
+
+            // set center based on click (z = 0)
+            cubeSource->SetCenter(position[0], position[1], position[2]);
+
+            // set basic length/width/height
+            cubeSource->SetXLength(25.0);
+            cubeSource->SetYLength(25.0);
+            cubeSource->SetZLength(25.0);
+
+            // map cube source to data set mapper
+            vtkSmartPointer<vtkDataSetMapper> mapper =
+              vtkSmartPointer<vtkDataSetMapper>::New();
+            mapper->SetInputConnection(cubeSource->GetOutputPort());
+
+            // create actor and set mapper
+            vtkSmartPointer<vtkActor> actor =
+              vtkSmartPointer<vtkActor>::New();
+            actor->SetMapper(mapper);
+
+            // add actor to the current renderer
+            this->CurrentRenderer->AddActor(actor);
+        }
+
         // setters
         void SetRendererMap(std::map<int,vtkRenderer*> map) { rendererMap = map; }
 
     private:
         // private vars
+        bool Cube;
+        bool Draw;
+        bool Rotate;
 
         // map vtkRenderer addresses to integers for processing
         std::map<int,vtkRenderer*> rendererMap;
@@ -164,6 +271,7 @@ vtkSmartPointer<vtkRenderer> CreateMoveButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreateRequestButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreateOutputButtonRenderer();
 std::vector<vtkSmartPointer<vtkPNGReader>> GetReaders(int numImages);
+void SetImageCamera(vtkSmartPointer<vtkPNGReader> reader, vtkSmartPointer<vtkRenderer> renderer);
 
 int main(int argc, char *argv[])
 {
@@ -186,17 +294,28 @@ int main(int argc, char *argv[])
 
     // create render window, set size and number of layers
     vtkSmartPointer<vtkRenderWindow> renderWindow =
-      vtkSmartPointer<vtkRenderWindow>::New();
+        vtkSmartPointer<vtkRenderWindow>::New();
+
     renderWindow->SetNumberOfLayers(2);
     renderWindow->SetSize(size[0],size[1]);
 
     // create map object to map renderer addresses to integers
     std::map<int,vtkRenderer*> rendererMap;
 
+    // create renderer for the cube button
+    vtkSmartPointer<vtkRenderer> cubeRenderer = CreateCubeButtonRenderer();
+    renderWindow->AddRenderer(cubeRenderer);
+    rendererMap[0] = cubeRenderer;
+
+    // create renderer for the others button
+    vtkSmartPointer<vtkRenderer> otherRenderer = CreateOtherButtonRenderer();
+    renderWindow->AddRenderer(otherRenderer);
+    rendererMap[1] = otherRenderer;
+
     // create renderer for the image (display first image for now)
     vtkSmartPointer<vtkRenderer> imageRenderer = CreateImageRenderer(readers[0]);
-    imageRenderer->SetLayer(0); // image renderer will be behind scene renderer
     renderWindow->AddRenderer(imageRenderer);
+    rendererMap[2] = imageRenderer;
 
     // create renderer for the operations text
     vtkSmartPointer<vtkRenderer> operationsRenderer = CreateOperationsRenderer();
@@ -210,58 +329,42 @@ int main(int argc, char *argv[])
     vtkSmartPointer<vtkRenderer> objectsRenderer = CreateObjectsRenderer();
     renderWindow->AddRenderer(objectsRenderer);
 
-    // create renderer for the cube text
-    vtkSmartPointer<vtkRenderer> cubeRenderer = CreateCubeButtonRenderer();
-    renderWindow->AddRenderer(cubeRenderer);
-    rendererMap[0] = cubeRenderer;
-
-    // create renderer for the others text
-    vtkSmartPointer<vtkRenderer> otherRenderer = CreateOtherButtonRenderer();
-    renderWindow->AddRenderer(otherRenderer);
-    rendererMap[1] = otherRenderer;
-
-    // create renderer for the scene (over the image)
-    vtkSmartPointer<vtkRenderer> sceneRenderer = vtkSmartPointer<vtkRenderer>::New();
-    sceneRenderer->SetLayer(1); // scene renderer on top of image renderer
-    renderWindow->AddRenderer(sceneRenderer);
-    rendererMap[2] = sceneRenderer;
-
-    // create renderer for the draw text
+    // create renderer for the draw button
     vtkSmartPointer<vtkRenderer> drawRenderer = CreateDrawButtonRenderer();
     renderWindow->AddRenderer(drawRenderer);
     rendererMap[3] = drawRenderer;
 
-    // create renderer for the zoom text
+    // create renderer for the zoom button
     vtkSmartPointer<vtkRenderer> zoomRenderer = CreateZoomButtonRenderer();
     renderWindow->AddRenderer(zoomRenderer);
     rendererMap[4] = zoomRenderer;
 
-    // create renderer for the scale text
+    // create renderer for the scale button
     vtkSmartPointer<vtkRenderer> scaleRenderer = CreateScaleButtonRenderer();
     renderWindow->AddRenderer(scaleRenderer);
     rendererMap[5] = scaleRenderer;
 
-    // create renderer for the stretch text
+    // create renderer for the stretch button
     vtkSmartPointer<vtkRenderer> stretchRenderer = CreateStretchButtonRenderer();
     renderWindow->AddRenderer(stretchRenderer);
     rendererMap[6] = stretchRenderer;
 
-    // create renderer for the rotate text
+    // create renderer for the rotate button
     vtkSmartPointer<vtkRenderer> rotateRenderer = CreateRotateButtonRenderer();
     renderWindow->AddRenderer(rotateRenderer);
     rendererMap[7] = rotateRenderer;
 
-    // create renderer for the move text
+    // create renderer for the move button
     vtkSmartPointer<vtkRenderer> moveRenderer = CreateMoveButtonRenderer();
     renderWindow->AddRenderer(moveRenderer);
     rendererMap[8] = moveRenderer;
 
-    // create renderer for the request text
+    // create renderer for the request button
     vtkSmartPointer<vtkRenderer> requestRenderer = CreateRequestButtonRenderer();
     renderWindow->AddRenderer(requestRenderer);
     rendererMap[9] = requestRenderer;
 
-    // create renderer for the output text
+    // create renderer for the output button
     vtkSmartPointer<vtkRenderer> outputRenderer = CreateOutputButtonRenderer();
     renderWindow->AddRenderer(outputRenderer);
     rendererMap[10] = outputRenderer;
@@ -286,7 +389,6 @@ int main(int argc, char *argv[])
     cubeRenderer->SetViewport(xmin[2], ymin[2], xmax[2], ymax[2]);
     otherRenderer->SetViewport(xmin[3], ymin[3], xmax[3], ymax[3]);
     imageRenderer->SetViewport(xmin[4], ymin[4], xmax[4], ymax[4]);
-    sceneRenderer->SetViewport(xmin[5], ymin[5], xmax[5], ymax[5]);
     operationsRenderer->SetViewport(xmin[6], ymin[6], xmax[6], ymax[6]);
     drawRenderer->SetViewport(xmin[7], ymin[7], xmax[7], ymax[7]);
     zoomRenderer->SetViewport(xmin[8], ymin[8], xmax[8], ymax[8]);
@@ -315,12 +417,14 @@ int main(int argc, char *argv[])
 
     // create render window interactor and set render window
     vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-      vtkSmartPointer<vtkRenderWindowInteractor>::New();
+        vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
     renderWindowInteractor->SetRenderWindow(renderWindow);
 
     // create interactor style to handle events
-    vtkSmartPointer<MyInteractorStyle> style = vtkSmartPointer<MyInteractorStyle>::New();
+    vtkSmartPointer<MyInteractorStyle> style =
+        vtkSmartPointer<MyInteractorStyle>::New();
+
     renderWindowInteractor->SetInteractorStyle(style);
 
     // set renderer map
@@ -329,32 +433,10 @@ int main(int argc, char *argv[])
     // render the window to figure out where image camera is
     renderWindow->Render();
 
-    // Set up the camera to fill the image renderer with the image
-    vtkImageData *imageData = readers[0]->GetOutput();
+    // fill image in the image renderer
+    SetImageCamera(readers[0], imageRenderer);
 
-    // get origin/spacing/extent to set camera
-    double origin[3];
-    double spacing[3];
-    int extent[6];
-    imageData->GetOrigin( origin );
-    imageData->GetSpacing( spacing );
-    imageData->GetExtent( extent );
-
-    // get active camera of the renderer
-    vtkCamera* camera = imageRenderer->GetActiveCamera();
-    camera->ParallelProjectionOn();
-
-    // calculate and set parallel scale/focal point/position of camera
-    double xc = origin[0] + 0.5*(extent[0] + extent[1])*spacing[0];
-    double yc = origin[1] + 0.5*(extent[2] + extent[3])*spacing[1];
-    //double xd = (extent[1] - extent[0] + 1)*spacing[0];
-    double yd = (extent[3] - extent[2] + 1)*spacing[1];
-    double d = camera->GetDistance();
-    camera->SetParallelScale(0.5*yd);
-    camera->SetFocalPoint(xc,yc,0.0);
-    camera->SetPosition(xc,yc,d);
-
-    // render window again to set the correct view
+    // re-render to reflect camera change
     renderWindow->Render();
 
     // start interactor
@@ -392,6 +474,33 @@ std::vector<vtkSmartPointer<vtkPNGReader>> GetReaders(int numImages) {
     return readers;
 }
 
+void SetImageCamera(vtkSmartPointer<vtkPNGReader> reader, vtkSmartPointer<vtkRenderer> renderer) {
+    // Set up the camera to fill the image renderer with the image
+    vtkImageData *imageData = reader->GetOutput();
+
+    // get origin/spacing/extent to set camera
+    double origin[3];
+    double spacing[3];
+    int extent[6];
+    imageData->GetOrigin( origin );
+    imageData->GetSpacing( spacing );
+    imageData->GetExtent( extent );
+
+    // get active camera of the renderer
+    vtkCamera* camera = renderer->GetActiveCamera();
+    camera->ParallelProjectionOn();
+
+    // calculate and set parallel scale/focal point/position of camera
+    double xc = origin[0] + 0.5*(extent[0] + extent[1])*spacing[0];
+    double yc = origin[1] + 0.5*(extent[2] + extent[3])*spacing[1];
+    //double xd = (extent[1] - extent[0] + 1)*spacing[0];
+    double yd = (extent[3] - extent[2] + 1)*spacing[1];
+    double d = camera->GetDistance();
+    camera->SetParallelScale(0.5*yd);
+    camera->SetFocalPoint(xc,yc,0.0);
+    camera->SetPosition(xc,yc,d);
+}
+
 vtkSmartPointer<vtkRenderer> CreateImageRenderer(vtkSmartPointer<vtkPNGReader> reader) {
     // put in its own image actor
     vtkSmartPointer<vtkImageActor> imageActor =
@@ -402,9 +511,6 @@ vtkSmartPointer<vtkRenderer> CreateImageRenderer(vtkSmartPointer<vtkPNGReader> r
     // create renderer to hold image
     vtkSmartPointer<vtkRenderer> renderer =
         vtkSmartPointer<vtkRenderer>::New();
-
-    // set renderer to the background layer
-    renderer->SetLayer(0);
 
     // add image actor to image renderer
     renderer->AddActor(imageActor);
