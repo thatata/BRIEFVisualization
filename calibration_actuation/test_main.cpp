@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
   loadCameraCalibration("KinectCalibration", cameraMatrix, distanceCoefficients);
   obtainSavedImage(argv[1], cameraMatrix, distanceCoefficients, showWindow);
 
+  socket_request("Test");
+
   /* TRANSLATION TO ACTUAL IMPLIMENTATION */
   // TODO:
     // Create getKinectLocation
