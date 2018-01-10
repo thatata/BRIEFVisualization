@@ -60,6 +60,46 @@
 #include <vtkIdFilter.h>
 #include <vtkActorCollection.h>
 
+/**
+  * TH: Operations Overview
+  *
+  * Draw: with an object button selected (e.g. cube, point),
+  * click on the scene to place that object in the scene.
+  *
+  * Zoom: left click on the scene to zoom in (X%), right
+  * click on the scene to zoom out.
+  *
+  * Scale: with an object in the scene selected, use the
+  * up and down arrow keys to scale larger and smaller,
+  * respectively.
+  *
+  * Stretch: ??
+  *
+  * Rotate: with an object in the scene selected, use the
+  * arrow keys to rotate the object in the appropriate
+  * direction.
+  *
+  * Move: with an object in the scene selected, click and
+  * drag the object to move the object in the scene.
+  *
+  * Request: ??
+  *
+  * Output: ??
+  *
+  **/
+
+// structure holding actor and cube source of each cube object
+struct CubeData {
+    // actor object
+    vtkSmartPointer<vtkActor> actor;
+
+    // cube source object
+    vtkSmartPointer<vtkCubeSource> cubeSource;
+
+    // variables to store scale factor, rotation angles
+    double scaleFactor, rotationX, rotationY;
+};
+
 class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
     public:
         static MyInteractorStyle* New();
@@ -74,9 +114,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             Scale = false;
             Move = false;
             Stretch = false;
-
-            // initialize selected actor
-            selectedActor = vtkSmartPointer<vtkActor>::New();
         }
 
         virtual void OnLeftButtonDown() {
@@ -92,6 +129,88 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // forward events
             //vtkInteractorStyleTrackballActor::OnLeftButtonDown();
+        }
+
+        virtual void OnKeyPress() {
+            // check if an object was selected
+            if (Selected) {
+                // if so, check if rotate was selected
+                if (Rotate) {
+                    // if so, rotate based on key pressed
+                    std::string key = this->Interactor->GetKeySym();
+
+                    // based on arrow key, rotate in the native direction
+                    if (key == "Left") {
+                        RotateCube(1,-5);
+                    } else if (key == "Right") {
+                        RotateCube(1,5);
+                    } else if (key == "Up") {
+                        RotateCube(0,-5);
+                    } else if (key == "Down") {
+                        RotateCube(0,5);
+                    }
+
+                    // if arrow key wasn't pressed, do nothing
+                }
+            }
+
+        }
+
+        void RotateCube(int axis, double angle) {
+            // create transform object
+            vtkSmartPointer<vtkTransform> transform =
+                vtkSmartPointer<vtkTransform>::New();
+
+            // get CubeData object from the selected actor
+            struct CubeData *data = GetCube(selectedActor);
+
+            // get the center position of the cube from CubeData
+            double *center = data->cubeSource->GetCenter();
+
+            // apply initial translation to center the cube at the origin
+            transform->Translate(center[0], center[1], center[2]);
+
+            // update rotation angles based on selected axis
+            switch(axis) {
+                case 0:
+                    // update x angle rotation
+                    data->rotationX += angle;
+                    break;
+                case 1:
+                    // update y angle rotation
+                    data->rotationY += angle;
+                    break;
+                default:
+                    break;
+            }
+
+            // apply appropriate rotations
+            transform->RotateX(data->rotationX);
+            transform->RotateY(data->rotationY);
+
+            // apply final translation
+            transform->Translate(-center[0], -center[1], -center[2]);
+
+            // set up transform filter
+            vtkSmartPointer<vtkTransformFilter> filter =
+              vtkSmartPointer<vtkTransformFilter>::New();
+
+            // add cube and transform, and update
+            filter->SetInputConnection(data->cubeSource->GetOutputPort());
+            filter->SetTransform(transform);
+            filter->Update();
+
+            // set up new mapper
+            vtkSmartPointer<vtkPolyDataMapper> mapper =
+              vtkSmartPointer<vtkPolyDataMapper>::New();
+
+            mapper->SetInputConnection(filter->GetOutputPort());
+
+            // set mapper to existing actor
+            this->selectedActor->SetMapper(mapper);
+
+            // reset camera and update window
+            this->Interactor->Render();
         }
 
         void PerformAction() {
@@ -136,7 +255,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         void SceneSelected() {
             // check if draw is selected
             if (Draw) {
-                // check if cube is selected, if so draw cube
+                // check if cube is selected, if so draw a cube
                 if (Cube) {
                     // if so, draw cube
                     DrawCubeOntoImage();
@@ -151,30 +270,26 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // otherwise, check if object was selected
             if (Selected) {
-                // if so, check if a manipulation tool was selected
-                if (Rotate) {
-
-                } else if (Scale) {
-
-                } else if (Stretch) {
+                // if so, check if stretch or move tool was selected
+                if (Stretch) {
 
                 } else if (Move) {
 
                 } else {
-                    // otherwise, deselect actor
-                    selectedActor->GetProperty()->SetColor(1,1,1); // white
+                    // otherwise, deselect the actor
+
+                    // change actor color to white
+                    selectedActor->GetProperty()->SetColor(1,1,1);
 
                     // change flag
                     Selected = false;
-
-                    // re-initialize selectedActor
-                    selectedActor = vtkSmartPointer<vtkActor>::New();
 
                     // re-render
                     this->Interactor->Render();
                 }
 
-            } else { // if not, check if user tried to select an object
+            } else {
+                // if no object was selected, check if user tried to select an object
 
                 // get click position
                 double *click = GetClickPosition();
@@ -216,9 +331,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
                 // if this is reached, none of the actors were under the mouse click
             }
-            // otherwise, do nothing
         }
-
         void CubeSelected() {
             // change flag depending on selected or not
             if (Cube) {
@@ -251,7 +364,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 ChangeRenderer(0,1,0);
             }
         }
-
         void RotateSelected() {
             // change flag depending on selected or not
             if (Rotate) {
@@ -268,14 +380,12 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 ChangeRenderer(0,1,0);
             }
         }
-
         void ZoomSelected() {}
         void ScaleSelected() {}
         void StretchSelected() {}
         void MoveSelected() {}
         void RequestSelected() {}
         void OutputSelected() {}
-
         void ChangeRenderer(double r, double g, double b) {
             // based on rgb values, set background of current renderer
             this->CurrentRenderer->SetBackground(r, g, b);
@@ -312,8 +422,8 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             vtkSmartPointer<vtkCubeSource> cubeSource =
               vtkSmartPointer<vtkCubeSource>::New();
 
-            // set center based on click (z = 0)
-            cubeSource->SetCenter(position[0], position[1], position[2]);
+            // set center based on click (z = 10)
+            cubeSource->SetCenter(position[0], position[1], 10);
 
             // set basic length/width/height
             cubeSource->SetXLength(25.0);
@@ -332,9 +442,29 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // add actor to the current renderer
             this->CurrentRenderer->AddActor(actor);
+
+            // create CubeData object to store cube source and actor
+            CubeData *cube = new CubeData();
+            cube->actor = actor;
+            cube->cubeSource = cubeSource;
+
+            // add to vector of cubes
+            cubes.push_back(cube);
         }
 
-        // setters
+        CubeData *GetCube(vtkSmartPointer<vtkActor> actor) {
+            // traverse through cubes and compare actors
+            for (unsigned int i = 0; i < cubes.size(); i++) {
+                if (cubes[i]->actor == actor) {
+                    return cubes[i];
+                }
+            }
+
+            // otherwise, return null
+            return NULL;
+        }
+
+        // setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map) { rendererMap = map; }
 
     private:
@@ -352,6 +482,9 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
         // map vtkRenderer addresses to integers for processing
         std::map<int,vtkRenderer*> rendererMap;
+
+        // store vector of CubeData objects
+        std::vector<CubeData*> cubes;
 };
 
 vtkStandardNewMacro(MyInteractorStyle);
