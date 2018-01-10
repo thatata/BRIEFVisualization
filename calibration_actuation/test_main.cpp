@@ -1,6 +1,6 @@
 #include "calibration_actuation.h"
 
-int main(int argv, char** argc) {
+int main(int argc, char** argv) {
 
   //createArucoMarkers(); // Done
 
@@ -16,11 +16,15 @@ int main(int argv, char** argc) {
   vector<int> markerIds;
   vector< vector<Point2f> > markerCorners;
 
-  // Not working, using temp file
-  // cameraCalibrationProcess( cameraMatrix, distanceCoefficients );
+  bool showWindow = false;
+  if (argc > 2 ) {
+    if ( strcmp(argv[2], "true") == 0) { printf("print\n"); showWindow = true; }
+  }
 
   loadCameraCalibration("KinectCalibration", cameraMatrix, distanceCoefficients);
-  obtainSavedImage(argc[1], cameraMatrix, distanceCoefficients, false);
+  obtainSavedImage(argv[1], cameraMatrix, distanceCoefficients, showWindow);
+
+  socket_request("Test");
 
   /* TRANSLATION TO ACTUAL IMPLIMENTATION */
   // TODO:
