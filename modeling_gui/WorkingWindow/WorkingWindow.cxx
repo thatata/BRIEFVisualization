@@ -108,12 +108,15 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         MyInteractorStyle() {
             // set default values
             Cube = false;
+            Point = false;
+            Other = false;
             Draw = false;
             Rotate = false;
             Selected = false;
             Scale = false;
             Move = false;
             Stretch = false;
+            Zoom = false;
         }
 
         virtual void OnLeftButtonDown() {
@@ -219,32 +222,36 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 // cube selected
                 CubeSelected();
             } else if (this->CurrentRenderer == rendererMap[1]) {
-                // other selected (future iteration)
+                // point selected
+                PointSelected();
             } else if (this->CurrentRenderer == rendererMap[2]) {
+                // other selected
+                OtherSelected();
+            } else if (this->CurrentRenderer == rendererMap[3]) {
                 // scene selected
                 SceneSelected();
-            } else if (this->CurrentRenderer == rendererMap[3]) {
+            } else if (this->CurrentRenderer == rendererMap[4]) {
                 // draw selected
                 DrawSelected();
-            } else if (this->CurrentRenderer == rendererMap[4]) {
+            } else if (this->CurrentRenderer == rendererMap[5]) {
                 // zoom selected
                 ZoomSelected();
-            } else if (this->CurrentRenderer == rendererMap[5]) {
+            } else if (this->CurrentRenderer == rendererMap[6]) {
                 // scale selected
                 ScaleSelected();
-            } else if (this->CurrentRenderer == rendererMap[6]) {
+            } else if (this->CurrentRenderer == rendererMap[7]) {
                 // stretch selected
                 StretchSelected();
-            } else if (this->CurrentRenderer == rendererMap[7]) {
+            } else if (this->CurrentRenderer == rendererMap[8]) {
                 // rotate selected
                 RotateSelected();
-            } else if (this->CurrentRenderer == rendererMap[8]) {
+            } else if (this->CurrentRenderer == rendererMap[9]) {
                 // move selected
                 MoveSelected();
-            } else if (this->CurrentRenderer == rendererMap[9]) {
+            } else if (this->CurrentRenderer == rendererMap[10]) {
                 // request selected
                 RequestSelected();
-            } else if (this->CurrentRenderer == rendererMap[10]) {
+            } else if (this->CurrentRenderer == rendererMap[11]) {
                 // output selected
                 OutputSelected();
             }
@@ -380,10 +387,102 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 ChangeRenderer(0,1,0);
             }
         }
-        void ZoomSelected() {}
-        void ScaleSelected() {}
-        void StretchSelected() {}
-        void MoveSelected() {}
+        void ZoomSelected() {
+            // change flag depending on selected or not
+            if (Zoom) {
+                // change back to false
+                Zoom = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Zoom = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+        void ScaleSelected() {
+            // change flag depending on selected or not
+            if (Scale) {
+                // change back to false
+                Scale = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Scale = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+        void StretchSelected() {
+            // change flag depending on selected or not
+            if (Stretch) {
+                // change back to false
+                Stretch = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Stretch = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+        void MoveSelected() {
+            // change flag depending on selected or not
+            if (Move) {
+                // change back to false
+                Move = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Move = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+        void PointSelected() {
+            // change flag depending on selected or not
+            if (Point) {
+                // change back to false
+                Point = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Point = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
+        void OtherSelected() {
+            // change flag depending on selected or not
+            if (Other) {
+                // change back to false
+                Other = false;
+
+                // change renderer to be gray
+                ChangeRenderer(.86,.86,.86);
+            } else {
+                // change to true
+                Other = true;
+
+                // change renderer to be green
+                ChangeRenderer(0,1,0);
+            }
+        }
         void RequestSelected() {}
         void OutputSelected() {}
         void ChangeRenderer(double r, double g, double b) {
@@ -470,12 +569,15 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
     private:
         // private vars
         bool Cube;
+        bool Point;
+        bool Other;
         bool Draw;
         bool Rotate;
         bool Selected;
         bool Scale;
         bool Move;
         bool Stretch;
+        bool Zoom;
 
         // selected actor
         vtkSmartPointer<vtkActor> selectedActor;
@@ -493,6 +595,7 @@ vtkSmartPointer<vtkRenderer> CreateImageRenderer(vtkSmartPointer<vtkPNGReader> r
 vtkSmartPointer<vtkRenderer> CreateTitleRenderer();
 vtkSmartPointer<vtkRenderer> CreateObjectsRenderer();
 vtkSmartPointer<vtkRenderer> CreateCubeButtonRenderer();
+vtkSmartPointer<vtkRenderer> CreatePointButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreateOtherButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreateSceneRenderer();
 vtkSmartPointer<vtkRenderer> CreateOperationsRenderer();
@@ -541,15 +644,20 @@ int main(int argc, char *argv[])
     renderWindow->AddRenderer(cubeRenderer);
     rendererMap[0] = cubeRenderer;
 
+    // create renderer for the point button
+    vtkSmartPointer<vtkRenderer> pointRenderer = CreatePointButtonRenderer();
+    renderWindow->AddRenderer(pointRenderer);
+    rendererMap[1] = pointRenderer;
+
     // create renderer for the others button
     vtkSmartPointer<vtkRenderer> otherRenderer = CreateOtherButtonRenderer();
     renderWindow->AddRenderer(otherRenderer);
-    rendererMap[1] = otherRenderer;
+    rendererMap[2] = otherRenderer;
 
     // create renderer for the image (display first image for now)
     vtkSmartPointer<vtkRenderer> imageRenderer = CreateImageRenderer(readers[0]);
     renderWindow->AddRenderer(imageRenderer);
-    rendererMap[2] = imageRenderer;
+    rendererMap[3] = imageRenderer;
 
     // create renderer for the operations text
     vtkSmartPointer<vtkRenderer> operationsRenderer = CreateOperationsRenderer();
@@ -566,48 +674,48 @@ int main(int argc, char *argv[])
     // create renderer for the draw button
     vtkSmartPointer<vtkRenderer> drawRenderer = CreateDrawButtonRenderer();
     renderWindow->AddRenderer(drawRenderer);
-    rendererMap[3] = drawRenderer;
+    rendererMap[4] = drawRenderer;
 
     // create renderer for the zoom button
     vtkSmartPointer<vtkRenderer> zoomRenderer = CreateZoomButtonRenderer();
     renderWindow->AddRenderer(zoomRenderer);
-    rendererMap[4] = zoomRenderer;
+    rendererMap[5] = zoomRenderer;
 
     // create renderer for the scale button
     vtkSmartPointer<vtkRenderer> scaleRenderer = CreateScaleButtonRenderer();
     renderWindow->AddRenderer(scaleRenderer);
-    rendererMap[5] = scaleRenderer;
+    rendererMap[6] = scaleRenderer;
 
     // create renderer for the stretch button
     vtkSmartPointer<vtkRenderer> stretchRenderer = CreateStretchButtonRenderer();
     renderWindow->AddRenderer(stretchRenderer);
-    rendererMap[6] = stretchRenderer;
+    rendererMap[7] = stretchRenderer;
 
     // create renderer for the rotate button
     vtkSmartPointer<vtkRenderer> rotateRenderer = CreateRotateButtonRenderer();
     renderWindow->AddRenderer(rotateRenderer);
-    rendererMap[7] = rotateRenderer;
+    rendererMap[8] = rotateRenderer;
 
     // create renderer for the move button
     vtkSmartPointer<vtkRenderer> moveRenderer = CreateMoveButtonRenderer();
     renderWindow->AddRenderer(moveRenderer);
-    rendererMap[8] = moveRenderer;
+    rendererMap[9] = moveRenderer;
 
     // create renderer for the request button
     vtkSmartPointer<vtkRenderer> requestRenderer = CreateRequestButtonRenderer();
     renderWindow->AddRenderer(requestRenderer);
-    rendererMap[9] = requestRenderer;
+    rendererMap[10] = requestRenderer;
 
     // create renderer for the output button
     vtkSmartPointer<vtkRenderer> outputRenderer = CreateOutputButtonRenderer();
     renderWindow->AddRenderer(outputRenderer);
-    rendererMap[10] = outputRenderer;
+    rendererMap[11] = outputRenderer;
 
     // define viewports (in pixels)
-    double xmin[15] = {0,0,200,400,0,0,800,800,800,800,800,800,800,800,800};
-    double ymin[15] = {700,0,0,0,100,100,700,612.5,525,437.5,350,262.5,175,87.5,0};
-    double xmax[15] = {800,200,400,800,800,800,1200,1200,1200,1200,1200,1200,1200,1200,1200};
-    double ymax[15] = {800,100,100,100,700,700,800,700,612.5,525,437.5,350,262.5,175,87.5};
+    double xmin[15] = {0,0,200,400,600,0,800,800,800,800,800,800,800,800,800};
+    double ymin[15] = {700,0,0,0,0,100,700,612.5,525,437.5,350,262.5,175,87.5,0};
+    double xmax[15] = {800,200,400,600,800,800,1200,1200,1200,1200,1200,1200,1200,1200,1200};
+    double ymax[15] = {800,100,100,100,100,700,800,700,612.5,525,437.5,350,262.5,175,87.5};
 
     // convert to (0,1) range
     for (unsigned int i = 0; i < 15; i++) {
@@ -621,8 +729,9 @@ int main(int argc, char *argv[])
     titleRenderer->SetViewport(xmin[0], ymin[0], xmax[0], ymax[0]);
     objectsRenderer->SetViewport(xmin[1], ymin[1], xmax[1], ymax[1]);
     cubeRenderer->SetViewport(xmin[2], ymin[2], xmax[2], ymax[2]);
-    otherRenderer->SetViewport(xmin[3], ymin[3], xmax[3], ymax[3]);
-    imageRenderer->SetViewport(xmin[4], ymin[4], xmax[4], ymax[4]);
+    pointRenderer->SetViewport(xmin[3], ymin[3], xmax[3], ymax[3]);
+    otherRenderer->SetViewport(xmin[4], ymin[4], xmax[4], ymax[4]);
+    imageRenderer->SetViewport(xmin[5], ymin[5], xmax[5], ymax[5]);
     operationsRenderer->SetViewport(xmin[6], ymin[6], xmax[6], ymax[6]);
     drawRenderer->SetViewport(xmin[7], ymin[7], xmax[7], ymax[7]);
     zoomRenderer->SetViewport(xmin[8], ymin[8], xmax[8], ymax[8]);
@@ -638,6 +747,7 @@ int main(int argc, char *argv[])
     imageRenderer->SetBackground(.86,.86,.86);
     objectsRenderer->SetBackground(.86,.86,.86);
     cubeRenderer->SetBackground(.86,.86,.86);
+    pointRenderer->SetBackground(.86,.86,.86);
     otherRenderer->SetBackground(.86,.86,.86);
     operationsRenderer->SetBackground(.86,.86,.86);
     drawRenderer->SetBackground(.86,.86,.86);
@@ -834,6 +944,27 @@ vtkSmartPointer<vtkRenderer> CreateCubeButtonRenderer() {
 
     // add actor to renderer and renderer to window
     renderer->AddActor2D(cubeTextActor);
+
+    return renderer;
+}
+
+vtkSmartPointer<vtkRenderer> CreatePointButtonRenderer() {
+    // create renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+        vtkSmartPointer<vtkRenderer>::New();
+
+    // create text actor to store "Point" text
+    vtkSmartPointer<vtkTextActor> pointTextActor =
+        vtkSmartPointer<vtkTextActor>::New();
+
+    // configure cube text
+    pointTextActor->SetInput("Point");
+    pointTextActor->SetPosition(0,15);
+    pointTextActor->GetTextProperty()->SetFontSize(20);
+    pointTextActor->GetTextProperty()->SetColor(0,0,0);
+
+    // add actor to renderer and renderer to window
+    renderer->AddActor2D(pointTextActor);
 
     return renderer;
 }
