@@ -96,8 +96,8 @@ struct CubeData {
     // cube source object
     vtkSmartPointer<vtkCubeSource> cubeSource;
 
-    // variables to store scale factor, rotation angles
-    double scaleFactor, rotationX, rotationY;
+    // variables to store scale factor, rotation angles, translation values
+    double scaleFactor, rotationX, rotationY, translateX, translateY;
 };
 
 class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
@@ -115,6 +115,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             Selected = false;
             Scale = false;
             Move = false;
+            Moving = false;
             Stretch = false;
             Zoom = false;
         }
@@ -129,9 +130,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // perform operation based on the renderer selected
             PerformAction();
-
-            // forward events
-            //vtkInteractorStyleTrackballActor::OnLeftButtonDown();
         }
 
         virtual void OnKeyPress() {
@@ -156,7 +154,50 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                     // if arrow key wasn't pressed, do nothing
                 }
             }
+        }
 
+        void OnLeftButtonUp() {
+            // check if moving, if so finish
+            if (Moving) {
+                // end pan
+                this->EndPan();
+
+                // change moving to false
+                Moving = false;
+
+                // get cube data to update translation values
+                CubeData *data = GetCube(selectedActor);
+
+                data->translateX = selectedActor->GetPosition()[0];
+                data->translateY = selectedActor->GetPosition()[1];
+            }
+        }
+
+        void OnMouseMove() {
+            // check if an actor is moving, if so just return
+            if (!Moving) {
+                return;
+            }
+
+            // otherwise, forward events
+            vtkInteractorStyleTrackballActor::OnMouseMove();
+        }
+
+        void MoveCube() {
+            // check if selected actor was under the mouse click
+            vtkSmartPointer<vtkActor> actor = GetActorUnderClick();
+
+            // check if actor isn't null and is the selected actor
+            if (actor != NULL && actor == selectedActor) {
+                // if so, moving
+                Moving = true;
+
+                // start pan
+                this->StartPan();
+
+                // change interaction prop to the actor selected
+                this->InteractionProp = selectedActor;
+            }
         }
 
         void RotateCube(int axis, double angle) {
@@ -165,7 +206,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 vtkSmartPointer<vtkTransform>::New();
 
             // get CubeData object from the selected actor
-            struct CubeData *data = GetCube(selectedActor);
+            CubeData *data = GetCube(selectedActor);
 
             // get the center position of the cube from CubeData
             double *center = data->cubeSource->GetCenter();
@@ -277,11 +318,10 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // otherwise, check if object was selected
             if (Selected) {
-                // if so, check if stretch or move tool was selected
-                if (Stretch) {
-
-                } else if (Move) {
-
+                // if so, check if move tool was selected
+                if (Move) {
+                    // if so, move cube
+                    MoveCube();
                 } else {
                     // otherwise, deselect the actor
 
@@ -293,52 +333,60 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
                     // re-render
                     this->Interactor->Render();
+
                 }
 
             } else {
                 // if no object was selected, check if user tried to select an object
+                vtkSmartPointer<vtkActor> actor = GetActorUnderClick();
 
-                // get click position
-                double *click = GetClickPosition();
+                // if actor is not null, user selected that actor
+                if (actor != NULL) {
+                    // change flag
+                    Selected = true;
 
-                // get actors from the renderer
-                vtkSmartPointer<vtkActorCollection> actors = this->CurrentRenderer->GetActors();
+                    // save address for future use
+                    selectedActor = actor;
 
-                // initialize traversal
-                actors->InitTraversal();
+                    // change color to red to denote selected
+                    actor->GetProperty()->SetColor(1,0,0); // red
 
-                // loop through each actor to see if it's under the mouse click
-                for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
-                    // get next actor
-                    vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
-
-                    // get the bounds of that actor (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax)
-                    double *bounds = actor->GetBounds();
-
-                    // check if the click position is within the bounds
-                    if ((click[0] >= bounds[0] && click[0] <= bounds[1]) &&
-                            click[1] >= bounds[2] && click[1] <= bounds[3]) {
-                        // if so, actor has been selected
-                        Selected = true;
-
-                        // save address for future use
-                        selectedActor = actor;
-
-                        // change color to red to denote selected
-                        actor->GetProperty()->SetColor(1,0,0); // red
-
-                        // re-render
-                        this->Interactor->Render();
-
-                        // done, so return
-                        return;
-                    }
-
+                    // re-render to update color
+                    this->Interactor->Render();
                 }
-
-                // if this is reached, none of the actors were under the mouse click
             }
         }
+
+        vtkSmartPointer<vtkActor> GetActorUnderClick() {
+            // get click position
+            double *click = GetClickPosition();
+
+            // get actors from the renderer
+            vtkSmartPointer<vtkActorCollection> actors = this->CurrentRenderer->GetActors();
+
+            // initialize traversal
+            actors->InitTraversal();
+
+            // loop through each actor to see if it's under the mouse click
+            for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
+                // get next actor
+                vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
+
+                // get the bounds of that actor (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax)
+                double *bounds = actor->GetBounds();
+
+                // check if the click position is within the bounds
+                if ((click[0] >= bounds[0] && click[0] <= bounds[1]) &&
+                        click[1] >= bounds[2] && click[1] <= bounds[3]) {
+                    // if so, actor is under the click
+                    return actor;
+                }
+            }
+
+            // if no actor was under the click, return null
+            return NULL;
+        }
+
         void CubeSelected() {
             // change flag depending on selected or not
             if (Cube) {
@@ -501,6 +549,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             int x = this->Interactor->GetEventPosition()[0];
             int y = this->Interactor->GetEventPosition()[1];
 
+
             // use picker to select correct pixel location
             this->Interactor->GetPicker()->Pick(x,
                                                 y,
@@ -576,6 +625,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         bool Selected;
         bool Scale;
         bool Move;
+        bool Moving;
         bool Stretch;
         bool Zoom;
 
