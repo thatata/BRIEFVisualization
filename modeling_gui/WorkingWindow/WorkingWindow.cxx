@@ -77,7 +77,8 @@
   *
   * Rotate: with an object in the scene selected, use the
   * arrow keys to rotate the object in the appropriate
-  * direction.
+  * direction. To rotate about the z-axis, press the z
+  * key and use the left and right arrow keys.
   *
   * Move: with an object in the scene selected, click and
   * drag the object to move the object in the scene.
@@ -97,7 +98,7 @@ struct CubeData {
     vtkSmartPointer<vtkCubeSource> cubeSource;
 
     // variables to store scale factor, rotation angles, translation values
-    double scaleFactor, rotationX, rotationY, translateX, translateY;
+    double scaleFactor, rotationX, rotationY, rotationZ, translateX, translateY;
 };
 
 class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
@@ -112,6 +113,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             Other = false;
             Draw = false;
             Rotate = false;
+            RotateZ = false;
             Selected = false;
             Scale = false;
             Move = false;
@@ -140,18 +142,60 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                     // if so, rotate based on key pressed
                     std::string key = this->Interactor->GetKeySym();
 
-                    // based on arrow key, rotate in the native direction
-                    if (key == "Left") {
-                        RotateCube(1,-5);
-                    } else if (key == "Right") {
-                        RotateCube(1,5);
-                    } else if (key == "Up") {
-                        RotateCube(0,-5);
-                    } else if (key == "Down") {
-                        RotateCube(0,5);
+                    // check if z was pressed for z-axis rotation
+                    if (key == "z") {
+                        // if so, switch flag
+                        RotateZ = !RotateZ;
+
+                        // alert user in the console
+                        std::cout << "Z Rotation " << (RotateZ ? "Enabled!" : "Disabled!")
+                                  << std::endl;
+
+                        return;
                     }
 
-                    // if arrow key wasn't pressed, do nothing
+                    // vars for axis and angle of rotation
+                    int axis;
+                    double angle;
+
+                    // check if z rotation has been enabled
+                    if (RotateZ) {
+                        // if so, axis = 2
+                        axis = 2;
+
+                        // check for left/right arrow keys only
+                        if (key == "Left") {
+                            // rotate in native direction
+                            angle = 5;
+                        } else if (key == "Right") {
+                            // rotate in native direction
+                            angle = -5;
+                        } else {
+                            // otherwise don't rotate and return
+                            return;
+                        }
+                    } else {
+                        // based on arrow key, rotate x/y axes in native direction
+                        if (key == "Left") {
+                            axis = 1;
+                            angle = -5;
+                        } else if (key == "Right") {
+                            axis = 1;
+                            angle = 5;
+                        } else if (key == "Up") {
+                            axis = 0;
+                            angle = -5;
+                        } else if (key == "Down") {
+                            axis = 0;
+                            angle = 5;
+                        } else {
+                            // otherwise don't rotate and return
+                            return;
+                        }
+                    }
+
+                    // rotate cube using axis and angle
+                    RotateCube(axis, angle);
                 }
             }
         }
@@ -165,9 +209,10 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 // change moving to false
                 Moving = false;
 
-                // get cube data to update translation values
+                // get cube data
                 CubeData *data = GetCube(selectedActor);
 
+                // update translation values (in world coordinates)
                 data->translateX = selectedActor->GetPosition()[0];
                 data->translateY = selectedActor->GetPosition()[1];
             }
@@ -224,6 +269,9 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                     // update y angle rotation
                     data->rotationY += angle;
                     break;
+                case 2:
+                    // update z angle rotation
+                    data->rotationZ += angle;
                 default:
                     break;
             }
@@ -231,6 +279,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             // apply appropriate rotations
             transform->RotateX(data->rotationX);
             transform->RotateY(data->rotationY);
+            transform->RotateZ(data->rotationZ);
 
             // apply final translation
             transform->Translate(-center[0], -center[1], -center[2]);
@@ -622,6 +671,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         bool Other;
         bool Draw;
         bool Rotate;
+        bool RotateZ;
         bool Selected;
         bool Scale;
         bool Move;
