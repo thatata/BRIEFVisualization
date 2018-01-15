@@ -63,7 +63,7 @@
 /**
   * TH: Operations Overview
   *
-  * Draw: with an object button selected (e.g. cube, point),
+  * Draw: after selecting an object (e.g. cube, point),
   * click on the scene to place that object in the scene.
   *
   * Zoom: left click on the scene to zoom in (X%), right
@@ -73,11 +73,14 @@
   * up and down arrow keys to scale larger and smaller,
   * respectively.
   *
-  * Stretch: ??
+  * Stretch: with an object in the scene selected, use the
+  * arrow keys to stretch the object in the appropriate
+  * direction. To stretch about the z axis, press the z
+  * key and use the left and right arrow keys.
   *
   * Rotate: with an object in the scene selected, use the
   * arrow keys to rotate the object in the appropriate
-  * direction. To rotate about the z-axis, press the z
+  * direction. To rotate about the z axis, press the z
   * key and use the left and right arrow keys.
   *
   * Move: with an object in the scene selected, click and
@@ -97,8 +100,8 @@ struct CubeData {
     // cube source object
     vtkSmartPointer<vtkCubeSource> cubeSource;
 
-    // variables to store scale factor, rotation angles, translation values
-    double scaleFactor, rotationX, rotationY, rotationZ, translateX, translateY;
+    // variables to store scale (start at 1), rotation, and translation values
+    double scaleX = 1, scaleY = 1, scaleZ = 1, rotationX, rotationY, rotationZ, translateX, translateY;
 };
 
 class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
@@ -119,6 +122,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             Move = false;
             Moving = false;
             Stretch = false;
+            StretchZ = false;
             Zoom = false;
         }
 
@@ -137,65 +141,13 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         virtual void OnKeyPress() {
             // check if an object was selected
             if (Selected) {
-                // if so, check if rotate was selected
+                // if so, check for rotation, stretch, or scale
                 if (Rotate) {
-                    // if so, rotate based on key pressed
-                    std::string key = this->Interactor->GetKeySym();
-
-                    // check if z was pressed for z-axis rotation
-                    if (key == "z") {
-                        // if so, switch flag
-                        RotateZ = !RotateZ;
-
-                        // alert user in the console
-                        std::cout << "Z Rotation " << (RotateZ ? "Enabled!" : "Disabled!")
-                                  << std::endl;
-
-                        return;
-                    }
-
-                    // vars for axis and angle of rotation
-                    int axis;
-                    double angle;
-
-                    // check if z rotation has been enabled
-                    if (RotateZ) {
-                        // if so, axis = 2
-                        axis = 2;
-
-                        // check for left/right arrow keys only
-                        if (key == "Left") {
-                            // rotate in native direction
-                            angle = 5;
-                        } else if (key == "Right") {
-                            // rotate in native direction
-                            angle = -5;
-                        } else {
-                            // otherwise don't rotate and return
-                            return;
-                        }
-                    } else {
-                        // based on arrow key, rotate x/y axes in native direction
-                        if (key == "Left") {
-                            axis = 1;
-                            angle = -5;
-                        } else if (key == "Right") {
-                            axis = 1;
-                            angle = 5;
-                        } else if (key == "Up") {
-                            axis = 0;
-                            angle = -5;
-                        } else if (key == "Down") {
-                            axis = 0;
-                            angle = 5;
-                        } else {
-                            // otherwise don't rotate and return
-                            return;
-                        }
-                    }
-
-                    // rotate cube using axis and angle
-                    RotateCube(axis, angle);
+                    // handle rotate operation
+                    RotateObject();
+                } else if (Stretch) {
+                    // handle stretch operation
+                    StretchObject();
                 }
             }
         }
@@ -245,7 +197,119 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             }
         }
 
-        void RotateCube(int axis, double angle) {
+        void RotateObject() {
+            // grab key pressed
+            std::string key = this->Interactor->GetKeySym();
+
+            // check if z was pressed for z axis rotation
+            if (key == "z") {
+                // if so, switch flag
+                RotateZ = !RotateZ;
+
+                // alert user in the console
+                std::cout << "Z Rotation " << (RotateZ ? "Enabled!" : "Disabled!")
+                          << std::endl;
+
+                return;
+            }
+
+            // get cube data to update rotation values
+            CubeData *data = GetCube(selectedActor);
+
+            // check if z rotation has been enabled
+            if (RotateZ) {
+                // check for left/right arrow keys only
+                if (key == "Left") {
+                    // rotate about z axis (+)
+                    data->rotationZ += 5;
+                } else if (key == "Right") {
+                    // rotate about z axis (-)
+                    data->rotationZ -= 5;
+                } else {
+                    // otherwise don't rotate and return
+                    return;
+                }
+            } else {
+                // based on arrow key, rotate in native direction
+                if (key == "Left") {
+                    // rotate about y axis (-)
+                    data->rotationY -= 5;
+                } else if (key == "Right") {
+                    // rotate about y axis (+)
+                    data->rotationY += 5;
+                } else if (key == "Up") {
+                    // rotate about x axis (-)
+                    data->rotationX -= 5;
+                } else if (key == "Down") {
+                    // rotate about x axis (+)
+                    data->rotationX += 5;
+                } else {
+                    // otherwise don't rotate and return
+                    return;
+                }
+            }
+
+            // perform transformations using cube data
+            PerformTransformations(data);
+        }
+
+        void StretchObject() {
+            // grab key pressed
+            std::string key = this->Interactor->GetKeySym();
+
+            // check if z was pressed to stretch about z axis
+            if (key == "z") {
+                // if so, switch flag
+                StretchZ = !StretchZ;
+
+                // alert user in the console
+                std::cout << "Z Stretch " << (StretchZ ? "Enabled!" : "Disabled!")
+                          << std::endl;
+
+                return;
+            }
+
+            // get cube data to update scale values
+            CubeData *data = GetCube(selectedActor);
+
+            // check if z rotation has been enabled
+            if (StretchZ) {
+                // check for left/right arrow keys only
+                if (key == "Left") {
+                    // stretch z axis (-)
+                    data->scaleZ -= .1;
+                } else if (key == "Right") {
+                    // stretch z axis (+)
+                    data->scaleZ += .1;
+                } else {
+                    // otherwise don't stretch and return
+                    return;
+                }
+            } else {
+                // based on arrow key, scale the object in the native direction
+                if (key == "Left") {
+                    // stretch x axis (-)
+                    data->scaleX -= .1;
+                } else if (key == "Right") {
+                    // stretch x axis (+)
+                    data->scaleX += .1;
+                } else if (key == "Up") {
+                    // stretch y axis (+)
+                    data->scaleY += .1;
+                } else if (key == "Down") {
+                    // stretch y axis (-)
+                    data->scaleY -= .1;
+                } else {
+                    // otherwise don't stretch and return
+                    return;
+                }
+            }
+
+            // rotate cube using axis and angle
+            PerformTransformations(data);
+        }
+
+        void StretchCube(int axis, double scale) {
             // create transform object
             vtkSmartPointer<vtkTransform> transform =
                 vtkSmartPointer<vtkTransform>::New();
@@ -259,27 +323,68 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             // apply initial translation to center the cube at the origin
             transform->Translate(center[0], center[1], center[2]);
 
-            // update rotation angles based on selected axis
+            // update scale factors based on selected axis
             switch(axis) {
                 case 0:
                     // update x angle rotation
-                    data->rotationX += angle;
+                    data->scaleX += scale;
                     break;
                 case 1:
                     // update y angle rotation
-                    data->rotationY += angle;
+                    data->scaleY += scale;
                     break;
                 case 2:
                     // update z angle rotation
-                    data->rotationZ += angle;
+                    data->scaleZ += scale;
                 default:
                     break;
             }
 
-            // apply appropriate rotations
+
+
+            // apply final translation
+            transform->Translate(-center[0], -center[1], -center[2]);
+
+            // set up transform filter
+            vtkSmartPointer<vtkTransformFilter> filter =
+              vtkSmartPointer<vtkTransformFilter>::New();
+
+            // add cube and transform, and update
+            filter->SetInputConnection(data->cubeSource->GetOutputPort());
+            filter->SetTransform(transform);
+            filter->Update();
+
+            // set up new mapper
+            vtkSmartPointer<vtkPolyDataMapper> mapper =
+              vtkSmartPointer<vtkPolyDataMapper>::New();
+
+            mapper->SetInputConnection(filter->GetOutputPort());
+
+            // set mapper to existing actor
+            this->selectedActor->SetMapper(mapper);
+
+            // reset camera and update window
+            this->Interactor->Render();
+        }
+
+        void PerformTransformations(CubeData *data) {
+            // create transform object
+            vtkSmartPointer<vtkTransform> transform =
+                vtkSmartPointer<vtkTransform>::New();
+
+            // get the center position of the cube from CubeData
+            double *center = data->cubeSource->GetCenter();
+
+            // apply initial translation to center the cube at the origin
+            transform->Translate(center[0], center[1], center[2]);
+
+            // apply rotations
             transform->RotateX(data->rotationX);
             transform->RotateY(data->rotationY);
             transform->RotateZ(data->rotationZ);
+
+            // scale with appropriate values
+            transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
 
             // apply final translation
             transform->Translate(-center[0], -center[1], -center[2]);
@@ -677,6 +782,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         bool Move;
         bool Moving;
         bool Stretch;
+        bool StretchZ;
         bool Zoom;
 
         // selected actor
