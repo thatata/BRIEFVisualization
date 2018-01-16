@@ -679,6 +679,7 @@
 
  int left() {
    // Stepper motor
+   socket_request("move(3, 10)");
  }
 
  int right() {

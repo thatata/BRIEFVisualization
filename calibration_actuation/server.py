@@ -2,6 +2,7 @@
 # The George Washington University
 
 # Import Karl API
+# TODO
 
 import socket
 
@@ -32,7 +33,10 @@ def Main():
             print("From connected user: ", data.decode()) # Decode from byte to string to desplay for proof of transfer
 
             # Do what needs to be done
-            # TODO
+            x = 1
+            print("Data: ", data)
+            eval(data)
+            print("x= ", x)
 
             connsocket.send(b'Echo=>' + data) # Rencode the data into the byte stream and send back to client
 

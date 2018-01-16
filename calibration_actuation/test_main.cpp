@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
 
   obtainSavedImage(argv[1], cameraMatrix, distanceCoefficients, showWindow);
 
-  socket_request("Test");
+  socket_request("x+1");
 
   /* TRANSLATION TO ACTUAL IMPLIMENTATION */
   // TODO:

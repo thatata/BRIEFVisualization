@@ -1,13 +1,27 @@
-# GW CS Senior Design Project Template
+# BRIEF Visualization
 
-Use the master branch of this repository for your **working** code.  You should use the [Feature Branch](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) or [Git Flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) structure for your code and branches.
+## System Requirements
 
-The gh-pages branch of this repository has starter files for your web page. You should upload PDF versions of all your assignments and keep your web page up to date.
+## Setup
+* Linux
+  * Updating Linux `install script goes here`
+* Installation
+  * OpenCV
+  * VTK
+  * 
 
-**Once you understand the structure listed above, you should replace this readme with something specific to your project.**
+## API Functionality
 
-`g++ -o test_calibration aruco_test.cpp pkg-config opencv --cflags --libs` 
+### Calibration & Actuation
+1. Saving Images for Analysis
 
+2. Loading saved images
+
+3. Analyzing live stream
+
+4. Movement
 
 `cv::Mat testImage = cv::imread("/home/ncr/frame.jpg");`
 
+
+`g++ -o test_calibration aruco_test.cpp pkg-config opencv --cflags --libs`
