@@ -3,6 +3,11 @@
 int main(int argc, char** argv) {
 
   load(argc, argv);
+  
+  bool showWindow = false;
+  if (argc > 2 ) {
+    if ( strcmp(argv[2], "true") == 0) { printf("print\n"); showWindow = true; }
+  }
 
   obtainSavedImage(argv[1], cameraMatrix, distanceCoefficients, showWindow);
 

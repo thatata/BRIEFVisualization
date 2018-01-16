@@ -56,6 +56,12 @@
  const float arucoSquareDimension = .160f;   //meters - 160mm = 16cm
  const Size chessboardDimensions = Size(6, 9); //Size of calibration board (given)
 
+ // Runtime Constants
+ Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
+ Mat distanceCoefficients;
+ vector<int> markerIds;
+ vector< vector<Point2f> > markerCorners;
+
  // Known location of markers in Test Environment
  /* TODO: Update these values with those recorded. */
  std::vector<Vec3d> translationVectorsToOrigin;
@@ -735,16 +741,6 @@
    translationVectorsToOrigin.push_back(mk1);
    translationVectorsToOrigin.push_back(mk2);
    translationVectorsToOrigin.push_back(mk3);
-
-   Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
-   Mat distanceCoefficients;
-   vector<int> markerIds;
-   vector< vector<Point2f> > markerCorners;
-
-   bool showWindow = false;
-   if (argc > 2 ) {
-     if ( strcmp(argv[2], "true") == 0) { printf("print\n"); showWindow = true; }
-   }
 
    loadCameraCalibration("KinectCalibration", cameraMatrix, distanceCoefficients);
  }
