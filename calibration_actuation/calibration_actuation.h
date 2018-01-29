@@ -56,6 +56,12 @@
  const float arucoSquareDimension = .160f;   //meters - 160mm = 16cm
  const Size chessboardDimensions = Size(6, 9); //Size of calibration board (given)
 
+ // Runtime Constants
+ Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
+ Mat distanceCoefficients;
+ vector<int> markerIds;
+ vector< vector<Point2f> > markerCorners;
+
  // Known location of markers in Test Environment
  /* TODO: Update these values with those recorded. */
  std::vector<Vec3d> translationVectorsToOrigin;
@@ -679,6 +685,7 @@
 
  int left() {
    // Stepper motor
+   socket_request("move(3, 10)");
  }
 
  int right() {
@@ -725,4 +732,15 @@
      //TODO: Call calibration function
      error_correct( new_pt );
      return 1;
+ }
+
+ //Initial calls within any running instance
+ void load(int argc, char** argv) {
+   // Add elements to translationVectorsToOrigin vector
+   translationVectorsToOrigin.push_back(mk0);
+   translationVectorsToOrigin.push_back(mk1);
+   translationVectorsToOrigin.push_back(mk2);
+   translationVectorsToOrigin.push_back(mk3);
+
+   loadCameraCalibration("KinectCalibration", cameraMatrix, distanceCoefficients);
  }

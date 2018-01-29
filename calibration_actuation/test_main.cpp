@@ -2,29 +2,16 @@
 
 int main(int argc, char** argv) {
 
-  //createArucoMarkers(); // Done
-
-  // Add elements to translationVectorsToOrigin vector
-  /* TODO: Must be copied into final main file with modeling. */
-  translationVectorsToOrigin.push_back(mk0);
-  translationVectorsToOrigin.push_back(mk1);
-  translationVectorsToOrigin.push_back(mk2);
-  translationVectorsToOrigin.push_back(mk3);
-
-  Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
-  Mat distanceCoefficients;
-  vector<int> markerIds;
-  vector< vector<Point2f> > markerCorners;
-
+  load(argc, argv);
+  
   bool showWindow = false;
   if (argc > 2 ) {
     if ( strcmp(argv[2], "true") == 0) { printf("print\n"); showWindow = true; }
   }
 
-  loadCameraCalibration("KinectCalibration", cameraMatrix, distanceCoefficients);
   obtainSavedImage(argv[1], cameraMatrix, distanceCoefficients, showWindow);
 
-  socket_request("Test");
+  socket_request("x+1");
 
   /* TRANSLATION TO ACTUAL IMPLIMENTATION */
   // TODO:
