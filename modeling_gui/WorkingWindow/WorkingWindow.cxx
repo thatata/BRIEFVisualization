@@ -104,6 +104,20 @@ struct CubeData {
     double scaleX = 1, scaleY = 1, scaleZ = 1, rotationX, rotationY, rotationZ, translateX, translateY;
 };
 
+struct PointData {
+    // actor object
+    vtkSmartPointer<vtkActor> actor;
+
+    // polydata object
+    vtkSmartPointer<vtkPolyData> polyData;
+
+    // points object
+    vtkSmartPointer<vtkPoints> points;
+
+    // cell array object
+    vtkSmartPointer<vtkCellArray> vertices;
+};
+
 class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
     public:
         static MyInteractorStyle* New();
@@ -467,6 +481,15 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
                     // done, so return
                     return;
+                } else if (Point) {
+                    // draw point
+                    DrawPointOntoImage();
+
+                    // re-render
+                    this->Interactor->Render();
+
+                    // done, so return
+                    return;
                 }
             }
 
@@ -504,6 +527,9 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
                     // change color to red to denote selected
                     actor->GetProperty()->SetColor(1,0,0); // red
+
+                    // set opacity to 50%
+                    actor->GetProperty()->SetOpacity(0.5);
 
                     // re-render to update color
                     this->Interactor->Render();
@@ -724,8 +750,8 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             vtkSmartPointer<vtkCubeSource> cubeSource =
               vtkSmartPointer<vtkCubeSource>::New();
 
-            // set center based on click (z = 10)
-            cubeSource->SetCenter(position[0], position[1], 10);
+            // set center based on click (z = 100)
+            cubeSource->SetCenter(position[0], position[1], 100);
 
             // set basic length/width/height
             cubeSource->SetXLength(25.0);
@@ -752,6 +778,43 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // add to vector of cubes
             cubes.push_back(cube);
+        }
+
+        void DrawPointOntoImage() {
+            // create PointData object
+            PointData *data = new PointData();
+
+            // get click position
+            double *position = GetClickPosition();
+
+            // initialize points and insert point
+            data->points = vtkSmartPointer<vtkPoints>::New();
+
+            vtkIdType pid[1];
+            //pid[0] = data->points->InsertNextPoint(x,y,10);
+            pid[0] = data->points->InsertNextPoint(position);
+
+            // initialize vertices and insert next cell
+            data->vertices = vtkSmartPointer<vtkCellArray>::New();
+            data->vertices->InsertNextCell(1,pid);
+
+            // initialize polyData object and assign vertices/points
+            data->polyData = vtkSmartPointer<vtkPolyData>::New();
+            data->polyData->SetPoints(data->points);
+            data->polyData->SetVerts(data->vertices);
+
+            // map poly data to its own mapper
+            vtkSmartPointer<vtkPolyDataMapper> mapper =
+                vtkSmartPointer<vtkPolyDataMapper>::New();
+            mapper->SetInputData(data->polyData);
+
+            // initialize actor and set mapper
+            data->actor = vtkSmartPointer<vtkActor>::New();
+            data->actor->SetMapper(mapper);
+            data->actor->GetProperty()->SetPointSize(10);
+
+            // add actor to the current renderer
+            this->CurrentRenderer->AddActor(data->actor);
         }
 
         CubeData *GetCube(vtkSmartPointer<vtkActor> actor) {
@@ -793,6 +856,9 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
         // store vector of CubeData objects
         std::vector<CubeData*> cubes;
+
+        // store vector of PointData objects
+        std::vector<PointData*> points;
 };
 
 vtkStandardNewMacro(MyInteractorStyle);
@@ -803,7 +869,6 @@ vtkSmartPointer<vtkRenderer> CreateObjectsRenderer();
 vtkSmartPointer<vtkRenderer> CreateCubeButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreatePointButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreateOtherButtonRenderer();
-vtkSmartPointer<vtkRenderer> CreateSceneRenderer();
 vtkSmartPointer<vtkRenderer> CreateOperationsRenderer();
 vtkSmartPointer<vtkRenderer> CreateDrawButtonRenderer();
 vtkSmartPointer<vtkRenderer> CreateScaleButtonRenderer();
@@ -1000,9 +1065,7 @@ std::vector<vtkSmartPointer<vtkPNGReader>> GetReaders(int numImages) {
     std::vector<vtkSmartPointer<vtkPNGReader>> readers;
 
     // loop through each image to get the reader and add to vector
-    for (unsigned int i = 13; i <= numImages; i++) {
-        // NOTE: looping from 13 to skip all images of the same position
-
+    for (unsigned int i = 0; i <= numImages; i++) {
         // create PNG reader to read each file
         vtkSmartPointer<vtkPNGReader> reader =
             vtkSmartPointer<vtkPNGReader>::New();
