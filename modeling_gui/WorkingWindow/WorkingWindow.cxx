@@ -123,6 +123,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         static MyInteractorStyle* New();
         vtkTypeMacro(MyInteractorStyle, vtkInteractorStyleTrackballActor);
 
+        // Constructor to initialize private vars
         MyInteractorStyle() {
             // set default values
             Cube = false;
@@ -140,6 +141,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             Zoom = false;
         }
 
+        // Mouse events
         virtual void OnLeftButtonDown() {
             // get position of the click
             int x = this->Interactor->GetEventPosition()[0];
@@ -151,7 +153,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             // perform operation based on the renderer selected
             PerformAction();
         }
-
         virtual void OnKeyPress() {
             // check if an object was selected
             if (Selected) {
@@ -162,10 +163,12 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 } else if (Stretch) {
                     // handle stretch operation
                     StretchObject();
+                } else if (Scale) {
+                    // handle scale operation
+                    ScaleObject();
                 }
             }
         }
-
         void OnLeftButtonUp() {
             // check if moving, if so finish
             if (Moving) {
@@ -183,7 +186,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 data->translateY = selectedActor->GetPosition()[1];
             }
         }
-
         void OnMouseMove() {
             // check if an actor is moving, if so just return
             if (!Moving) {
@@ -194,6 +196,7 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             vtkInteractorStyleTrackballActor::OnMouseMove();
         }
 
+        // Operations
         void MoveCube() {
             // check if selected actor was under the mouse click
             vtkSmartPointer<vtkActor> actor = GetActorUnderClick();
@@ -210,7 +213,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 this->InteractionProp = selectedActor;
             }
         }
-
         void RotateObject() {
             // grab key pressed
             std::string key = this->Interactor->GetKeySym();
@@ -266,7 +268,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             // perform transformations using cube data
             PerformTransformations(data);
         }
-
         void StretchObject() {
             // grab key pressed
             std::string key = this->Interactor->GetKeySym();
@@ -322,65 +323,105 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             // rotate cube using axis and angle
             PerformTransformations(data);
         }
+        void ScaleObject() {
+            // grab key pressed
+            std::string key = this->Interactor->GetKeySym();
 
-        void StretchCube(int axis, double scale) {
-            // create transform object
-            vtkSmartPointer<vtkTransform> transform =
-                vtkSmartPointer<vtkTransform>::New();
-
-            // get CubeData object from the selected actor
+            // get cube data to update scale values
             CubeData *data = GetCube(selectedActor);
 
-            // get the center position of the cube from CubeData
-            double *center = data->cubeSource->GetCenter();
-
-            // apply initial translation to center the cube at the origin
-            transform->Translate(center[0], center[1], center[2]);
-
-            // update scale factors based on selected axis
-            switch(axis) {
-                case 0:
-                    // update x angle rotation
-                    data->scaleX += scale;
-                    break;
-                case 1:
-                    // update y angle rotation
-                    data->scaleY += scale;
-                    break;
-                case 2:
-                    // update z angle rotation
-                    data->scaleZ += scale;
-                default:
-                    break;
+            // scale object equally for each axis for up/down arrows
+            if (key == "Up") {
+                // scale +10%
+                data->scaleX += .1;
+                data->scaleY += .1;
+                data->scaleZ += .1;
+            } else if (key == "Down") {
+                // scale -10%
+                data->scaleX -= .1;
+                data->scaleY -= .1;
+                data->scaleZ -= .1;
+            } else {
+                // otherwise don't scale and return
+                return;
             }
 
-
-
-            // apply final translation
-            transform->Translate(-center[0], -center[1], -center[2]);
-
-            // set up transform filter
-            vtkSmartPointer<vtkTransformFilter> filter =
-              vtkSmartPointer<vtkTransformFilter>::New();
-
-            // add cube and transform, and update
-            filter->SetInputConnection(data->cubeSource->GetOutputPort());
-            filter->SetTransform(transform);
-            filter->Update();
-
-            // set up new mapper
-            vtkSmartPointer<vtkPolyDataMapper> mapper =
-              vtkSmartPointer<vtkPolyDataMapper>::New();
-
-            mapper->SetInputConnection(filter->GetOutputPort());
-
-            // set mapper to existing actor
-            this->selectedActor->SetMapper(mapper);
-
-            // reset camera and update window
-            this->Interactor->Render();
+            // rotate cube using axis and angle
+            PerformTransformations(data);
         }
+        void DrawCubeOntoImage() {
+            // get click position (x,y)
+            double *position = GetClickPosition();
 
+            // Create a cube
+            vtkSmartPointer<vtkCubeSource> cubeSource =
+              vtkSmartPointer<vtkCubeSource>::New();
+
+            // set center based on click (z = 100)
+            cubeSource->SetCenter(position[0], position[1], 100);
+
+            // set basic length/width/height
+            cubeSource->SetXLength(25.0);
+            cubeSource->SetYLength(25.0);
+            cubeSource->SetZLength(25.0);
+
+            // map cube source to data set mapper
+            vtkSmartPointer<vtkDataSetMapper> mapper =
+              vtkSmartPointer<vtkDataSetMapper>::New();
+            mapper->SetInputConnection(cubeSource->GetOutputPort());
+
+            // create actor and set mapper
+            vtkSmartPointer<vtkActor> actor =
+              vtkSmartPointer<vtkActor>::New();
+            actor->SetMapper(mapper);
+
+            // add actor to the current renderer
+            this->CurrentRenderer->AddActor(actor);
+
+            // create CubeData object to store cube source and actor
+            CubeData *cube = new CubeData();
+            cube->actor = actor;
+            cube->cubeSource = cubeSource;
+
+            // add to vector of cubes
+            cubes.push_back(cube);
+        }
+        void DrawPointOntoImage() {
+            // create PointData object
+            PointData *data = new PointData();
+
+            // get click position
+            double *position = GetClickPosition();
+
+            // initialize points and insert point
+            data->points = vtkSmartPointer<vtkPoints>::New();
+
+            vtkIdType pid[1];
+            //pid[0] = data->points->InsertNextPoint(x,y,10);
+            pid[0] = data->points->InsertNextPoint(position);
+
+            // initialize vertices and insert next cell
+            data->vertices = vtkSmartPointer<vtkCellArray>::New();
+            data->vertices->InsertNextCell(1,pid);
+
+            // initialize polyData object and assign vertices/points
+            data->polyData = vtkSmartPointer<vtkPolyData>::New();
+            data->polyData->SetPoints(data->points);
+            data->polyData->SetVerts(data->vertices);
+
+            // map poly data to its own mapper
+            vtkSmartPointer<vtkPolyDataMapper> mapper =
+                vtkSmartPointer<vtkPolyDataMapper>::New();
+            mapper->SetInputData(data->polyData);
+
+            // initialize actor and set mapper
+            data->actor = vtkSmartPointer<vtkActor>::New();
+            data->actor->SetMapper(mapper);
+            data->actor->GetProperty()->SetPointSize(10);
+
+            // add actor to the current renderer
+            this->CurrentRenderer->AddActor(data->actor);
+        }
         void PerformTransformations(CubeData *data) {
             // create transform object
             vtkSmartPointer<vtkTransform> transform =
@@ -425,6 +466,76 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             this->Interactor->Render();
         }
 
+        // Utils
+        vtkSmartPointer<vtkActor> GetActorUnderClick() {
+            // get click position
+            double *click = GetClickPosition();
+
+            // get actors from the renderer
+            vtkSmartPointer<vtkActorCollection> actors = this->CurrentRenderer->GetActors();
+
+            // initialize traversal
+            actors->InitTraversal();
+
+            // loop through each actor to see if it's under the mouse click
+            for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
+                // get next actor
+                vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
+
+                // get the bounds of that actor (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax)
+                double *bounds = actor->GetBounds();
+
+                // check if the click position is within the bounds
+                if ((click[0] >= bounds[0] && click[0] <= bounds[1]) &&
+                        click[1] >= bounds[2] && click[1] <= bounds[3]) {
+                    // if so, actor is under the click
+                    return actor;
+                }
+            }
+
+            // if no actor was under the click, return null
+            return NULL;
+        }
+        void ChangeRenderer(double r, double g, double b) {
+            // based on rgb values, set background of current renderer
+            this->CurrentRenderer->SetBackground(r, g, b);
+
+            // reset camera
+            this->CurrentRenderer->ResetCamera();
+
+            // render the window to reflect this change
+            this->Interactor->Render();
+        }
+        double *GetClickPosition() {
+            // get x and y from mouse event
+            int x = this->Interactor->GetEventPosition()[0];
+            int y = this->Interactor->GetEventPosition()[1];
+
+
+            // use picker to select correct pixel location
+            this->Interactor->GetPicker()->Pick(x,
+                                                y,
+                                                0, // always zero
+                                                this->CurrentRenderer);
+
+            // get the pick position
+            double *position = this->Interactor->GetPicker()->GetPickPosition();
+
+            return position;
+        }
+        CubeData *GetCube(vtkSmartPointer<vtkActor> actor) {
+            // traverse through cubes and compare actors
+            for (unsigned int i = 0; i < cubes.size(); i++) {
+                if (cubes[i]->actor == actor) {
+                    return cubes[i];
+                }
+            }
+
+            // otherwise, return null
+            return NULL;
+        }
+
+        // Button handling
         void PerformAction() {
             // perform appropriate action based on which renderer is selected
             if (this->CurrentRenderer == rendererMap[0]) {
@@ -467,7 +578,6 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
             // otherwise, perform no action
         }
-
         void SceneSelected() {
             // check if draw is selected
             if (Draw) {
@@ -528,45 +638,14 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                     // change color to red to denote selected
                     actor->GetProperty()->SetColor(1,0,0); // red
 
-                    // set opacity to 50%
-                    actor->GetProperty()->SetOpacity(0.5);
+                    // set opacity to 75%
+                    actor->GetProperty()->SetOpacity(0.75);
 
                     // re-render to update color
                     this->Interactor->Render();
                 }
             }
         }
-
-        vtkSmartPointer<vtkActor> GetActorUnderClick() {
-            // get click position
-            double *click = GetClickPosition();
-
-            // get actors from the renderer
-            vtkSmartPointer<vtkActorCollection> actors = this->CurrentRenderer->GetActors();
-
-            // initialize traversal
-            actors->InitTraversal();
-
-            // loop through each actor to see if it's under the mouse click
-            for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
-                // get next actor
-                vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
-
-                // get the bounds of that actor (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax)
-                double *bounds = actor->GetBounds();
-
-                // check if the click position is within the bounds
-                if ((click[0] >= bounds[0] && click[0] <= bounds[1]) &&
-                        click[1] >= bounds[2] && click[1] <= bounds[3]) {
-                    // if so, actor is under the click
-                    return actor;
-                }
-            }
-
-            // if no actor was under the click, return null
-            return NULL;
-        }
-
         void CubeSelected() {
             // change flag depending on selected or not
             if (Cube) {
@@ -713,123 +792,8 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
         }
         void RequestSelected() {}
         void OutputSelected() {}
-        void ChangeRenderer(double r, double g, double b) {
-            // based on rgb values, set background of current renderer
-            this->CurrentRenderer->SetBackground(r, g, b);
 
-            // reset camera
-            this->CurrentRenderer->ResetCamera();
-
-            // render the window to reflect this change
-            this->Interactor->Render();
-        }
-
-        double *GetClickPosition() {
-            // get x and y from mouse event
-            int x = this->Interactor->GetEventPosition()[0];
-            int y = this->Interactor->GetEventPosition()[1];
-
-
-            // use picker to select correct pixel location
-            this->Interactor->GetPicker()->Pick(x,
-                                                y,
-                                                0, // always zero
-                                                this->CurrentRenderer);
-
-            // get the pick position
-            double *position = this->Interactor->GetPicker()->GetPickPosition();
-
-            return position;
-        }
-
-        void DrawCubeOntoImage() {
-            // get click position (x,y)
-            double *position = GetClickPosition();
-
-            // Create a cube
-            vtkSmartPointer<vtkCubeSource> cubeSource =
-              vtkSmartPointer<vtkCubeSource>::New();
-
-            // set center based on click (z = 100)
-            cubeSource->SetCenter(position[0], position[1], 100);
-
-            // set basic length/width/height
-            cubeSource->SetXLength(25.0);
-            cubeSource->SetYLength(25.0);
-            cubeSource->SetZLength(25.0);
-
-            // map cube source to data set mapper
-            vtkSmartPointer<vtkDataSetMapper> mapper =
-              vtkSmartPointer<vtkDataSetMapper>::New();
-            mapper->SetInputConnection(cubeSource->GetOutputPort());
-
-            // create actor and set mapper
-            vtkSmartPointer<vtkActor> actor =
-              vtkSmartPointer<vtkActor>::New();
-            actor->SetMapper(mapper);
-
-            // add actor to the current renderer
-            this->CurrentRenderer->AddActor(actor);
-
-            // create CubeData object to store cube source and actor
-            CubeData *cube = new CubeData();
-            cube->actor = actor;
-            cube->cubeSource = cubeSource;
-
-            // add to vector of cubes
-            cubes.push_back(cube);
-        }
-
-        void DrawPointOntoImage() {
-            // create PointData object
-            PointData *data = new PointData();
-
-            // get click position
-            double *position = GetClickPosition();
-
-            // initialize points and insert point
-            data->points = vtkSmartPointer<vtkPoints>::New();
-
-            vtkIdType pid[1];
-            //pid[0] = data->points->InsertNextPoint(x,y,10);
-            pid[0] = data->points->InsertNextPoint(position);
-
-            // initialize vertices and insert next cell
-            data->vertices = vtkSmartPointer<vtkCellArray>::New();
-            data->vertices->InsertNextCell(1,pid);
-
-            // initialize polyData object and assign vertices/points
-            data->polyData = vtkSmartPointer<vtkPolyData>::New();
-            data->polyData->SetPoints(data->points);
-            data->polyData->SetVerts(data->vertices);
-
-            // map poly data to its own mapper
-            vtkSmartPointer<vtkPolyDataMapper> mapper =
-                vtkSmartPointer<vtkPolyDataMapper>::New();
-            mapper->SetInputData(data->polyData);
-
-            // initialize actor and set mapper
-            data->actor = vtkSmartPointer<vtkActor>::New();
-            data->actor->SetMapper(mapper);
-            data->actor->GetProperty()->SetPointSize(10);
-
-            // add actor to the current renderer
-            this->CurrentRenderer->AddActor(data->actor);
-        }
-
-        CubeData *GetCube(vtkSmartPointer<vtkActor> actor) {
-            // traverse through cubes and compare actors
-            for (unsigned int i = 0; i < cubes.size(); i++) {
-                if (cubes[i]->actor == actor) {
-                    return cubes[i];
-                }
-            }
-
-            // otherwise, return null
-            return NULL;
-        }
-
-        // setter for renderer map
+        // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map) { rendererMap = map; }
 
     private:
