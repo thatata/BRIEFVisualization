@@ -12,3 +12,6 @@ Release Update Notes:
 **Saving images:**
 Run `save` within `calibration_actuation/` 
 with command: `$ ./save [fileName.png]`
+
+Run `load_and_analyze` within `calibration_actuation/`
+with command `./load_and_analyze [path to image] [boolean: Display image or not]`
