@@ -1,0 +1,84 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% INVERSE KINEMATICS
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Deducing theta1 and theta2 from x and y coordinates using inverse
+% kinematics formulae
+% theta1 = f(x, y)
+% theta2 = g(x, y)
+
+l1 = .77; % length of first arm
+l2 = .265; % length of second arm
+
+X = 0:0.1:2; % x coordinates for validation
+Y = 8:0.1:10; % y coordinates for validation
+
+theta1D = [];
+theta2D = [];
+
+xy = [];
+
+for i = 1:1:length(X)
+    for j = 1:1:length(Y)
+
+        x = X(i);
+        y = Y(j);
+        c2 = (x^2 + y^2 - l1^2 - l2^2)/(2*l1*l2);
+        s2 = sqrt(1 - c2^2);
+        theta2 = atan2(s2, c2); % theta2 is deduced
+
+        k1 = l1 + l2*c2;
+        k2 = l2*s2;
+        theta1 = atan2(y, x) - atan2(k2, k1); % theta1 is deduced
+
+        theta1D = [theta1D; theta1]; % save theta1
+        theta2D = [theta2D; theta2]; % save theta2
+
+        xy = [xy; x y]; % save x-y coordinates
+
+    end
+end
+
+
+opt = anfisOptions;
+opt.InitialFIS = 7;
+opt.EpochNumber = 150;
+opt.DisplayANFISInformation = 0;
+opt.DisplayErrorValues = 0;
+opt.DisplayStepSize = 0;
+opt.DisplayFinalResults = 0;
+
+disp('--> Training first ANFIS network.')
+anfis1 = anfis(data1,opt);
+
+disp('--> Training second ANFIS network.')
+opt.InitialFIS = 6;
+anfis2 = anfis(data2,opt);
+
+[X,Y] = meshgrid(x,y);
+
+c2 = (X.^2 + Y.^2 - l1^2 - l2^2)/(2*l1*l2);
+s2 = sqrt(1 - c2.^2);
+THETA2D = atan2(s2,c2); % theta2 is deduced
+
+k1 = l1 + l2.*c2;
+k2 = l2*s2;
+THETA1D = atan2(Y,X) - atan2(k2,k1); % theta1 is deduced
+
+XY = [X(:) Y(:)];
+THETA1P = evalfis(XY,anfis1); % theta1 predicted by anfis1
+THETA2P = evalfis(XY,anfis2); % theta2 predicted by anfis2
+
+theta1diff = THETA1D(:) - THETA1P;
+theta2diff = THETA2D(:) - THETA2P;
+
+subplot(2,1,1);
+plot(theta1diff);
+ylabel('THETA1D - THETA1P','fontsize',10)
+title('Deduced theta1 - Predicted theta1','fontsize',10)
+
+subplot(2,1,2);
+plot(theta2diff);
+ylabel('THETA2D - THETA2P','fontsize',10)
+title('Deduced theta2 - Predicted theta2','fontsize',10)
