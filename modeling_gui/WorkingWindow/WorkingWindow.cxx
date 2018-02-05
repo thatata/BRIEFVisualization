@@ -92,6 +92,9 @@
   *
   **/
 
+// temporary image actor
+vtkSmartPointer<vtkImageActor> daImage;
+
 // structure holding actor and cube source of each cube object
 struct CubeData {
     // actor object
@@ -535,6 +538,182 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
             return NULL;
         }
 
+        void RequestNewPose() {
+            // print the request string to the console
+            std::cout << "New Pose Request!" << std::endl
+                      << "Please enter pose number: ";
+
+            // get pose number from input
+            int poseNum;
+            std::cin >> poseNum;
+
+            // STEPS:
+            // 1. update the image to reflect new pose
+            // get all actors in the scene
+            daImage->GetMapper()->SetInputConnection(readers[poseNum]->GetOutputPort());
+
+            // 2. transform cube based on T matrices
+            // get cube data
+            CubeData *data = GetCube(selectedActor);
+
+            // create transform object
+            vtkSmartPointer<vtkTransform> transform =
+                vtkSmartPointer<vtkTransform>::New();
+
+            // get the center position of the cube from CubeData
+            double *center = data->cubeSource->GetCenter();
+
+            // apply initial translation to center the cube at the origin
+            transform->Translate(center[0], center[1], center[2]);
+
+            // apply rotations
+            transform->RotateX(data->rotationX);
+            transform->RotateY(data->rotationY);
+            transform->RotateZ(data->rotationZ);
+
+            // scale with appropriate values
+            transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
+
+            // apply final translation
+            transform->Translate(-center[0], -center[1], -center[2]);
+
+            // get filename of pose
+            std::stringstream filename;
+            filename << poseNum << ".txt";
+
+            // get final matrix
+            vtkSmartPointer<vtkMatrix4x4> initialMatrix = GetMatrix(filename.str().c_str());
+
+            // get initial matrix
+            vtkSmartPointer<vtkMatrix4x4> finalMatrix = GetMatrix("0.txt");
+
+            transform->Concatenate(finalMatrix);
+            transform->PostMultiply();
+            transform->Concatenate(initialMatrix);
+
+            // set up transform filter
+            vtkSmartPointer<vtkTransformFilter> filter =
+              vtkSmartPointer<vtkTransformFilter>::New();
+
+            // add cube and transform, and update
+            filter->SetInputConnection(data->cubeSource->GetOutputPort());
+            filter->SetTransform(transform);
+            filter->Update();
+
+            // set up new mapper
+            vtkSmartPointer<vtkPolyDataMapper> mapper =
+              vtkSmartPointer<vtkPolyDataMapper>::New();
+
+            mapper->SetInputConnection(filter->GetOutputPort());
+
+            // set mapper to existing actor
+            this->selectedActor->SetMapper(mapper);
+
+            this->Interactor->Render();
+        }
+
+        vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName) {
+            // vars to read text files
+            std::string line;
+            ifstream file (fileName);
+
+            // vars to represent t vector and r matrix
+            double tVector[3];
+            double rMatrix[3][3];
+
+            // local vars for parsing
+            int lineCount = 0;
+            int tIdx = 0;
+            int rIdxRow = 0;
+            int rIdxCol = 0;
+
+            // parse through text file
+            if (file.is_open()) {
+                while (std::getline(file, line)) {
+                    // check for t vector
+                    if (lineCount > 0 && lineCount < 4) {
+                        // get float from string
+                        tVector[tIdx] = atof(line.c_str());
+                        tIdx++;
+                    }
+
+                    // check for r matrix
+                    else if (lineCount > 5 && lineCount < 9) {
+                        // loop through characters of the string
+                        // to get each element of the row
+
+                        int startIdx = 0;
+                        int length = 0;
+                        for (unsigned int i = 0; i < line.length(); i++) {
+                            if (line.at(i) == ' ' || i == line.length() - 1) {
+                                // compute the length of the string from the start index
+                                length = i - startIdx + 1;
+
+                                // get resulting substring to check validity
+                                std::string result = line.substr(startIdx, length);
+
+                                // check if string is just " " or "  "
+                                if (result == " " || result == "  ") {
+                                    // if so, change start idx and continue
+                                    startIdx = i;
+                                    continue;
+                                }
+
+                                // get float value and assign to r matrix
+                                rMatrix[rIdxRow][rIdxCol] = atof(line.substr(startIdx, length).c_str());
+
+                                // change start idx to current index
+                                startIdx = i;
+
+                                // check if end of row is reached
+                                if (rIdxCol == 2) {
+                                    // if so, reset column idx and increment row idx
+                                    rIdxCol = 0;
+                                    rIdxRow++;
+                                } else {
+                                    // otherwise, just increment column idx
+                                    rIdxCol++;
+                                }
+                            }
+                        }
+                    }
+
+                    // increment line count
+                    lineCount++;
+                }
+            } else cout << "Unable to open file";
+
+            // create 4x4 matrix to represent Transformation Matrix
+            vtkSmartPointer<vtkMatrix4x4> matrix =
+                vtkSmartPointer<vtkMatrix4x4>::New();
+
+            // use r matrix and t vector to fill out 4x4 matrix
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    // check if the last column is reached
+                    if (i == 3) {
+                        // set last line for homogeneous coords
+                        matrix->SetElement(i, 0, 0);
+                        matrix->SetElement(i, 1, 0);
+                        matrix->SetElement(i, 2, 0);
+                        matrix->SetElement(i, 3, 1);
+                        break;
+                    }
+
+                    // check if columns should be r matrix or t vector
+                    if (j < 3) {
+                        // r matrix
+                        matrix->SetElement(i, j, rMatrix[i][j]);
+                    } else {
+                        // t vector
+                        matrix->SetElement(i, j, tVector[i]);
+                    }
+                }
+            }
+
+            return matrix;
+        }
+
         // Button handling
         void PerformAction() {
             // perform appropriate action based on which renderer is selected
@@ -790,11 +969,14 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
                 ChangeRenderer(0,1,0);
             }
         }
-        void RequestSelected() {}
+        void RequestSelected() {
+            RequestNewPose();
+        }
         void OutputSelected() {}
 
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map) { rendererMap = map; }
+        void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders) { readers = pngReaders; }
 
     private:
         // private vars
@@ -823,6 +1005,9 @@ class MyInteractorStyle : public vtkInteractorStyleTrackballActor {
 
         // store vector of PointData objects
         std::vector<PointData*> points;
+
+        // readers
+        std::vector<vtkSmartPointer<vtkPNGReader>> readers;
 };
 
 vtkStandardNewMacro(MyInteractorStyle);
@@ -1006,8 +1191,9 @@ int main(int argc, char *argv[])
 
     renderWindowInteractor->SetInteractorStyle(style);
 
-    // set renderer map
+    // set renderer map and readers
     style->SetRendererMap(rendererMap);
+    style->SetReaders(readers);
 
     // render the window to figure out where image camera is
     renderWindow->Render();
@@ -1091,6 +1277,8 @@ vtkSmartPointer<vtkRenderer> CreateImageRenderer(vtkSmartPointer<vtkPNGReader> r
 
     // add image actor to image renderer
     renderer->AddActor(imageActor);
+
+    daImage = imageActor;
 
     return renderer;
 }
