@@ -299,8 +299,8 @@ void ModelingWindowStyle::DrawCubeOntoImage() {
     vtkSmartPointer<vtkCubeSource> cubeSource =
       vtkSmartPointer<vtkCubeSource>::New();
 
-    // set center based on click (z = 100)
-    cubeSource->SetCenter(position[0], position[1], 100);
+    // set center based on click (z = 0)
+    cubeSource->SetCenter(position[0], position[1], 0);
 
     // set basic length/width/height
     cubeSource->SetXLength(25.0);
@@ -364,6 +364,73 @@ void ModelingWindowStyle::DrawPointOntoImage() {
 
     // add actor to the current renderer
     this->CurrentRenderer->AddActor(data->actor);
+}
+
+void ModelingWindowStyle::TransformEntities(int poseNum) {
+    // loop through cubes in attributes
+    for (unsigned int i = 0; i < attributes->cubes.size(); i++) {
+        // get CubeData
+        CubeData *data = attributes->cubes[i];
+
+        // create transform object
+        vtkSmartPointer<vtkTransform> transform =
+            vtkSmartPointer<vtkTransform>::New();
+
+        // get the center position of the cube from CubeData
+        double *center = data->cubeSource->GetCenter();
+
+        // apply initial translation to center the cube at the origin
+        transform->Translate(center[0], center[1], center[2]);
+
+        // apply rotations
+        transform->RotateX(data->rotationX);
+        transform->RotateY(data->rotationY);
+        transform->RotateZ(data->rotationZ);
+
+        // scale with appropriate values
+        transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
+
+        // apply final translation
+        transform->Translate(-center[0], -center[1], -center[2]);
+
+        // get filename of pose
+        std::stringstream filename;
+        filename << poseNum << ".txt";
+
+        // get final matrix
+        vtkSmartPointer<vtkMatrix4x4> initialMatrix = GetMatrix(filename.str().c_str());
+
+        // get initial matrix
+        vtkSmartPointer<vtkMatrix4x4> finalMatrix = GetMatrix("0.txt");
+
+        // apply matrices
+        transform->Concatenate(finalMatrix);
+        transform->PostMultiply();
+        transform->Concatenate(initialMatrix);
+
+        // set up transform filter
+        vtkSmartPointer<vtkTransformFilter> filter =
+          vtkSmartPointer<vtkTransformFilter>::New();
+
+        // add cube and transform, and update
+        filter->SetInputConnection(data->cubeSource->GetOutputPort());
+        filter->SetTransform(transform);
+        filter->Update();
+
+        // set up new mapper
+        vtkSmartPointer<vtkPolyDataMapper> mapper =
+          vtkSmartPointer<vtkPolyDataMapper>::New();
+
+        mapper->SetInputConnection(filter->GetOutputPort());
+
+        // set mapper to actor of CubeData
+        data->actor->SetMapper(mapper);
+
+        // add actor to the scene renderer
+        this->DefaultRenderer->AddActor(data->actor);
+    }
+
+    // TODO: REPEAT PROCESS FOR POINTS
 }
 
 void ModelingWindowStyle::PerformTransformations(CubeData *data) {
@@ -491,73 +558,14 @@ void ModelingWindowStyle::RequestNewPose() {
     std::cin >> poseNum;
 
     // create new modeling window for a pose
-    attributes->window = new ModelingWindow(10);
+    WindowStyleAttributes *newAttributes = new WindowStyleAttributes();
+    newAttributes->cubes = attributes->cubes;
+    newAttributes->points = attributes->points;
+    newAttributes->readers = attributes->readers;
 
+    // create new window and start it
+    attributes->window = new ModelingWindow(poseNum, newAttributes);
     attributes->window->renderWindowInteractor->Start();
-
-//    // STEPS:
-//    // 1. update the image to reflect new pose
-//    // get all actors in the scene
-//    //daImage->GetMapper()->SetInputConnection(readers[poseNum]->GetOutputPort());
-
-//    // 2. transform cube based on T matrices
-//    // get cube data
-//    CubeData *data = GetCube(selectedActor);
-
-//    // create transform object
-//    vtkSmartPointer<vtkTransform> transform =
-//        vtkSmartPointer<vtkTransform>::New();
-
-//    // get the center position of the cube from CubeData
-//    double *center = data->cubeSource->GetCenter();
-
-//    // apply initial translation to center the cube at the origin
-//    transform->Translate(center[0], center[1], center[2]);
-
-//    // apply rotations
-//    transform->RotateX(data->rotationX);
-//    transform->RotateY(data->rotationY);
-//    transform->RotateZ(data->rotationZ);
-
-//    // scale with appropriate values
-//    transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
-
-//    // apply final translation
-//    transform->Translate(-center[0], -center[1], -center[2]);
-
-//    // get filename of pose
-//    std::stringstream filename;
-//    filename << poseNum << ".txt";
-
-//    // get final matrix
-//    vtkSmartPointer<vtkMatrix4x4> initialMatrix = GetMatrix(filename.str().c_str());
-
-//    // get initial matrix
-//    vtkSmartPointer<vtkMatrix4x4> finalMatrix = GetMatrix("0.txt");
-
-//    transform->Concatenate(finalMatrix);
-//    transform->PostMultiply();
-//    transform->Concatenate(initialMatrix);
-
-//    // set up transform filter
-//    vtkSmartPointer<vtkTransformFilter> filter =
-//      vtkSmartPointer<vtkTransformFilter>::New();
-
-//    // add cube and transform, and update
-//    filter->SetInputConnection(data->cubeSource->GetOutputPort());
-//    filter->SetTransform(transform);
-//    filter->Update();
-
-//    // set up new mapper
-//    vtkSmartPointer<vtkPolyDataMapper> mapper =
-//      vtkSmartPointer<vtkPolyDataMapper>::New();
-
-//    mapper->SetInputConnection(filter->GetOutputPort());
-
-//    // set mapper to existing actor
-//    this->selectedActor->SetMapper(mapper);
-
-//    this->Interactor->Render();
 }
 
 vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileName) {
@@ -932,6 +940,10 @@ void ModelingWindowStyle::RequestSelected() {
 }
 
 void ModelingWindowStyle::OutputSelected() {}
+
+void ModelingWindowStyle::SetCubes(std::vector<CubeData *> cubes) { attributes->cubes = cubes; }
+
+void ModelingWindowStyle::SetPoints(std::vector<PointData *> points) { attributes->points = points; }
 
 void ModelingWindowStyle::SetRendererMap(std::map<int, vtkRenderer *> map) { attributes->rendererMap = map; }
 

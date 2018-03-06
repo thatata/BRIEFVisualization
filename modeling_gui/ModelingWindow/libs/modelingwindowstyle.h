@@ -150,6 +150,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         CubeData *GetCube(vtkSmartPointer<vtkActor> actor);
         void RequestNewPose();
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
+        void TransformEntities(int poseNum);
 
         // Button handling
         void PerformAction();
@@ -169,6 +170,8 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map);
         void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders);
+        void SetCubes(std::vector<CubeData*> cubes);
+        void SetPoints(std::vector<PointData*> points);
 
     private:
         // private attributes stored in struct

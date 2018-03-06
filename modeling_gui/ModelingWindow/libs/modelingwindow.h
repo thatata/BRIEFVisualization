@@ -13,9 +13,15 @@
 #include <vtkTextProperty.h>
 #include <vtkRenderWindow.h>
 
+struct WindowStyleAttributes;
+
 class ModelingWindow {
     public:
+        // constructor for first window to open
         ModelingWindow(int numImages);
+
+        // constructor for subsequent windows to open
+        ModelingWindow(int poseNum, WindowStyleAttributes *attributes);
 
         // store interactor as a public member
         vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor;
