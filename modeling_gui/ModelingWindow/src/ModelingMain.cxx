@@ -53,7 +53,5 @@ int main(int argc, char *argv[])
     // create new window with numImages as parameter
     ModelingWindow *window = new ModelingWindow(numImages);
 
-    window->renderWindowInteractor->Start();
-
     return EXIT_SUCCESS;
 }

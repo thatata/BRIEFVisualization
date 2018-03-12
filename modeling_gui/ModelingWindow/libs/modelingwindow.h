@@ -14,6 +14,8 @@
 #include <vtkRenderWindow.h>
 
 struct WindowStyleAttributes;
+struct PoseData;
+class ModelingWindowStyle;
 
 class ModelingWindow {
     public:
@@ -21,10 +23,16 @@ class ModelingWindow {
         ModelingWindow(int numImages);
 
         // constructor for subsequent windows to open
-        ModelingWindow(int poseNum, WindowStyleAttributes *attributes);
+        ModelingWindow(int newPose, PoseData *data, ModelingWindowStyle *style);
+
+        // update window to dual-windowed
+        void DualWindows(int newPose, PoseData *data);
 
         // store interactor as a public member
         vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor;
+
+        // store ptr to window attributes
+        WindowStyleAttributes *attributes;
 
     private:
         std::vector<vtkSmartPointer<vtkPNGReader>> GetReaders(int numImages);

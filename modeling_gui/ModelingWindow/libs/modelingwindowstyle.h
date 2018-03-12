@@ -85,6 +85,23 @@ struct PointData {
     vtkSmartPointer<vtkCellArray> vertices;
 };
 
+struct PoseData {
+    // store vector of CubeData objects
+    std::vector<CubeData*> cubes;
+
+    // store vector of PointData objects
+    std::vector<PointData*> points;
+
+    // transformation matrix of this pose
+    vtkSmartPointer<vtkMatrix4x4> currMatrix;
+
+    // transformation matrix of previous pose
+    vtkSmartPointer<vtkMatrix4x4> prevMatrix;
+
+    // pose number
+    int poseNum;
+};
+
 struct WindowStyleAttributes {
     // private vars
     bool Cube;
@@ -107,17 +124,8 @@ struct WindowStyleAttributes {
     // map vtkRenderer addresses to integers for processing
     std::map<int,vtkRenderer*> rendererMap;
 
-    // store vector of CubeData objects
-    std::vector<CubeData*> cubes;
-
-    // store vector of PointData objects
-    std::vector<PointData*> points;
-
-    // readers
+    // PNG readers
     std::vector<vtkSmartPointer<vtkPNGReader>> readers;
-
-    // next modeling window for a new pose
-    ModelingWindow *window;
 };
 
 class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
@@ -150,11 +158,14 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         CubeData *GetCube(vtkSmartPointer<vtkActor> actor);
         void RequestNewPose();
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
-        void TransformEntities(int poseNum);
+        void TransformEntities(int newPose);
+        void UpdateRightPoseWindow(int newPose);
+        void RedrawWindow();
 
         // Button handling
         void PerformAction();
-        void SceneSelected();
+        void LeftSceneSelected();
+        void RightSceneSelected();
         void CubeSelected();
         void DrawSelected();
         void RotateSelected();
@@ -172,10 +183,27 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders);
         void SetCubes(std::vector<CubeData*> cubes);
         void SetPoints(std::vector<PointData*> points);
+        void SetCurrentPose(int poseNum);
+        void SetWindow(ModelingWindow *window);
+
+        // getter for window style attributes
+        ModelingWindowStyle *GetAttributes();
 
     private:
-        // private attributes stored in struct
+        // window attributes
         WindowStyleAttributes *attributes;
+
+        // vector of PoseData for each pose
+        std::vector<PoseData*> poses;
+
+        // current PoseData object
+        PoseData *currentPose;
+
+        // current modeling window
+        ModelingWindow *window;
+
+        // index of pose displayed on the right image
+        int rightPoseIdx;
 };
 
 #endif // MODELINGWINDOWSTYLE_H

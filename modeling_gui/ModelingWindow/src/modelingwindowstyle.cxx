@@ -76,6 +76,24 @@ ModelingWindowStyle::ModelingWindowStyle() {
     attributes->Stretch = false;
     attributes->StretchZ = false;
     attributes->Zoom = false;
+
+    // initialize PoseData object for initial pose
+    PoseData *data = new PoseData();
+
+    // set pose number
+    data->poseNum = 0;
+
+    // set current pose
+    currentPose = data;
+
+    // set current transformation matrix
+    data->currMatrix = GetMatrix("0.txt");
+
+    // set right pose index to -1 (right pose DNE)
+    rightPoseIdx = -1;
+
+    // add to vector of poses
+    poses.push_back(data);
 }
 
 void ModelingWindowStyle::OnLeftButtonDown() {
@@ -126,7 +144,7 @@ void ModelingWindowStyle::OnLeftButtonUp() {
 }
 
 void ModelingWindowStyle::OnMouseMove() {
-    // check if an actor is moving, if so just return
+    // check if an actor is not moving, if so just return
     if (!attributes->Moving) {
         return;
     }
@@ -326,7 +344,7 @@ void ModelingWindowStyle::DrawCubeOntoImage() {
     cube->cubeSource = cubeSource;
 
     // add to vector of cubes
-    attributes->cubes.push_back(cube);
+    currentPose->cubes.push_back(cube);
 }
 
 void ModelingWindowStyle::DrawPointOntoImage() {
@@ -366,73 +384,6 @@ void ModelingWindowStyle::DrawPointOntoImage() {
     this->CurrentRenderer->AddActor(data->actor);
 }
 
-void ModelingWindowStyle::TransformEntities(int poseNum) {
-    // loop through cubes in attributes
-    for (unsigned int i = 0; i < attributes->cubes.size(); i++) {
-        // get CubeData
-        CubeData *data = attributes->cubes[i];
-
-        // create transform object
-        vtkSmartPointer<vtkTransform> transform =
-            vtkSmartPointer<vtkTransform>::New();
-
-        // get the center position of the cube from CubeData
-        double *center = data->cubeSource->GetCenter();
-
-        // apply initial translation to center the cube at the origin
-        transform->Translate(center[0], center[1], center[2]);
-
-        // apply rotations
-        transform->RotateX(data->rotationX);
-        transform->RotateY(data->rotationY);
-        transform->RotateZ(data->rotationZ);
-
-        // scale with appropriate values
-        transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
-
-        // apply final translation
-        transform->Translate(-center[0], -center[1], -center[2]);
-
-        // get filename of pose
-        std::stringstream filename;
-        filename << poseNum << ".txt";
-
-        // get final matrix
-        vtkSmartPointer<vtkMatrix4x4> initialMatrix = GetMatrix(filename.str().c_str());
-
-        // get initial matrix
-        vtkSmartPointer<vtkMatrix4x4> finalMatrix = GetMatrix("0.txt");
-
-        // apply matrices
-        transform->Concatenate(finalMatrix);
-        transform->PostMultiply();
-        transform->Concatenate(initialMatrix);
-
-        // set up transform filter
-        vtkSmartPointer<vtkTransformFilter> filter =
-          vtkSmartPointer<vtkTransformFilter>::New();
-
-        // add cube and transform, and update
-        filter->SetInputConnection(data->cubeSource->GetOutputPort());
-        filter->SetTransform(transform);
-        filter->Update();
-
-        // set up new mapper
-        vtkSmartPointer<vtkPolyDataMapper> mapper =
-          vtkSmartPointer<vtkPolyDataMapper>::New();
-
-        mapper->SetInputConnection(filter->GetOutputPort());
-
-        // set mapper to actor of CubeData
-        data->actor->SetMapper(mapper);
-
-        // add actor to the scene renderer
-        this->DefaultRenderer->AddActor(data->actor);
-    }
-
-    // TODO: REPEAT PROCESS FOR POINTS
-}
-
 void ModelingWindowStyle::PerformTransformations(CubeData *data) {
     // create transform object
     vtkSmartPointer<vtkTransform> transform =
@@ -454,6 +405,14 @@ void ModelingWindowStyle::PerformTransformations(CubeData *data) {
 
     // apply final translation
     transform->Translate(-center[0], -center[1], -center[2]);
+
+    // check pose number for initial pose (0)
+    if (currentPose->poseNum != 0) {
+        // if pose number is not 0, need to concat transformation matrices
+        transform->Concatenate(currentPose->prevMatrix);
+        transform->PostMultiply();
+        transform->Concatenate(currentPose->currMatrix);
+    } // otherwise, no need
 
     // set up transform filter
     vtkSmartPointer<vtkTransformFilter> filter =
@@ -538,9 +497,9 @@ double *ModelingWindowStyle::GetClickPosition() {
 
 CubeData *ModelingWindowStyle::GetCube(vtkSmartPointer<vtkActor> actor) {
     // traverse through cubes and compare actors
-    for (unsigned int i = 0; i < attributes->cubes.size(); i++) {
-        if (attributes->cubes[i]->actor == actor) {
-            return attributes->cubes[i];
+    for (unsigned int i = 0; i < currentPose->cubes.size(); i++) {
+        if (currentPose->cubes[i]->actor == actor) {
+            return currentPose->cubes[i];
         }
     }
 
@@ -557,15 +516,167 @@ void ModelingWindowStyle::RequestNewPose() {
     int poseNum;
     std::cin >> poseNum;
 
-    // create new modeling window for a pose
-    WindowStyleAttributes *newAttributes = new WindowStyleAttributes();
-    newAttributes->cubes = attributes->cubes;
-    newAttributes->points = attributes->points;
-    newAttributes->readers = attributes->readers;
+    // check if pose has already been fetched
+    for (unsigned int i = 0; i < poses.size(); i++) {
+        // check each pose number in poses
+        if (poses[i]->poseNum == poseNum) {
+            // prompt user that pose already fetched
+            std::cout << "Pose Already Requested!\nUse the arrow keys to toggle to the pose."
+                      << std::endl;
+        }
+    }
 
-    // create new window and start it
-    attributes->window = new ModelingWindow(poseNum, newAttributes);
-    attributes->window->renderWindowInteractor->Start();
+    // otherwise, check if dual window exists (check if pose idx is invalid)
+    if (rightPoseIdx != -1) {
+        // if so, update image in the right pose renderer
+        UpdateRightPoseWindow(poseNum);
+
+        // transform entities for the new renderer
+        TransformEntities(poseNum);
+    } else {
+        // create image actor to display new pose in right image renderer
+        vtkSmartPointer<vtkImageActor> imageActor =
+            vtkSmartPointer<vtkImageActor>::New();
+        imageActor->GetMapper()->SetInputConnection(attributes->readers[poseNum]->GetOutputPort());
+
+        // set image actor's z coordinate (z = -100)
+        imageActor->SetPosition(imageActor->GetPosition()[0],
+                                imageActor->GetPosition()[1],
+                                -100);
+
+        // add image actor to the right image renderer (i = 10)
+        attributes->rendererMap[10]->AddActor(imageActor);
+
+        // reset camera of that renderer
+        attributes->rendererMap[10]->ResetCamera();
+
+        // re-render to check
+        this->Interactor->Render();
+
+        // transform entities
+        TransformEntities(poseNum);
+    }
+
+    // update right pose idx
+    rightPoseIdx = poseNum;
+
+    // reset camera of that renderer
+    attributes->rendererMap[10]->ResetCamera();
+
+    // re-render window
+    this->Interactor->Render();
+}
+
+void ModelingWindowStyle::UpdateRightPoseWindow(int newPose) {
+    // get actors in the right pose renderer
+    vtkSmartPointer<vtkActorCollection> actors = attributes->rendererMap[10]->GetActors();
+
+    // initialize traversal
+    actors->InitTraversal();
+
+    // loop through each actor to find the imageActor
+    for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
+        // get next actor
+        vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
+
+        // check class name
+        if (actor->GetClassName() == "vtkImageActor") {
+            std::cout << "found image actor!" << std::endl;
+
+            // set the mapper to the new pose
+            actor->GetMapper()->SetInputConnection(attributes->readers[newPose]->GetOutputPort());
+            return;
+        }
+    }
+}
+
+void ModelingWindowStyle::TransformEntities(int newPose) {
+    // create new PoseData object
+    PoseData *pose = new PoseData();
+
+    // set pose number to newPose
+    pose->poseNum = newPose;
+
+    // get filename of new pose
+    std::stringstream newPoseFile;
+    newPoseFile << newPose << ".txt";
+
+    // set current matrix of new pose
+    pose->currMatrix = GetMatrix(newPoseFile.str().c_str());
+
+    // set previous matrix of new pose to current matrix of current pose
+    pose->prevMatrix = currentPose->currMatrix;
+
+    // loop through each cube drawn in the first RF
+    for (unsigned int i = 0; i < currentPose->cubes.size(); i++) {
+        // create new CubeData object
+        CubeData *data = new CubeData();
+
+        // copy cube source and transformation values (except translation
+        // values) to new CubeData object
+        data->cubeSource = currentPose->cubes[i]->cubeSource;
+        data->rotationX = currentPose->cubes[i]->rotationX;
+        data->rotationY = currentPose->cubes[i]->rotationY;
+        data->rotationZ = currentPose->cubes[i]->rotationZ;
+        data->scaleX = currentPose->cubes[i]->scaleX;
+        data->scaleY = currentPose->cubes[i]->scaleY;
+        data->scaleZ = currentPose->cubes[i]->scaleZ;
+
+        // initialize actor to be placed in right pose renderer
+        data->actor = vtkSmartPointer<vtkActor>::New();
+
+        // create transform object
+        vtkSmartPointer<vtkTransform> transform =
+            vtkSmartPointer<vtkTransform>::New();
+
+        // get the center position of the cube from CubeData
+        double *center = currentPose->cubes[i]->cubeSource->GetCenter();
+
+        // apply initial translation to center the cube at the origin
+        transform->Translate(center[0], center[1], center[2]);
+
+        // apply rotations
+        transform->RotateX(currentPose->cubes[i]->rotationX);
+        transform->RotateY(currentPose->cubes[i]->rotationY);
+        transform->RotateZ(currentPose->cubes[i]->rotationZ);
+
+        // scale with appropriate values
+        transform->Scale(currentPose->cubes[i]->scaleX, currentPose->cubes[i]->scaleY, currentPose->cubes[i]->scaleZ);
+
+        // apply final translation
+        transform->Translate(-center[0], -center[1], -center[2]);
+
+        // apply matrices
+        transform->Concatenate(pose->prevMatrix);
+        transform->PostMultiply();
+        transform->Concatenate(pose->currMatrix);
+
+        // set up transform filter
+        vtkSmartPointer<vtkTransformFilter> filter =
+          vtkSmartPointer<vtkTransformFilter>::New();
+
+        // add cube and transform, and update
+        filter->SetInputConnection(data->cubeSource->GetOutputPort());
+        filter->SetTransform(transform);
+        filter->Update();
+
+        // set up new mapper
+        vtkSmartPointer<vtkPolyDataMapper> mapper =
+          vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper->SetInputConnection(filter->GetOutputPort());
+
+        // set mapper to actor of CubeData
+        data->actor->SetMapper(mapper);
+
+        // add actor to the right renderer (i = 10)
+        attributes->rendererMap[10]->AddActor(data->actor);
+
+        // add new CubeData to new PoseData
+        pose->cubes.push_back(data);
+    }
+
+    // add new PoseData to vector of PoseData objects
+    poses.push_back(pose);
 }
 
 vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileName) {
@@ -673,47 +784,53 @@ vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileNam
 void ModelingWindowStyle::PerformAction() {
     // perform appropriate action based on which renderer is selected
     if (this->CurrentRenderer == attributes->rendererMap[0]) {
-        // cube selected
-        CubeSelected();
+        // left scene selected
+        LeftSceneSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[1]) {
-        // point selected
-        PointSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[2]) {
-        // other selected
-        OtherSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[3]) {
-        // scene selected
-        SceneSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[4]) {
         // draw selected
         DrawSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[2]) {
+        // scale selected
+        ScaleSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[3]) {
+        // stretch selected
+        StretchSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[4]) {
+        // rotate selected
+        RotateSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[5]) {
+        // move selected
+        MoveSelected();
         // zoom selected
         ZoomSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[6]) {
-        // scale selected
-        ScaleSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[7]) {
-        // stretch selected
-        StretchSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[8]) {
-        // rotate selected
-        RotateSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[9]) {
-        // move selected
-        MoveSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[10]) {
         // request selected
         RequestSelected();
-    } else if (this->CurrentRenderer == attributes->rendererMap[11]) {
+    } else if (this->CurrentRenderer == attributes->rendererMap[7]) {
         // output selected
         OutputSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[8]) {
+        // left arrow selected
+    } else if (this->CurrentRenderer == attributes->rendererMap[9]) {
+        // right arrow selected
+    } else if (this->CurrentRenderer == attributes->rendererMap[10]) {
+        // right pose selected
+        RightSceneSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[11]) {
+        // cube selected
+        CubeSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[12]) {
+        // point selected
+        PointSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[13]) {
+        // other selected
+        OtherSelected();
     }
 
     // otherwise, perform no action
 }
 
-void ModelingWindowStyle::SceneSelected() {
+void ModelingWindowStyle::LeftSceneSelected() {
     // check if draw is selected
     if (attributes->Draw) {
         // check if cube is selected, if so draw a cube
@@ -778,6 +895,23 @@ void ModelingWindowStyle::SceneSelected() {
 
             // re-render to update color
             this->Interactor->Render();
+        }
+    }
+}
+
+void ModelingWindowStyle::RightSceneSelected() {
+    // check if pose is displayed (do nothing if not)
+    if (rightPoseIdx == -1) return;
+
+    // find PoseData object for pose displayed
+    for (unsigned int i = 0; i < poses.size(); i++) {
+        // check pose number
+        if (poses[i]->poseNum == rightPoseIdx) {
+            // set as current pose
+            currentPose = poses[i];
+
+            // perform scene selected actions
+            LeftSceneSelected();
         }
     }
 }
@@ -941,12 +1075,18 @@ void ModelingWindowStyle::RequestSelected() {
 
 void ModelingWindowStyle::OutputSelected() {}
 
-void ModelingWindowStyle::SetCubes(std::vector<CubeData *> cubes) { attributes->cubes = cubes; }
+//void ModelingWindowStyle::SetCurrentPose(int poseNum) { this->currentPose = poseNum; }
 
-void ModelingWindowStyle::SetPoints(std::vector<PointData *> points) { attributes->points = points; }
+void ModelingWindowStyle::SetCubes(std::vector<CubeData *> cubes) { currentPose->cubes = cubes; }
+
+//void ModelingWindowStyle::SetPoints(std::vector<PointData *> points) { attributes->points = points; }
+
+void ModelingWindowStyle::SetWindow(ModelingWindow *window) { this->window = window; }
 
 void ModelingWindowStyle::SetRendererMap(std::map<int, vtkRenderer *> map) { attributes->rendererMap = map; }
 
 void ModelingWindowStyle::SetReaders(std::vector<vtkSmartPointer<vtkPNGReader> > pngReaders) { attributes->readers = pngReaders; }
+
+//WindowStyleAttributes *ModelingWindowStyle::GetAttributes() { return attributes; }
 
 //vtkStandardNewMacro(ModelingWindowStyle);
