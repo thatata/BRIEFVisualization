@@ -22,9 +22,6 @@ class ModelingWindow {
         // constructor for first window to open
         ModelingWindow(int numImages);
 
-        // constructor for subsequent windows to open
-        ModelingWindow(int newPose, PoseData *data, ModelingWindowStyle *style);
-
         // update window to dual-windowed
         void DualWindows(int newPose, PoseData *data);
 
@@ -52,6 +49,8 @@ class ModelingWindow {
         vtkSmartPointer<vtkRenderer> CreateMoveButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateRequestButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateOutputButtonRenderer();
+        vtkSmartPointer<vtkRenderer> CreateLeftArrowButtonRenderer();
+        vtkSmartPointer<vtkRenderer> CreateRightArrowButtonRenderer();
 };
 
 #endif // MODELINGWINDOW_H

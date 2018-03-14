@@ -89,6 +89,9 @@ ModelingWindowStyle::ModelingWindowStyle() {
     // set current transformation matrix
     data->currMatrix = GetMatrix("0.txt");
 
+    // set pose idx to 0 (first element in the vector)
+    poseIdx = 0;
+
     // set right pose index to -1 (right pose DNE)
     rightPoseIdx = -1;
 
@@ -516,23 +519,46 @@ void ModelingWindowStyle::RequestNewPose() {
     int poseNum;
     std::cin >> poseNum;
 
+    // check if pose is already displayed in either pose renderer
+    if (rightPoseIdx == poseNum || poseNum == 0) {
+        // prompt user and return
+        std::cout << "Pose Already Displayed!" << std::endl;
+        return;
+    }
+
     // check if pose has already been fetched
     for (unsigned int i = 0; i < poses.size(); i++) {
         // check each pose number in poses
         if (poses[i]->poseNum == poseNum) {
             // prompt user that pose already fetched
-            std::cout << "Pose Already Requested!\nUse the arrow keys to toggle to the pose."
-                      << std::endl;
+            std::cout << "Pose Already Requested!" << std::endl;
+
+            // update right pose image
+            UpdateRightPoseImage(poseNum);
+
+            // reset camera and re-render before adding objects
+            attributes->rendererMap[10]->ResetCamera();
+            this->Interactor->Render();
+
+            // update entities in that renderer
+            UpdateRightPoseEntities(poses[i]);
+
+            // set pose idx to i
+            poseIdx = i;
         }
     }
 
     // otherwise, check if dual window exists (check if pose idx is invalid)
     if (rightPoseIdx != -1) {
         // if so, update image in the right pose renderer
-        UpdateRightPoseWindow(poseNum);
+        UpdateRightPoseImage(poseNum);
 
-        // transform entities for the new renderer
-        TransformEntities(poseNum);
+        // reset camera and re-render before adding objects
+//        attributes->rendererMap[10]->ResetCamera();
+//        this->Interactor->Render();
+
+        // create new pose using pose #
+        CreateNewPose(poseNum);
     } else {
         // create image actor to display new pose in right image renderer
         vtkSmartPointer<vtkImageActor> imageActor =
@@ -544,17 +570,18 @@ void ModelingWindowStyle::RequestNewPose() {
                                 imageActor->GetPosition()[1],
                                 -100);
 
-        // add image actor to the right image renderer (i = 10)
+        // add image actor to the right image renderer (idx = 10)
         attributes->rendererMap[10]->AddActor(imageActor);
 
-        // reset camera of that renderer
-        attributes->rendererMap[10]->ResetCamera();
+        // save reference in style
+        rightPoseImage = imageActor;
 
-        // re-render to check
+        // reset camera and re-render
+        attributes->rendererMap[10]->ResetCamera();
         this->Interactor->Render();
 
-        // transform entities
-        TransformEntities(poseNum);
+        // create new pose
+        CreateNewPose(poseNum);
     }
 
     // update right pose idx
@@ -567,30 +594,47 @@ void ModelingWindowStyle::RequestNewPose() {
     this->Interactor->Render();
 }
 
-void ModelingWindowStyle::UpdateRightPoseWindow(int newPose) {
-    // get actors in the right pose renderer
-    vtkSmartPointer<vtkActorCollection> actors = attributes->rendererMap[10]->GetActors();
-
-    // initialize traversal
-    actors->InitTraversal();
-
-    // loop through each actor to find the imageActor
-    for (unsigned int i = 0; i < actors->GetNumberOfItems(); i++) {
-        // get next actor
-        vtkSmartPointer<vtkActor> actor = actors->GetNextActor();
-
-        // check class name
-        if (actor->GetClassName() == "vtkImageActor") {
-            std::cout << "found image actor!" << std::endl;
-
-            // set the mapper to the new pose
-            actor->GetMapper()->SetInputConnection(attributes->readers[newPose]->GetOutputPort());
-            return;
-        }
+void ModelingWindowStyle::UpdateRightPoseImage(int newPose) {
+    // check if pose idx is valid
+    if (newPose < 0 || newPose >= attributes->readers.size()) {
+        std::cout << "Invalid Pose Number!" << std::endl;
     }
+
+    // otherwise, update right pose image
+    rightPoseImage->GetMapper()->SetInputConnection(attributes->readers[newPose]->GetOutputPort());
 }
 
-void ModelingWindowStyle::TransformEntities(int newPose) {
+void ModelingWindowStyle::UpdateRightPoseEntities(PoseData *pose) {
+    // find PoseData object of right pose
+    PoseData *oldPose;
+
+    // loop through poses vector
+    for (unsigned int i = 0; i < poses.size(); i++) {
+        // if rightPoseIdx matches pose #, break
+        if (poses[i]->poseNum == rightPoseIdx) {
+            oldPose = poses[i];
+            break;
+        }
+    }
+
+    // check if pose was found
+    if (oldPose) {
+        // if so, loop through each cube in this pose
+        for (unsigned int i = 0; i < oldPose->cubes.size(); i++) {
+            // remove actor from the right pose renderer (idx = 10)
+            attributes->rendererMap[10]->RemoveActor(oldPose->cubes[i]->actor);
+        }
+
+        // now, loop through each cube in the new pose
+        for (unsigned int i = 0; i < pose->cubes.size(); i++) {
+            // add actor to the same renderer
+            attributes->rendererMap[10]->AddActor(pose->cubes[i]->actor);
+        }
+
+    } // otherwise, do nothing
+}
+
+void ModelingWindowStyle::CreateNewPose(int newPose) {
     // create new PoseData object
     PoseData *pose = new PoseData();
 
@@ -605,9 +649,47 @@ void ModelingWindowStyle::TransformEntities(int newPose) {
     pose->currMatrix = GetMatrix(newPoseFile.str().c_str());
 
     // set previous matrix of new pose to current matrix of current pose
-    pose->prevMatrix = currentPose->currMatrix;
+//    pose->prevMatrix = currentPose->currMatrix;
+    pose->prevMatrix = poses[0]->currMatrix;
 
-    // loop through each cube drawn in the first RF
+    // find PoseData object of right pose
+    PoseData *oldPose;
+
+    // loop through poses vector
+    for (unsigned int i = 0; i < poses.size(); i++) {
+        // if rightPoseIdx matches pose #, break
+        if (poses[i]->poseNum == rightPoseIdx) {
+            oldPose = poses[i];
+            break;
+        }
+    }
+
+    // check if pose was found
+    if (oldPose) {
+        // if so, loop through each cube in this pose
+        for (unsigned int i = 0; i < oldPose->cubes.size(); i++) {
+            // remove actor from the right pose renderer (idx = 10)
+            attributes->rendererMap[10]->RemoveActor(oldPose->cubes[i]->actor);
+        }
+    } else return; // otherwise, do nothing
+
+    // transform entities to reflect new pose
+    TransformEntities(pose);
+
+    // add pose to vector of PoseData objects
+    poses.push_back(pose);
+
+    // update pose index to last element of the vector
+    poseIdx = poses.size() - 1;
+
+    // deselect selectedActor if it exists
+    if (attributes->selectedActor != NULL) {
+        DeselectActor();
+    }
+}
+
+void ModelingWindowStyle::TransformEntities(PoseData *pose) {
+    // loop through each cube drawn in the previous RF
     for (unsigned int i = 0; i < currentPose->cubes.size(); i++) {
         // create new CubeData object
         CubeData *data = new CubeData();
@@ -674,9 +756,48 @@ void ModelingWindowStyle::TransformEntities(int newPose) {
         // add new CubeData to new PoseData
         pose->cubes.push_back(data);
     }
+}
 
-    // add new PoseData to vector of PoseData objects
-    poses.push_back(pose);
+void ModelingWindowStyle::ChangePose(int direction) {
+    // check if only two poses (or less) exist
+    if (poses.size() <= 2) {
+        // prompt user and return
+        std::cout << "No New Poses to Display! Request a New Pose to Display a New One!"
+                  << std::endl;
+        return;
+    }
+    // update pose idx based on bounds of the vector of poses
+    if ((poseIdx + direction) > (poses.size() - 1)) {
+        // idx becomes the second element of vector of poses (i.e. don't
+        // want to show initial pose twice)
+        poseIdx = 1;
+    } else if ((poseIdx + direction) <= 0) {
+        // idx becomes the last element of the vector
+        poseIdx = poses.size() - 1;
+    } else {
+        // otherwise, just add direction
+        poseIdx += direction;
+    }
+
+    // update image
+    UpdateRightPoseImage(poses[poseIdx]->poseNum);
+
+    // update entities
+    UpdateRightPoseEntities(poses[poseIdx]);
+
+    // update right pose idx
+    rightPoseIdx = poses[poseIdx]->poseNum;
+
+    // deselect selectedActor if it exists
+    if (attributes->selectedActor != NULL) {
+        DeselectActor();
+    }
+
+    // reset camera of the right pose renderer
+    attributes->rendererMap[10]->ResetCamera();
+
+    // re-render window
+    this->Interactor->Render();
 }
 
 vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileName) {
@@ -801,8 +922,6 @@ void ModelingWindowStyle::PerformAction() {
     } else if (this->CurrentRenderer == attributes->rendererMap[5]) {
         // move selected
         MoveSelected();
-        // zoom selected
-        ZoomSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[6]) {
         // request selected
         RequestSelected();
@@ -811,8 +930,10 @@ void ModelingWindowStyle::PerformAction() {
         OutputSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[8]) {
         // left arrow selected
+        LeftArrowSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[9]) {
         // right arrow selected
+        RightArrowSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[10]) {
         // right pose selected
         RightSceneSelected();
@@ -863,40 +984,46 @@ void ModelingWindowStyle::LeftSceneSelected() {
             MoveCube();
         } else {
             // otherwise, deselect the actor
-
-            // change actor color to white
-            attributes->selectedActor->GetProperty()->SetColor(1,1,1);
-
-            // change flag
-            attributes->Selected = false;
-
-            // re-render
-            this->Interactor->Render();
-
-        }
-
-    } else {
-        // if no object was selected, check if user tried to select an object
-        vtkSmartPointer<vtkActor> actor = GetActorUnderClick();
-
-        // if actor is not null, user selected that actor
-        if (actor != NULL) {
-            // change flag
-            attributes->Selected = true;
-
-            // save address for future use
-            attributes->selectedActor = actor;
-
-            // change color to red to denote selected
-            actor->GetProperty()->SetColor(1,0,0); // red
-
-            // set opacity to 75%
-            actor->GetProperty()->SetOpacity(0.75);
-
-            // re-render to update color
-            this->Interactor->Render();
+            DeselectActor();
         }
     }
+
+    // check if user tried to select an object
+    vtkSmartPointer<vtkActor> actor = GetActorUnderClick();
+
+    // check if actor was selected
+    if (actor != NULL) {
+        // if actor is not null, user selected that actor
+        SelectActor(actor);
+    }
+}
+
+void ModelingWindowStyle::SelectActor(vtkSmartPointer<vtkActor> actor) {
+    // change flag
+    attributes->Selected = true;
+
+    // save address for future use
+    attributes->selectedActor = actor;
+
+    // change color to red to denote selected
+    actor->GetProperty()->SetColor(1,0,0); // red
+
+    // set opacity to 75%
+    actor->GetProperty()->SetOpacity(0.75);
+
+    // re-render to update color
+    this->Interactor->Render();
+}
+
+void ModelingWindowStyle::DeselectActor() {
+    // change selectedActor color to white
+    attributes->selectedActor->GetProperty()->SetColor(1,1,1);
+
+    // change Selected flag
+    attributes->Selected = false;
+
+    // re-render the window
+    this->Interactor->Render();
 }
 
 void ModelingWindowStyle::RightSceneSelected() {
@@ -1070,16 +1197,29 @@ void ModelingWindowStyle::OtherSelected() {
 }
 
 void ModelingWindowStyle::RequestSelected() {
+    // change renderer to be green
+    ChangeRenderer(0,1,0);
+
+    // request a new pose
     RequestNewPose();
+
+    // change renderer back to gray
+    ChangeRenderer(.86,.86,.86);
 }
 
 void ModelingWindowStyle::OutputSelected() {}
 
-//void ModelingWindowStyle::SetCurrentPose(int poseNum) { this->currentPose = poseNum; }
+void ModelingWindowStyle::LeftArrowSelected() {
+    // change pose in the negative direction
+    ChangePose(-1);
+}
+
+void ModelingWindowStyle::RightArrowSelected() {
+    // change pose in the positive direction
+    ChangePose(1);
+}
 
 void ModelingWindowStyle::SetCubes(std::vector<CubeData *> cubes) { currentPose->cubes = cubes; }
-
-//void ModelingWindowStyle::SetPoints(std::vector<PointData *> points) { attributes->points = points; }
 
 void ModelingWindowStyle::SetWindow(ModelingWindow *window) { this->window = window; }
 
@@ -1087,6 +1227,5 @@ void ModelingWindowStyle::SetRendererMap(std::map<int, vtkRenderer *> map) { att
 
 void ModelingWindowStyle::SetReaders(std::vector<vtkSmartPointer<vtkPNGReader> > pngReaders) { attributes->readers = pngReaders; }
 
-//WindowStyleAttributes *ModelingWindowStyle::GetAttributes() { return attributes; }
 
 //vtkStandardNewMacro(ModelingWindowStyle);

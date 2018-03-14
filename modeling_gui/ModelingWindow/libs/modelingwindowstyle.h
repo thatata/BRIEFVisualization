@@ -158,9 +158,13 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         CubeData *GetCube(vtkSmartPointer<vtkActor> actor);
         void RequestNewPose();
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
-        void TransformEntities(int newPose);
-        void UpdateRightPoseWindow(int newPose);
-        void RedrawWindow();
+        void CreateNewPose(int newPose);
+        void TransformEntities(PoseData *pose);
+        void UpdateRightPoseImage(int newPose);
+        void UpdateRightPoseEntities(PoseData *pose);
+        void ChangePose(int direction);
+        void DeselectActor();
+        void SelectActor(vtkSmartPointer<vtkActor> actor);
 
         // Button handling
         void PerformAction();
@@ -177,17 +181,14 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void OtherSelected();
         void RequestSelected();
         void OutputSelected();
+        void LeftArrowSelected();
+        void RightArrowSelected();
 
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map);
         void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders);
         void SetCubes(std::vector<CubeData*> cubes);
-        void SetPoints(std::vector<PointData*> points);
-        void SetCurrentPose(int poseNum);
         void SetWindow(ModelingWindow *window);
-
-        // getter for window style attributes
-        ModelingWindowStyle *GetAttributes();
 
     private:
         // window attributes
@@ -202,8 +203,14 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         // current modeling window
         ModelingWindow *window;
 
+        // index of pose in the vector of poses
+        int poseIdx;
+
         // index of pose displayed on the right image
         int rightPoseIdx;
+
+        // pointer to right pose image actor
+        vtkSmartPointer<vtkImageActor> rightPoseImage;
 };
 
 #endif // MODELINGWINDOWSTYLE_H
