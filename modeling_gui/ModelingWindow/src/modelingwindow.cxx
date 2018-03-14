@@ -15,7 +15,7 @@
 
 ModelingWindow::ModelingWindow(int numImages) {
     // array for size of the window
-    int size[2] = {1200, 800};
+    int size[2] = {1350, 700};
 
     // create vector of PNG readers to store images
     std::vector<vtkSmartPointer<vtkPNGReader>> readers = GetReaders(numImages);
@@ -23,254 +23,89 @@ ModelingWindow::ModelingWindow(int numImages) {
     // create render window, set size and number of layers
     vtkSmartPointer<vtkRenderWindow> renderWindow =
         vtkSmartPointer<vtkRenderWindow>::New();
-
-    renderWindow->SetNumberOfLayers(2);
     renderWindow->SetSize(size[0],size[1]);
 
     // create map object to map renderer addresses to integers
     std::map<int,vtkRenderer*> rendererMap;
 
-    // create renderer for the cube button
-    vtkSmartPointer<vtkRenderer> cubeRenderer = CreateCubeButtonRenderer();
-    renderWindow->AddRenderer(cubeRenderer);
-    rendererMap[0] = cubeRenderer;
-
-    // create renderer for the point button
-    vtkSmartPointer<vtkRenderer> pointRenderer = CreatePointButtonRenderer();
-    renderWindow->AddRenderer(pointRenderer);
-    rendererMap[1] = pointRenderer;
-
-    // create renderer for the others button
-    vtkSmartPointer<vtkRenderer> otherRenderer = CreateOtherButtonRenderer();
-    renderWindow->AddRenderer(otherRenderer);
-    rendererMap[2] = otherRenderer;
-
-    // create renderer for the image (display first image for now)
+    // create renderer for the image (display first pose)
     vtkSmartPointer<vtkRenderer> imageRenderer = CreateImageRenderer(readers[0]);
     renderWindow->AddRenderer(imageRenderer);
-    rendererMap[3] = imageRenderer;
-
-    // create renderer for the operations text
-    vtkSmartPointer<vtkRenderer> operationsRenderer = CreateOperationsRenderer();
-    renderWindow->AddRenderer(operationsRenderer);
-
-    // create renderer for the title
-    vtkSmartPointer<vtkRenderer> titleRenderer = CreateTitleRenderer();
-    renderWindow->AddRenderer(titleRenderer);
-
-    // create renderer for the objects text
-    vtkSmartPointer<vtkRenderer> objectsRenderer = CreateObjectsRenderer();
-    renderWindow->AddRenderer(objectsRenderer);
+    rendererMap[0] = imageRenderer;
 
     // create renderer for the draw button
     vtkSmartPointer<vtkRenderer> drawRenderer = CreateDrawButtonRenderer();
     renderWindow->AddRenderer(drawRenderer);
-    rendererMap[4] = drawRenderer;
-
-    // create renderer for the zoom button
-    vtkSmartPointer<vtkRenderer> zoomRenderer = CreateZoomButtonRenderer();
-    renderWindow->AddRenderer(zoomRenderer);
-    rendererMap[5] = zoomRenderer;
+    rendererMap[1] = drawRenderer;
 
     // create renderer for the scale button
     vtkSmartPointer<vtkRenderer> scaleRenderer = CreateScaleButtonRenderer();
     renderWindow->AddRenderer(scaleRenderer);
-    rendererMap[6] = scaleRenderer;
+    rendererMap[2] = scaleRenderer;
 
     // create renderer for the stretch button
     vtkSmartPointer<vtkRenderer> stretchRenderer = CreateStretchButtonRenderer();
     renderWindow->AddRenderer(stretchRenderer);
-    rendererMap[7] = stretchRenderer;
+    rendererMap[3] = stretchRenderer;
 
     // create renderer for the rotate button
     vtkSmartPointer<vtkRenderer> rotateRenderer = CreateRotateButtonRenderer();
     renderWindow->AddRenderer(rotateRenderer);
-    rendererMap[8] = rotateRenderer;
+    rendererMap[4] = rotateRenderer;
 
     // create renderer for the move button
     vtkSmartPointer<vtkRenderer> moveRenderer = CreateMoveButtonRenderer();
     renderWindow->AddRenderer(moveRenderer);
-    rendererMap[9] = moveRenderer;
+    rendererMap[5] = moveRenderer;
 
     // create renderer for the request button
     vtkSmartPointer<vtkRenderer> requestRenderer = CreateRequestButtonRenderer();
     renderWindow->AddRenderer(requestRenderer);
-    rendererMap[10] = requestRenderer;
+    rendererMap[6] = requestRenderer;
 
     // create renderer for the output button
     vtkSmartPointer<vtkRenderer> outputRenderer = CreateOutputButtonRenderer();
     renderWindow->AddRenderer(outputRenderer);
-    rendererMap[11] = outputRenderer;
+    rendererMap[7] = outputRenderer;
 
-    // define viewports (in pixels)
-    double xmin[15] = {0,0,200,400,600,0,800,800,800,800,800,800,800,800,800};
-    double ymin[15] = {700,0,0,0,0,100,700,612.5,525,437.5,350,262.5,175,87.5,0};
-    double xmax[15] = {800,200,400,600,800,800,1200,1200,1200,1200,1200,1200,1200,1200,1200};
-    double ymax[15] = {800,100,100,100,100,700,800,700,612.5,525,437.5,350,262.5,175,87.5};
+    // TODO: create renderer for each arrow key
+    vtkSmartPointer<vtkRenderer> leftArrowRenderer = CreateLeftArrowButtonRenderer();
+    renderWindow->AddRenderer(leftArrowRenderer);
+    rendererMap[8] = leftArrowRenderer;
 
-    // convert to (0,1) range
-    for (unsigned int i = 0; i < 15; i++) {
-        xmin[i] = xmin[i] / size[0];
-        xmax[i] = xmax[i] / size[0];
-        ymin[i] = ymin[i] / size[1];
-        ymax[i] = ymax[i] / size[1];
-    }
+    vtkSmartPointer<vtkRenderer> rightArrowRenderer = CreateRightArrowButtonRenderer();
+    renderWindow->AddRenderer(rightArrowRenderer);
+    rendererMap[9] = rightArrowRenderer;
 
-    // set the appropriate viewport for each renderer
-    titleRenderer->SetViewport(xmin[0], ymin[0], xmax[0], ymax[0]);
-    objectsRenderer->SetViewport(xmin[1], ymin[1], xmax[1], ymax[1]);
-    cubeRenderer->SetViewport(xmin[2], ymin[2], xmax[2], ymax[2]);
-    pointRenderer->SetViewport(xmin[3], ymin[3], xmax[3], ymax[3]);
-    otherRenderer->SetViewport(xmin[4], ymin[4], xmax[4], ymax[4]);
-    imageRenderer->SetViewport(xmin[5], ymin[5], xmax[5], ymax[5]);
-    operationsRenderer->SetViewport(xmin[6], ymin[6], xmax[6], ymax[6]);
-    drawRenderer->SetViewport(xmin[7], ymin[7], xmax[7], ymax[7]);
-    zoomRenderer->SetViewport(xmin[8], ymin[8], xmax[8], ymax[8]);
-    scaleRenderer->SetViewport(xmin[9], ymin[9], xmax[9], ymax[9]);
-    stretchRenderer->SetViewport(xmin[10], ymin[10], xmax[10], ymax[10]);
-    rotateRenderer->SetViewport(xmin[11], ymin[11], xmax[11], ymax[11]);
-    moveRenderer->SetViewport(xmin[12], ymin[12], xmax[12], ymax[12]);
-    requestRenderer->SetViewport(xmin[13], ymin[13], xmax[13], ymax[13]);
-    outputRenderer->SetViewport(xmin[14], ymin[14], xmax[14], ymax[14]);
-
-    // set colors of each renderer to gray (rgb = .86, .86, .86)
-    titleRenderer->SetBackground(.86,.86,.86);
-    imageRenderer->SetBackground(.86,.86,.86);
-    objectsRenderer->SetBackground(.86,.86,.86);
-    cubeRenderer->SetBackground(.86,.86,.86);
-    pointRenderer->SetBackground(.86,.86,.86);
-    otherRenderer->SetBackground(.86,.86,.86);
-    operationsRenderer->SetBackground(.86,.86,.86);
-    drawRenderer->SetBackground(.86,.86,.86);
-    zoomRenderer->SetBackground(.86,.86,.86);
-    scaleRenderer->SetBackground(.86,.86,.86);
-    stretchRenderer->SetBackground(.86,.86,.86);
-    rotateRenderer->SetBackground(.86,.86,.86);
-    moveRenderer->SetBackground(.86,.86,.86);
-    requestRenderer->SetBackground(.86,.86,.86);
-    outputRenderer->SetBackground(.86,.86,.86);
-
-    // initialize render window interactor and set render window
-    renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    renderWindowInteractor->SetRenderWindow(renderWindow);
-
-    // create interactor style to handle events
-    vtkSmartPointer<ModelingWindowStyle> style =
-        vtkSmartPointer<ModelingWindowStyle>::New();
-
-    renderWindowInteractor->SetInteractorStyle(style);
-
-    // set renderer map and readers
-    style->SetRendererMap(rendererMap);
-    style->SetReaders(readers);
-
-    // render the window to figure out where image camera is
-    renderWindow->Render();
-
-    // fill image in the image renderer
-    SetImageCamera(readers[0], imageRenderer);
-
-    // re-render to reflect camera change
-    renderWindow->Render();
-
-    // start interactor
-    renderWindowInteractor->Start();
-}
-
-ModelingWindow::ModelingWindow(int poseNum, WindowStyleAttributes *attributes) {
-    // array for size of the window
-    int size[2] = {1200, 800};
-
-    // grab readers from the previous modeling window
-    std::vector<vtkSmartPointer<vtkPNGReader>> readers = attributes->readers;
-
-    // create render window, set size and number of layers
-    vtkSmartPointer<vtkRenderWindow> renderWindow =
-        vtkSmartPointer<vtkRenderWindow>::New();
-
-    renderWindow->SetNumberOfLayers(2);
-    renderWindow->SetSize(size[0],size[1]);
-
-    // create map object to map renderer addresses to integers
-    std::map<int,vtkRenderer*> rendererMap;
+    // create renderer for the right image (empty for now)
+    vtkSmartPointer<vtkRenderer> rightPoseRenderer = vtkSmartPointer<vtkRenderer>::New();
+    renderWindow->AddRenderer(rightPoseRenderer);
+    rendererMap[10] = rightPoseRenderer;
 
     // create renderer for the cube button
     vtkSmartPointer<vtkRenderer> cubeRenderer = CreateCubeButtonRenderer();
     renderWindow->AddRenderer(cubeRenderer);
-    rendererMap[0] = cubeRenderer;
+    rendererMap[11] = cubeRenderer;
 
     // create renderer for the point button
     vtkSmartPointer<vtkRenderer> pointRenderer = CreatePointButtonRenderer();
     renderWindow->AddRenderer(pointRenderer);
-    rendererMap[1] = pointRenderer;
+    rendererMap[12] = pointRenderer;
 
     // create renderer for the others button
     vtkSmartPointer<vtkRenderer> otherRenderer = CreateOtherButtonRenderer();
     renderWindow->AddRenderer(otherRenderer);
-    rendererMap[2] = otherRenderer;
-
-    // create renderer for the image (display first image for now)
-    vtkSmartPointer<vtkRenderer> imageRenderer = CreateImageRenderer(readers[poseNum]);
-    renderWindow->AddRenderer(imageRenderer);
-    rendererMap[3] = imageRenderer;
+    rendererMap[13] = otherRenderer;
 
     // create renderer for the operations text
     vtkSmartPointer<vtkRenderer> operationsRenderer = CreateOperationsRenderer();
     renderWindow->AddRenderer(operationsRenderer);
 
-    // create renderer for the title
-    vtkSmartPointer<vtkRenderer> titleRenderer = CreateTitleRenderer();
-    renderWindow->AddRenderer(titleRenderer);
-
-    // create renderer for the objects text
-    vtkSmartPointer<vtkRenderer> objectsRenderer = CreateObjectsRenderer();
-    renderWindow->AddRenderer(objectsRenderer);
-
-    // create renderer for the draw button
-    vtkSmartPointer<vtkRenderer> drawRenderer = CreateDrawButtonRenderer();
-    renderWindow->AddRenderer(drawRenderer);
-    rendererMap[4] = drawRenderer;
-
-    // create renderer for the zoom button
-    vtkSmartPointer<vtkRenderer> zoomRenderer = CreateZoomButtonRenderer();
-    renderWindow->AddRenderer(zoomRenderer);
-    rendererMap[5] = zoomRenderer;
-
-    // create renderer for the scale button
-    vtkSmartPointer<vtkRenderer> scaleRenderer = CreateScaleButtonRenderer();
-    renderWindow->AddRenderer(scaleRenderer);
-    rendererMap[6] = scaleRenderer;
-
-    // create renderer for the stretch button
-    vtkSmartPointer<vtkRenderer> stretchRenderer = CreateStretchButtonRenderer();
-    renderWindow->AddRenderer(stretchRenderer);
-    rendererMap[7] = stretchRenderer;
-
-    // create renderer for the rotate button
-    vtkSmartPointer<vtkRenderer> rotateRenderer = CreateRotateButtonRenderer();
-    renderWindow->AddRenderer(rotateRenderer);
-    rendererMap[8] = rotateRenderer;
-
-    // create renderer for the move button
-    vtkSmartPointer<vtkRenderer> moveRenderer = CreateMoveButtonRenderer();
-    renderWindow->AddRenderer(moveRenderer);
-    rendererMap[9] = moveRenderer;
-
-    // create renderer for the request button
-    vtkSmartPointer<vtkRenderer> requestRenderer = CreateRequestButtonRenderer();
-    renderWindow->AddRenderer(requestRenderer);
-    rendererMap[10] = requestRenderer;
-
-    // create renderer for the output button
-    vtkSmartPointer<vtkRenderer> outputRenderer = CreateOutputButtonRenderer();
-    renderWindow->AddRenderer(outputRenderer);
-    rendererMap[11] = outputRenderer;
-
     // define viewports (in pixels)
-    double xmin[15] = {0,0,200,400,600,0,800,800,800,800,800,800,800,800,800};
-    double ymin[15] = {700,0,0,0,0,100,700,612.5,525,437.5,350,262.5,175,87.5,0};
-    double xmax[15] = {800,200,400,600,800,800,1200,1200,1200,1200,1200,1200,1200,1200,1200};
-    double ymax[15] = {800,100,100,100,100,700,800,700,612.5,525,437.5,350,262.5,175,87.5};
+    double xmin[15] = {0,600,600,600,600,600,600,600,600,600,675,750,600,650,700};
+    double ymin[15] = {0,630,560,420,350,280,210,140,70,0,0,0,490,490,490};
+    double xmax[15] = {600,750,750,750,750,750,750,750,750,675,750,1350,650,700,750};
+    double ymax[15] = {700,700,630,560,420,350,280,210,140,70,70,700,560,560,560};
 
     // convert to (0,1) range
     for (unsigned int i = 0; i < 15; i++) {
@@ -281,38 +116,38 @@ ModelingWindow::ModelingWindow(int poseNum, WindowStyleAttributes *attributes) {
     }
 
     // set the appropriate viewport for each renderer
-    titleRenderer->SetViewport(xmin[0], ymin[0], xmax[0], ymax[0]);
-    objectsRenderer->SetViewport(xmin[1], ymin[1], xmax[1], ymax[1]);
-    cubeRenderer->SetViewport(xmin[2], ymin[2], xmax[2], ymax[2]);
-    pointRenderer->SetViewport(xmin[3], ymin[3], xmax[3], ymax[3]);
-    otherRenderer->SetViewport(xmin[4], ymin[4], xmax[4], ymax[4]);
-    imageRenderer->SetViewport(xmin[5], ymin[5], xmax[5], ymax[5]);
-    operationsRenderer->SetViewport(xmin[6], ymin[6], xmax[6], ymax[6]);
-    drawRenderer->SetViewport(xmin[7], ymin[7], xmax[7], ymax[7]);
-    zoomRenderer->SetViewport(xmin[8], ymin[8], xmax[8], ymax[8]);
-    scaleRenderer->SetViewport(xmin[9], ymin[9], xmax[9], ymax[9]);
-    stretchRenderer->SetViewport(xmin[10], ymin[10], xmax[10], ymax[10]);
-    rotateRenderer->SetViewport(xmin[11], ymin[11], xmax[11], ymax[11]);
-    moveRenderer->SetViewport(xmin[12], ymin[12], xmax[12], ymax[12]);
-    requestRenderer->SetViewport(xmin[13], ymin[13], xmax[13], ymax[13]);
-    outputRenderer->SetViewport(xmin[14], ymin[14], xmax[14], ymax[14]);
+    imageRenderer->SetViewport(xmin[0], ymin[0], xmax[0], ymax[0]);
+    operationsRenderer->SetViewport(xmin[1], ymin[1], xmax[1], ymax[1]);
+    drawRenderer->SetViewport(xmin[2], ymin[2], xmax[2], ymax[2]);
+    scaleRenderer->SetViewport(xmin[3], ymin[3], xmax[3], ymax[3]);
+    stretchRenderer->SetViewport(xmin[4], ymin[4], xmax[4], ymax[4]);
+    rotateRenderer->SetViewport(xmin[5], ymin[5], xmax[5], ymax[5]);
+    moveRenderer->SetViewport(xmin[6], ymin[6], xmax[6], ymax[6]);
+    requestRenderer->SetViewport(xmin[7], ymin[7], xmax[7], ymax[7]);
+    outputRenderer->SetViewport(xmin[8], ymin[8], xmax[8], ymax[8]);
+    leftArrowRenderer->SetViewport(xmin[9], ymin[9], xmax[9], ymax[9]);
+    rightArrowRenderer->SetViewport(xmin[10], ymin[10], xmax[10], ymax[10]);
+    rightPoseRenderer->SetViewport(xmin[11], ymin[11], xmax[11], ymax[11]);
+    cubeRenderer->SetViewport(xmin[12], ymin[12], xmax[12], ymax[12]);
+    pointRenderer->SetViewport(xmin[13], ymin[13], xmax[13], ymax[13]);
+    otherRenderer->SetViewport(xmin[14], ymin[14], xmax[14], ymax[14]);
 
     // set colors of each renderer to gray (rgb = .86, .86, .86)
-    titleRenderer->SetBackground(.86,.86,.86);
     imageRenderer->SetBackground(.86,.86,.86);
-    objectsRenderer->SetBackground(.86,.86,.86);
-    cubeRenderer->SetBackground(.86,.86,.86);
-    pointRenderer->SetBackground(.86,.86,.86);
-    otherRenderer->SetBackground(.86,.86,.86);
     operationsRenderer->SetBackground(.86,.86,.86);
     drawRenderer->SetBackground(.86,.86,.86);
-    zoomRenderer->SetBackground(.86,.86,.86);
     scaleRenderer->SetBackground(.86,.86,.86);
     stretchRenderer->SetBackground(.86,.86,.86);
     rotateRenderer->SetBackground(.86,.86,.86);
     moveRenderer->SetBackground(.86,.86,.86);
     requestRenderer->SetBackground(.86,.86,.86);
     outputRenderer->SetBackground(.86,.86,.86);
+    leftArrowRenderer->SetBackground(.86,.86,.86);
+    rightArrowRenderer->SetBackground(.86,.86,.86);
+    rightPoseRenderer->SetBackground(.86,.86,.86);
+    cubeRenderer->SetBackground(.86,.86,.86);
+    pointRenderer->SetBackground(.86,.86,.86);
+    otherRenderer->SetBackground(.86,.86,.86);
 
     // initialize render window interactor and set render window
     renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
@@ -324,23 +159,16 @@ ModelingWindow::ModelingWindow(int poseNum, WindowStyleAttributes *attributes) {
 
     renderWindowInteractor->SetInteractorStyle(style);
 
-    // set renderer map and readers
+    // set renderer map, readers, and current window
     style->SetRendererMap(rendererMap);
     style->SetReaders(readers);
-
-    // set cubes and points
-    style->SetPoints(attributes->points);
-    style->SetCubes(attributes->cubes);
-
-    // set default renderer to scene renderer and transform entities
-    style->SetDefaultRenderer(rendererMap[3]);
-    style->TransformEntities(poseNum);
+    style->SetWindow(this);
 
     // render the window to figure out where image camera is
     renderWindow->Render();
 
     // fill image in the image renderer
-    SetImageCamera(readers[poseNum], imageRenderer);
+    //SetImageCamera(readers[0], imageRenderer);
 
     // re-render to reflect camera change
     renderWindow->Render();
@@ -436,9 +264,9 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreateOperationsRenderer() {
 
     // configure text
     operationsText->SetInput("Operations");
-    operationsText->SetPosition(20,0);
+    operationsText->SetPosition(0,0);
     operationsText->GetTextProperty()->BoldOn();
-    operationsText->GetTextProperty()->SetFontSize(30);
+    operationsText->GetTextProperty()->SetFontSize(20);
     operationsText->GetTextProperty()->SetColor(0,0,0);
 
     // add actor to renderer
@@ -502,7 +330,7 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreateCubeButtonRenderer() {
     // configure cube text
     cubeTextActor->SetInput("Cube");
     cubeTextActor->SetPosition(0,15);
-    cubeTextActor->GetTextProperty()->SetFontSize(20);
+    cubeTextActor->GetTextProperty()->SetFontSize(15);
     cubeTextActor->GetTextProperty()->SetColor(0,0,0);
 
     // add actor to renderer and renderer to window
@@ -523,7 +351,7 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreatePointButtonRenderer() {
     // configure cube text
     pointTextActor->SetInput("Point");
     pointTextActor->SetPosition(0,15);
-    pointTextActor->GetTextProperty()->SetFontSize(20);
+    pointTextActor->GetTextProperty()->SetFontSize(15);
     pointTextActor->GetTextProperty()->SetColor(0,0,0);
 
     // add actor to renderer and renderer to window
@@ -543,7 +371,7 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreateOtherButtonRenderer() {
 
     otherTextActor->SetInput("Other");
     otherTextActor->SetPosition(0,15);
-    otherTextActor->GetTextProperty()->SetFontSize(20);
+    otherTextActor->GetTextProperty()->SetFontSize(15);
     otherTextActor->GetTextProperty()->SetColor(0,0,0);
 
     // add actor to renderer and renderer to window
@@ -708,6 +536,46 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreateOutputButtonRenderer() {
 
     // add actor to renderer and renderer to window
     renderer->AddActor2D(outputTextActor);
+
+    return renderer;
+}
+
+vtkSmartPointer<vtkRenderer> ModelingWindow::CreateLeftArrowButtonRenderer() {
+    // create renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+        vtkSmartPointer<vtkRenderer>::New();
+
+    // create text actor to store "<" text
+    vtkSmartPointer<vtkTextActor> leftTextActor =
+        vtkSmartPointer<vtkTextActor>::New();
+
+    leftTextActor->SetInput("<");
+    leftTextActor->SetPosition(0,15);
+    leftTextActor->GetTextProperty()->SetFontSize(20);
+    leftTextActor->GetTextProperty()->SetColor(0,0,0);
+
+    // add actor to renderer and renderer to window
+    renderer->AddActor2D(leftTextActor);
+
+    return renderer;
+}
+
+vtkSmartPointer<vtkRenderer> ModelingWindow::CreateRightArrowButtonRenderer() {
+    // create renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+        vtkSmartPointer<vtkRenderer>::New();
+
+    // create text actor to store ">" text
+    vtkSmartPointer<vtkTextActor> rightTextActor =
+        vtkSmartPointer<vtkTextActor>::New();
+
+    rightTextActor->SetInput(">");
+    rightTextActor->SetPosition(0,15);
+    rightTextActor->GetTextProperty()->SetFontSize(20);
+    rightTextActor->GetTextProperty()->SetColor(0,0,0);
+
+    // add actor to renderer and renderer to window
+    renderer->AddActor2D(rightTextActor);
 
     return renderer;
 }

@@ -85,6 +85,23 @@ struct PointData {
     vtkSmartPointer<vtkCellArray> vertices;
 };
 
+struct PoseData {
+    // store vector of CubeData objects
+    std::vector<CubeData*> cubes;
+
+    // store vector of PointData objects
+    std::vector<PointData*> points;
+
+    // transformation matrix of this pose
+    vtkSmartPointer<vtkMatrix4x4> currMatrix;
+
+    // transformation matrix of previous pose
+    vtkSmartPointer<vtkMatrix4x4> prevMatrix;
+
+    // pose number
+    int poseNum;
+};
+
 struct WindowStyleAttributes {
     // private vars
     bool Cube;
@@ -107,17 +124,8 @@ struct WindowStyleAttributes {
     // map vtkRenderer addresses to integers for processing
     std::map<int,vtkRenderer*> rendererMap;
 
-    // store vector of CubeData objects
-    std::vector<CubeData*> cubes;
-
-    // store vector of PointData objects
-    std::vector<PointData*> points;
-
-    // readers
+    // PNG readers
     std::vector<vtkSmartPointer<vtkPNGReader>> readers;
-
-    // next modeling window for a new pose
-    ModelingWindow *window;
 };
 
 class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
@@ -150,11 +158,18 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         CubeData *GetCube(vtkSmartPointer<vtkActor> actor);
         void RequestNewPose();
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
-        void TransformEntities(int poseNum);
+        void CreateNewPose(int newPose);
+        void TransformEntities(PoseData *pose);
+        void UpdateRightPoseImage(int newPose);
+        void UpdateRightPoseEntities(PoseData *pose);
+        void ChangePose(int direction);
+        void DeselectActor();
+        void SelectActor(vtkSmartPointer<vtkActor> actor);
 
         // Button handling
         void PerformAction();
-        void SceneSelected();
+        void LeftSceneSelected();
+        void RightSceneSelected();
         void CubeSelected();
         void DrawSelected();
         void RotateSelected();
@@ -166,16 +181,36 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void OtherSelected();
         void RequestSelected();
         void OutputSelected();
+        void LeftArrowSelected();
+        void RightArrowSelected();
 
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map);
         void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders);
         void SetCubes(std::vector<CubeData*> cubes);
-        void SetPoints(std::vector<PointData*> points);
+        void SetWindow(ModelingWindow *window);
 
     private:
-        // private attributes stored in struct
+        // window attributes
         WindowStyleAttributes *attributes;
+
+        // vector of PoseData for each pose
+        std::vector<PoseData*> poses;
+
+        // current PoseData object
+        PoseData *currentPose;
+
+        // current modeling window
+        ModelingWindow *window;
+
+        // index of pose in the vector of poses
+        int poseIdx;
+
+        // index of pose displayed on the right image
+        int rightPoseIdx;
+
+        // pointer to right pose image actor
+        vtkSmartPointer<vtkImageActor> rightPoseImage;
 };
 
 #endif // MODELINGWINDOWSTYLE_H
