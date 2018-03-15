@@ -224,8 +224,17 @@ void ModelingWindowStyle::StretchObject() {
     if (attributes->StretchZ) {
         // check for left/right arrow keys only
         if (key == "Left") {
-            // stretch z axis (-)
-            data->scaleZ -= .1;
+            // make sure scale value doesn't fall to 0.3 or below
+            if (data->scaleZ - .3 <= 0) {
+                // prompt user and return
+                std::cout << "Error Stretching!" << std::endl
+                          << "Scale value would fall to zero or below."
+                          << std::endl;
+                return;
+            } else {
+                // stretch z axis (-)
+                data->scaleZ -= .1;
+            }
         } else if (key == "Right") {
             // stretch z axis (+)
             data->scaleZ += .1;
@@ -236,8 +245,17 @@ void ModelingWindowStyle::StretchObject() {
     } else {
         // based on arrow key, scale the object in the native direction
         if (key == "Left") {
-            // stretch x axis (-)
-            data->scaleX -= .1;
+            // make sure scale value doesn't fall to 0.3 or below
+            if (data->scaleX - .3 <= 0) {
+                // prompt user and return
+                std::cout << "Error Stretching!" << std::endl
+                          << "Scale value would fall to zero or below."
+                          << std::endl;
+                return;
+            } else {
+                // stretch x axis (-)
+                data->scaleX -= .1;
+            }
         } else if (key == "Right") {
             // stretch x axis (+)
             data->scaleX += .1;
@@ -245,8 +263,17 @@ void ModelingWindowStyle::StretchObject() {
             // stretch y axis (+)
             data->scaleY += .1;
         } else if (key == "Down") {
-            // stretch y axis (-)
-            data->scaleY -= .1;
+            // make sure scale value doesn't fall to 0.3 or below
+            if (data->scaleY - .3 <= 0) {
+                // prompt user and return
+                std::cout << "Error Stretching!" << std::endl
+                          << "Scale value would fall to zero or below."
+                          << std::endl;
+                return;
+            } else {
+                // stretch y axis (-)
+                data->scaleY -= .1;
+            }
         } else {
             // otherwise don't stretch and return
             return;
@@ -271,10 +298,20 @@ void ModelingWindowStyle::ScaleObject() {
         data->scaleY += .1;
         data->scaleZ += .1;
     } else if (key == "Down") {
-        // scale -10%
-        data->scaleX -= .1;
-        data->scaleY -= .1;
-        data->scaleZ -= .1;
+        // make sure scale values don't fall to 0.3 or below
+        if (data->scaleX - .1 <= .3 || data->scaleY - .1 <= .3 ||
+                data->scaleZ - .3 <= 0) {
+            // prompt user and return
+            std::cout << "Error Scaling!" << std::endl
+                      << "Scale value(s) would fall to zero or below."
+                      << std::endl;
+            return;
+        } else {
+            // scale -10%
+            data->scaleX -= .1;
+            data->scaleY -= .1;
+            data->scaleZ -= .1;
+        }
     } else {
         // otherwise don't scale and return
         return;
