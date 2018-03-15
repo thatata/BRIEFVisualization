@@ -27,38 +27,6 @@
 
 #include "modelingwindow.h"
 
-/**
-  * TH: Operations Overview
-  *
-  * Draw: after selecting an object (e.g. cube, point),
-  * click on the scene to place that object in the scene.
-  *
-  * Zoom: left click on the scene to zoom in (X%), right
-  * click on the scene to zoom out.
-  *
-  * Scale: with an object in the scene selected, use the
-  * up and down arrow keys to scale larger and smaller,
-  * respectively.
-  *
-  * Stretch: with an object in the scene selected, use the
-  * arrow keys to stretch the object in the appropriate
-  * direction. To stretch about the z axis, press the z
-  * key and use the left and right arrow keys.
-  *
-  * Rotate: with an object in the scene selected, use the
-  * arrow keys to rotate the object in the appropriate
-  * direction. To rotate about the z axis, press the z
-  * key and use the left and right arrow keys.
-  *
-  * Move: with an object in the scene selected, click and
-  * drag the object to move the object in the scene.
-  *
-  * Request: ??
-  *
-  * Output: ??
-  *
-  **/
-
 // structure holding actor and cube source of each cube object
 struct CubeData {
     // actor object
@@ -153,22 +121,22 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void DrawCubeOntoImage();
         void DrawPointOntoImage();
         void PerformTransformations(CubeData *data);
+        void CameraZoom(double factor);
+        void ChangePose(int direction);
+        void RequestNewPose();
 
         // Utils
         vtkSmartPointer<vtkActor> GetActorUnderClick();
         void ChangeRenderer(double r, double g, double b);
         double *GetClickPosition();
         CubeData *GetCube(vtkSmartPointer<vtkActor> actor);
-        void RequestNewPose();
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
         void CreateNewPose(int newPose);
         void TransformEntities(PoseData *pose);
         void UpdateRightPoseImage(int newPose);
         void UpdateRightPoseEntities(PoseData *pose);
-        void ChangePose(int direction);
         void DeselectActor();
         void SelectActor(vtkSmartPointer<vtkActor> actor);
-        void CameraZoom(double factor);
 
         // Button handling
         void PerformAction();
@@ -193,8 +161,6 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map);
         void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders);
-        void SetCubes(std::vector<CubeData*> cubes);
-        void SetWindow(ModelingWindow *window);
 
     private:
         // window attributes
@@ -205,9 +171,6 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
 
         // current PoseData object
         PoseData *currentPose;
-
-        // current modeling window
-        ModelingWindow *window;
 
         // index of pose in the vector of poses
         int poseIdx;

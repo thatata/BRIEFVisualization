@@ -25,39 +25,6 @@
 #include "modelingwindow.h"
 #include "modelingwindowstyle.h"
 
-/**
-  * TH: Operations Overview
-  *
-  * Draw: after selecting an object (e.g. , point),
-  * click on the scene to place that object in the scene.
-  *
-  * Zoom: left click on the scene to zoom in (X%), right
-  * click on the scene to zoom out.
-  *
-  * Scale: with an object in the scene selected, use the
-  * up and down arrow keys to scale larger and smaller,
-  * respectively.
-  *
-  * Stretch: with an object in the scene selected, use the
-  * arrow keys to stretch the object in the appropriate
-  * direction. To stretch about the z axis, press the z
-  * key and use the left and right arrow keys.
-  *
-  * Rotate: with an object in the scene selected, use the
-  * arrow keys to rotate the object in the appropriate
-  * direction. To rotate about the z axis, press the z
-  * key and use the left and right arrow keys.
-  *
-  * Move: with an object in the scene selected, click and
-  * drag the object to move the object in the scene.
-  *
-  * Request: select Request, and in the console enter the
-  * pose number to pop up a new rendering window.
-  *
-  * Output: ??
-  *
-  **/
-
 ModelingWindowStyle::ModelingWindowStyle() {
     // initialize struct for attributes
     attributes = new WindowStyleAttributes();
@@ -186,7 +153,8 @@ void ModelingWindowStyle::RotateObject() {
         attributes->RotateZ = !attributes->RotateZ;
 
         // alert user in the console
-        std::cout << "Z Rotation " << (attributes->RotateZ ? "Enabled!" : "Disabled!")
+        std::cout << "Z Rotation "
+                  << (attributes->RotateZ ? "Enabled!" : "Disabled!")
                   << std::endl;
 
         return;
@@ -242,7 +210,8 @@ void ModelingWindowStyle::StretchObject() {
         attributes->StretchZ = !attributes->StretchZ;
 
         // alert user in the console
-        std::cout << "Z Stretch " << (attributes->StretchZ ? "Enabled!" : "Disabled!")
+        std::cout << "Z Stretch "
+                  << (attributes->StretchZ ? "Enabled!" : "Disabled!")
                   << std::endl;
 
         return;
@@ -364,7 +333,6 @@ void ModelingWindowStyle::DrawPointOntoImage() {
     data->points = vtkSmartPointer<vtkPoints>::New();
 
     vtkIdType pid[1];
-    //pid[0] = data->points->InsertNextPoint(x,y,10);
     pid[0] = data->points->InsertNextPoint(position);
 
     // initialize vertices and insert next cell
@@ -412,9 +380,9 @@ void ModelingWindowStyle::PerformTransformations(CubeData *data) {
     // apply final translation
     transform->Translate(-center[0], -center[1], -center[2]);
 
-    // check pose number for initial pose (0)
+    // check pose number for initial pose
     if (currentPose->poseNum != 0) {
-        // if pose number is not 0, need to concat transformation matrices
+        // if not initial pose, concat transformation matrices
         transform->Concatenate(currentPose->prevMatrix);
         transform->PostMultiply();
         transform->Concatenate(currentPose->currMatrix);
@@ -432,7 +400,6 @@ void ModelingWindowStyle::PerformTransformations(CubeData *data) {
     // set up new mapper
     vtkSmartPointer<vtkPolyDataMapper> mapper =
       vtkSmartPointer<vtkPolyDataMapper>::New();
-
     mapper->SetInputConnection(filter->GetOutputPort());
 
     // set mapper to existing actor
@@ -504,6 +471,7 @@ double *ModelingWindowStyle::GetClickPosition() {
 CubeData *ModelingWindowStyle::GetCube(vtkSmartPointer<vtkActor> actor) {
     // traverse through cubes and compare actors
     for (unsigned int i = 0; i < currentPose->cubes.size(); i++) {
+        // if actors match, return the CubeData reference
         if (currentPose->cubes[i]->actor == actor) {
             return currentPose->cubes[i];
         }
@@ -555,10 +523,6 @@ void ModelingWindowStyle::RequestNewPose() {
     if (rightPoseIdx != -1) {
         // if so, update image in the right pose renderer
         UpdateRightPoseImage(poseNum);
-
-        // reset camera and re-render before adding objects
-//        attributes->rendererMap[10]->ResetCamera();
-//        this->Interactor->Render();
 
         // create new pose using pose #
         CreateNewPose(poseNum);
@@ -652,7 +616,6 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
     pose->currMatrix = GetMatrix(newPoseFile.str().c_str());
 
     // set previous matrix of new pose to current matrix of current pose
-//    pose->prevMatrix = currentPose->currMatrix;
     pose->prevMatrix = poses[0]->currMatrix;
 
     // find PoseData object of right pose
@@ -731,7 +694,7 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
         // apply final translation
         transform->Translate(-center[0], -center[1], -center[2]);
 
-        // apply matrices
+        // apply transformation matrices
         transform->Concatenate(pose->prevMatrix);
         transform->PostMultiply();
         transform->Concatenate(pose->currMatrix);
@@ -1139,7 +1102,8 @@ void ModelingWindowStyle::ZoomSelected() {
         ChangeRenderer(0,1,0);
 
         // prompt user to select a pose to zoom
-        std::cout << "Zoom Selected! \nEnter 0 for left pose, or 1 for right pose: ";
+        std::cout << "Zoom Selected!" << std::endl
+                  << "Enter 0 for left pose, or 1 for right pose: ";
 
         // grab value
         int selectedPose;
@@ -1286,12 +1250,6 @@ void ModelingWindowStyle::RightArrowSelected() {
     ChangePose(1);
 }
 
-void ModelingWindowStyle::SetCubes(std::vector<CubeData *> cubes) { currentPose->cubes = cubes; }
-
-void ModelingWindowStyle::SetWindow(ModelingWindow *window) { this->window = window; }
-
 void ModelingWindowStyle::SetRendererMap(std::map<int, vtkRenderer *> map) { attributes->rendererMap = map; }
 
 void ModelingWindowStyle::SetReaders(std::vector<vtkSmartPointer<vtkPNGReader> > pngReaders) { attributes->readers = pngReaders; }
-
-//vtkStandardNewMacro(ModelingWindowStyle);

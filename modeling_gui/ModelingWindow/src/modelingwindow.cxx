@@ -183,7 +183,6 @@ ModelingWindow::ModelingWindow(int numImages) {
     // set renderer map, readers, and current window
     style->SetRendererMap(rendererMap);
     style->SetReaders(readers);
-    style->SetWindow(this);
 
     // render the window to figure out where image camera is
     renderWindow->Render();
@@ -220,33 +219,6 @@ std::vector<vtkSmartPointer<vtkPNGReader>> ModelingWindow::GetReaders(int numIma
     }
 
     return readers;
-}
-
-void ModelingWindow::SetImageCamera(vtkSmartPointer<vtkPNGReader> reader, vtkSmartPointer<vtkRenderer> renderer) {
-    // Set up the camera to fill the image renderer with the image
-    vtkImageData *imageData = reader->GetOutput();
-
-    // get origin/spacing/extent to set camera
-    double origin[3];
-    double spacing[3];
-    int extent[6];
-    imageData->GetOrigin( origin );
-    imageData->GetSpacing( spacing );
-    imageData->GetExtent( extent );
-
-    // get active camera of the renderer
-    vtkCamera* camera = renderer->GetActiveCamera();
-    camera->ParallelProjectionOn();
-
-    // calculate and set parallel scale/focal point/position of camera
-    double xc = origin[0] + 0.5*(extent[0] + extent[1])*spacing[0];
-    double yc = origin[1] + 0.5*(extent[2] + extent[3])*spacing[1];
-    //double xd = (extent[1] - extent[0] + 1)*spacing[0];
-    double yd = (extent[3] - extent[2] + 1)*spacing[1];
-    double d = camera->GetDistance();
-    camera->SetParallelScale(0.5*yd);
-    camera->SetFocalPoint(xc,yc,0.0);
-    camera->SetPosition(xc,yc,d);
 }
 
 vtkSmartPointer<vtkRenderer> ModelingWindow::CreateImageRenderer(vtkSmartPointer<vtkPNGReader> reader) {

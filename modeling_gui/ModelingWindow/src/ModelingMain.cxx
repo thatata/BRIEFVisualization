@@ -4,11 +4,11 @@
 /**
   * TH: Operations Overview
   *
-  * Draw: after selecting an object (e.g. cube, point),
+  * Draw: after selecting an object (e.g. , point),
   * click on the scene to place that object in the scene.
   *
-  * Zoom: left click on the scene to zoom in (X%), right
-  * click on the scene to zoom out.
+  * Zoom: select Zoom, and in the console enter either 0
+  * or 1 to zoom on the left and right pose, respectively.
   *
   * Scale: with an object in the scene selected, use the
   * up and down arrow keys to scale larger and smaller,
@@ -27,9 +27,12 @@
   * Move: with an object in the scene selected, click and
   * drag the object to move the object in the scene.
   *
-  * Request: click on the request button, and enter the
-  * desired pose number in the console to open a new
-  * modeling window.
+  * Request: select Request, and in the console enter the
+  * pose number to pop up a new rendering window.
+  *
+  * Arrow Keys: use the left and right arrow buttons on
+  * the bottom of the window to toggle between requested
+  * poses (if they exist).
   *
   * Output: ??
   *
