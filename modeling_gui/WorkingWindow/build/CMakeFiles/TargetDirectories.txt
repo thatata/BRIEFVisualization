@@ -1,3 +1,0 @@
-/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/CMakeFiles/rebuild_cache.dir
-/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/CMakeFiles/edit_cache.dir
-/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/WorkingWindow/build/CMakeFiles/WorkingWindow.dir
