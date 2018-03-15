@@ -75,6 +75,8 @@ vtkAbstractPicker.h
 -
 vtkImageMapper3D.h
 -
+vtkSphereSource.h
+-
 sstream
 -
 modelingwindow.h
@@ -616,6 +618,12 @@ vtkFiltersSourcesModule.h
 vtkPolyDataAlgorithm.h
 /home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkPolyDataAlgorithm.h
 
+/home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkSphereSource.h
+vtkFiltersSourcesModule.h
+/home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkFiltersSourcesModule.h
+vtkPolyDataAlgorithm.h
+/home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkPolyDataAlgorithm.h
+
 /home/thatata/workplace/source/sd/VTK/IO/Image/vtkImageReader2.h
 vtkIOImageModule.h
 /home/thatata/workplace/source/sd/VTK/IO/Image/vtkIOImageModule.h
@@ -1008,6 +1016,8 @@ vtkProperty.h
 vtkAbstractPicker.h
 -
 vtkImageMapper3D.h
+-
+vtkSphereSource.h
 -
 sstream
 -

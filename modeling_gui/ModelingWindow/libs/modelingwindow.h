@@ -34,7 +34,7 @@ class ModelingWindow {
         vtkSmartPointer<vtkRenderer> CreateObjectsRenderer();
         vtkSmartPointer<vtkRenderer> CreateCubeButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreatePointButtonRenderer();
-        vtkSmartPointer<vtkRenderer> CreateOtherButtonRenderer();
+        vtkSmartPointer<vtkRenderer> CreateSphereButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateDrawButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateScaleButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateStretchButtonRenderer();

@@ -92,10 +92,10 @@ ModelingWindow::ModelingWindow(int numImages) {
     renderWindow->AddRenderer(pointRenderer);
     rendererMap[12] = pointRenderer;
 
-    // create renderer for the others button
-    vtkSmartPointer<vtkRenderer> otherRenderer = CreateOtherButtonRenderer();
-    renderWindow->AddRenderer(otherRenderer);
-    rendererMap[13] = otherRenderer;
+    // create renderer for the sphere button
+    vtkSmartPointer<vtkRenderer> sphereRenderer = CreateSphereButtonRenderer();
+    renderWindow->AddRenderer(sphereRenderer);
+    rendererMap[13] = sphereRenderer;
 
     // create renderer for the zoom button
     vtkSmartPointer<vtkRenderer> zoomRenderer = CreateZoomButtonRenderer();
@@ -145,7 +145,7 @@ ModelingWindow::ModelingWindow(int numImages) {
     rightPoseRenderer->SetViewport(xmin[11], ymin[11], xmax[11], ymax[11]);
     cubeRenderer->SetViewport(xmin[12], ymin[12], xmax[12], ymax[12]);
     pointRenderer->SetViewport(xmin[13], ymin[13], xmax[13], ymax[13]);
-    otherRenderer->SetViewport(xmin[14], ymin[14], xmax[14], ymax[14]);
+    sphereRenderer->SetViewport(xmin[14], ymin[14], xmax[14], ymax[14]);
     zoomRenderer->SetViewport(xmin[15], ymin[15], xmax[15], ymax[15]);
     zoomInRenderer->SetViewport(xmin[16], ymin[16], xmax[16], ymax[16]);
     zoomOutRenderer->SetViewport(xmin[17], ymin[17], xmax[17], ymax[17]);
@@ -165,7 +165,7 @@ ModelingWindow::ModelingWindow(int numImages) {
     rightPoseRenderer->SetBackground(.86,.86,.86);
     cubeRenderer->SetBackground(.86,.86,.86);
     pointRenderer->SetBackground(.86,.86,.86);
-    otherRenderer->SetBackground(.86,.86,.86);
+    sphereRenderer->SetBackground(.86,.86,.86);
     zoomRenderer->SetBackground(.86,.86,.86);
     zoomInRenderer->SetBackground(.86,.86,.86);
     zoomOutRenderer->SetBackground(.86,.86,.86);
@@ -350,22 +350,22 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreatePointButtonRenderer() {
     return renderer;
 }
 
-vtkSmartPointer<vtkRenderer> ModelingWindow::CreateOtherButtonRenderer() {
+vtkSmartPointer<vtkRenderer> ModelingWindow::CreateSphereButtonRenderer() {
     // create renderer
     vtkSmartPointer<vtkRenderer> renderer =
         vtkSmartPointer<vtkRenderer>::New();
 
-    // create text actor to store "Other" text
-    vtkSmartPointer<vtkTextActor> otherTextActor =
+    // create text actor to store "Sphere" text
+    vtkSmartPointer<vtkTextActor> sphereTextActor =
         vtkSmartPointer<vtkTextActor>::New();
 
-    otherTextActor->SetInput("Other");
-    otherTextActor->SetPosition(0,15);
-    otherTextActor->GetTextProperty()->SetFontSize(15);
-    otherTextActor->GetTextProperty()->SetColor(0,0,0);
+    sphereTextActor->SetInput("Sphere");
+    sphereTextActor->SetPosition(0,15);
+    sphereTextActor->GetTextProperty()->SetFontSize(15);
+    sphereTextActor->GetTextProperty()->SetColor(0,0,0);
 
     // add actor to renderer and renderer to window
-    renderer->AddActor2D(otherTextActor);
+    renderer->AddActor2D(sphereTextActor);
 
     return renderer;
 }
