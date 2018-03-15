@@ -111,7 +111,6 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void OnLeftButtonDown();
         void OnKeyPress();
         void OnLeftButtonUp();
-        void OnMouseMove();
 
         // Operations
         void MoveCube();

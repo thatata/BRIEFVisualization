@@ -116,16 +116,6 @@ void ModelingWindowStyle::OnLeftButtonUp() {
     }
 }
 
-void ModelingWindowStyle::OnMouseMove() {
-    // check if an actor is not moving, if so just return
-    if (!attributes->Moving) {
-        return;
-    }
-
-    // otherwise, forward events
-    vtkInteractorStyleTrackballActor::OnMouseMove();
-}
-
 void ModelingWindowStyle::MoveCube() {
     // check if selected actor was under the mouse click
     vtkSmartPointer<vtkActor> actor = GetActorUnderClick();

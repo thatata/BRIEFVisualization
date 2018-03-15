@@ -24,7 +24,7 @@
   * direction. To rotate about the z axis, press the z
   * key and use the left and right arrow keys.
   *
-  * Move: with an object in the scene selected, click and
+  * *Move: with an object in the scene selected, click and
   * drag the object to move the object in the scene.
   *
   * Request: select Request, and in the console enter the
@@ -35,6 +35,13 @@
   * poses (if they exist).
   *
   * Output: ??
+  *
+  * (*) --> Note: there's an underlying issue where a
+  * placed object seems inverted or intersects with the
+  * background image during manipulation. To resolve,
+  * move the object using the "Move" operation, and
+  * the object will snap itself into the appropriate
+  * place.
   *
   **/
 
