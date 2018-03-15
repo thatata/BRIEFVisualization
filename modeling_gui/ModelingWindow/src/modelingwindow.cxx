@@ -97,18 +97,33 @@ ModelingWindow::ModelingWindow(int numImages) {
     renderWindow->AddRenderer(otherRenderer);
     rendererMap[13] = otherRenderer;
 
+    // create renderer for the zoom button
+    vtkSmartPointer<vtkRenderer> zoomRenderer = CreateZoomButtonRenderer();
+    renderWindow->AddRenderer(zoomRenderer);
+    rendererMap[14] = zoomRenderer;
+
+    // create renderer for the zoom in (+) button
+    vtkSmartPointer<vtkRenderer> zoomInRenderer = CreateZoomInButtonRenderer();
+    renderWindow->AddRenderer(zoomInRenderer);
+    rendererMap[15] = zoomInRenderer;
+
+    // create renderer for the zoom out (-) button
+    vtkSmartPointer<vtkRenderer> zoomOutRenderer = CreateZoomOutButtonRenderer();
+    renderWindow->AddRenderer(zoomOutRenderer);
+    rendererMap[16] = zoomOutRenderer;
+
     // create renderer for the operations text
     vtkSmartPointer<vtkRenderer> operationsRenderer = CreateOperationsRenderer();
     renderWindow->AddRenderer(operationsRenderer);
 
     // define viewports (in pixels)
-    double xmin[15] = {0,600,600,600,600,600,600,600,600,600,675,750,600,650,700};
-    double ymin[15] = {0,630,560,420,350,280,210,140,70,0,0,0,490,490,490};
-    double xmax[15] = {600,750,750,750,750,750,750,750,750,675,750,1350,650,700,750};
-    double ymax[15] = {700,700,630,560,420,350,280,210,140,70,70,700,560,560,560};
+    double xmin[18] = {0,600,600,600,600,600,600,600,600,600,675,750,600,650,700,600,600,675};
+    double ymin[18] = {0,638,580,464,406,348,290,116,58,0,0,0,522,522,522,232,174,174};
+    double xmax[18] = {600,750,750,750,750,750,750,750,750,675,750,1350,650,700,750,750,675,750};
+    double ymax[18] = {700,700,638,522,464,406,348,174,116,58,58,700,580,580,580,290,232,232};
 
     // convert to (0,1) range
-    for (unsigned int i = 0; i < 15; i++) {
+    for (unsigned int i = 0; i < 18; i++) {
         xmin[i] = xmin[i] / size[0];
         xmax[i] = xmax[i] / size[0];
         ymin[i] = ymin[i] / size[1];
@@ -131,6 +146,9 @@ ModelingWindow::ModelingWindow(int numImages) {
     cubeRenderer->SetViewport(xmin[12], ymin[12], xmax[12], ymax[12]);
     pointRenderer->SetViewport(xmin[13], ymin[13], xmax[13], ymax[13]);
     otherRenderer->SetViewport(xmin[14], ymin[14], xmax[14], ymax[14]);
+    zoomRenderer->SetViewport(xmin[15], ymin[15], xmax[15], ymax[15]);
+    zoomInRenderer->SetViewport(xmin[16], ymin[16], xmax[16], ymax[16]);
+    zoomOutRenderer->SetViewport(xmin[17], ymin[17], xmax[17], ymax[17]);
 
     // set colors of each renderer to gray (rgb = .86, .86, .86)
     imageRenderer->SetBackground(.86,.86,.86);
@@ -148,6 +166,9 @@ ModelingWindow::ModelingWindow(int numImages) {
     cubeRenderer->SetBackground(.86,.86,.86);
     pointRenderer->SetBackground(.86,.86,.86);
     otherRenderer->SetBackground(.86,.86,.86);
+    zoomRenderer->SetBackground(.86,.86,.86);
+    zoomInRenderer->SetBackground(.86,.86,.86);
+    zoomOutRenderer->SetBackground(.86,.86,.86);
 
     // initialize render window interactor and set render window
     renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
@@ -166,9 +187,6 @@ ModelingWindow::ModelingWindow(int numImages) {
 
     // render the window to figure out where image camera is
     renderWindow->Render();
-
-    // fill image in the image renderer
-    //SetImageCamera(readers[0], imageRenderer);
 
     // re-render to reflect camera change
     renderWindow->Render();
@@ -420,26 +438,6 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreateScaleButtonRenderer() {
     return renderer;
 }
 
-vtkSmartPointer<vtkRenderer> ModelingWindow::CreateZoomButtonRenderer() {
-    // create renderer
-    vtkSmartPointer<vtkRenderer> renderer =
-        vtkSmartPointer<vtkRenderer>::New();
-
-    // create text actor to store "Zoom" text
-    vtkSmartPointer<vtkTextActor> zoomTextActor =
-        vtkSmartPointer<vtkTextActor>::New();
-
-    zoomTextActor->SetInput("Zoom");
-    zoomTextActor->SetPosition(0,15);
-    zoomTextActor->GetTextProperty()->SetFontSize(20);
-    zoomTextActor->GetTextProperty()->SetColor(0,0,0);
-
-    // add actor to renderer and renderer to window
-    renderer->AddActor2D(zoomTextActor);
-
-    return renderer;
-}
-
 vtkSmartPointer<vtkRenderer> ModelingWindow::CreateStretchButtonRenderer() {
     // create renderer
     vtkSmartPointer<vtkRenderer> renderer =
@@ -572,6 +570,66 @@ vtkSmartPointer<vtkRenderer> ModelingWindow::CreateRightArrowButtonRenderer() {
     rightTextActor->SetInput(">");
     rightTextActor->SetPosition(0,15);
     rightTextActor->GetTextProperty()->SetFontSize(20);
+    rightTextActor->GetTextProperty()->SetColor(0,0,0);
+
+    // add actor to renderer and renderer to window
+    renderer->AddActor2D(rightTextActor);
+
+    return renderer;
+}
+
+vtkSmartPointer<vtkRenderer> ModelingWindow::CreateZoomButtonRenderer() {
+    // create renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+        vtkSmartPointer<vtkRenderer>::New();
+
+    // create text actor to store "zoom" text
+    vtkSmartPointer<vtkTextActor> rightTextActor =
+        vtkSmartPointer<vtkTextActor>::New();
+
+    rightTextActor->SetInput("Zoom");
+    rightTextActor->SetPosition(0,15);
+    rightTextActor->GetTextProperty()->SetFontSize(20);
+    rightTextActor->GetTextProperty()->SetColor(0,0,0);
+
+    // add actor to renderer and renderer to window
+    renderer->AddActor2D(rightTextActor);
+
+    return renderer;
+}
+
+vtkSmartPointer<vtkRenderer> ModelingWindow::CreateZoomInButtonRenderer() {
+    // create renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+        vtkSmartPointer<vtkRenderer>::New();
+
+    // create text actor to store "+" text
+    vtkSmartPointer<vtkTextActor> rightTextActor =
+        vtkSmartPointer<vtkTextActor>::New();
+
+    rightTextActor->SetInput("+");
+    rightTextActor->SetPosition(0,15);
+    rightTextActor->GetTextProperty()->SetFontSize(25);
+    rightTextActor->GetTextProperty()->SetColor(0,0,0);
+
+    // add actor to renderer and renderer to window
+    renderer->AddActor2D(rightTextActor);
+
+    return renderer;
+}
+
+vtkSmartPointer<vtkRenderer> ModelingWindow::CreateZoomOutButtonRenderer() {
+    // create renderer
+    vtkSmartPointer<vtkRenderer> renderer =
+        vtkSmartPointer<vtkRenderer>::New();
+
+    // create text actor to store "-" text
+    vtkSmartPointer<vtkTextActor> rightTextActor =
+        vtkSmartPointer<vtkTextActor>::New();
+
+    rightTextActor->SetInput("-");
+    rightTextActor->SetPosition(0,15);
+    rightTextActor->GetTextProperty()->SetFontSize(25);
     rightTextActor->GetTextProperty()->SetColor(0,0,0);
 
     // add actor to renderer and renderer to window

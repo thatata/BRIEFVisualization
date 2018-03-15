@@ -118,6 +118,9 @@ struct WindowStyleAttributes {
     bool StretchZ;
     bool Zoom;
 
+    // value to determine which pose to zoom in/out
+    int poseToZoom;
+
     // selected actor
     vtkSmartPointer<vtkActor> selectedActor;
 
@@ -165,6 +168,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void ChangePose(int direction);
         void DeselectActor();
         void SelectActor(vtkSmartPointer<vtkActor> actor);
+        void CameraZoom(double factor);
 
         // Button handling
         void PerformAction();
@@ -183,6 +187,8 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void OutputSelected();
         void LeftArrowSelected();
         void RightArrowSelected();
+        void ZoomInSelected();
+        void ZoomOutSelected();
 
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map);

@@ -77,6 +77,9 @@ ModelingWindowStyle::ModelingWindowStyle() {
     attributes->StretchZ = false;
     attributes->Zoom = false;
 
+    // set default value for pose to zoom (-1)
+    attributes->poseToZoom = -1;
+
     // initialize PoseData object for initial pose
     PoseData *data = new PoseData();
 
@@ -800,6 +803,34 @@ void ModelingWindowStyle::ChangePose(int direction) {
     this->Interactor->Render();
 }
 
+void ModelingWindowStyle::SelectActor(vtkSmartPointer<vtkActor> actor) {
+    // change flag
+    attributes->Selected = true;
+
+    // save address for future use
+    attributes->selectedActor = actor;
+
+    // change color to red to denote selected
+    actor->GetProperty()->SetColor(1,0,0); // red
+
+    // set opacity to 75%
+    actor->GetProperty()->SetOpacity(0.75);
+
+    // re-render to update color
+    this->Interactor->Render();
+}
+
+void ModelingWindowStyle::DeselectActor() {
+    // change selectedActor color to white
+    attributes->selectedActor->GetProperty()->SetColor(1,1,1);
+
+    // change Selected flag
+    attributes->Selected = false;
+
+    // re-render the window
+    this->Interactor->Render();
+}
+
 vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileName) {
     // vars to read text files
     std::string line;
@@ -902,6 +933,23 @@ vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileNam
     return matrix;
 }
 
+void ModelingWindowStyle::CameraZoom(double factor) {
+    // get the (pose) renderer to zoom based on attributes value
+    vtkSmartPointer<vtkRenderer> renderer;
+
+    if (attributes->poseToZoom == 0) renderer = attributes->rendererMap[0];
+    else renderer = attributes->rendererMap[10];
+
+    // get active camera of the renderer
+    vtkCamera *camera = renderer->GetActiveCamera();
+
+    // zoom based on the factor passed in (add 1 to start at 100%)
+    camera->Zoom(factor + 1);
+
+    // re-render window to show change
+    this->Interactor->Render();
+}
+
 void ModelingWindowStyle::PerformAction() {
     // perform appropriate action based on which renderer is selected
     if (this->CurrentRenderer == attributes->rendererMap[0]) {
@@ -946,6 +994,15 @@ void ModelingWindowStyle::PerformAction() {
     } else if (this->CurrentRenderer == attributes->rendererMap[13]) {
         // other selected
         OtherSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[14]) {
+        // zoom selected
+        ZoomSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[15]) {
+        // zoom in selected
+        ZoomInSelected();
+    } else if (this->CurrentRenderer == attributes->rendererMap[16]) {
+        // zoom out selected
+        ZoomOutSelected();
     }
 
     // otherwise, perform no action
@@ -976,7 +1033,7 @@ void ModelingWindowStyle::LeftSceneSelected() {
         }
     }
 
-    // otherwise, check if object was selected
+    // check if object was selected
     if (attributes->Selected) {
         // if so, check if move tool was selected
         if (attributes->Move) {
@@ -996,34 +1053,6 @@ void ModelingWindowStyle::LeftSceneSelected() {
         // if actor is not null, user selected that actor
         SelectActor(actor);
     }
-}
-
-void ModelingWindowStyle::SelectActor(vtkSmartPointer<vtkActor> actor) {
-    // change flag
-    attributes->Selected = true;
-
-    // save address for future use
-    attributes->selectedActor = actor;
-
-    // change color to red to denote selected
-    actor->GetProperty()->SetColor(1,0,0); // red
-
-    // set opacity to 75%
-    actor->GetProperty()->SetOpacity(0.75);
-
-    // re-render to update color
-    this->Interactor->Render();
-}
-
-void ModelingWindowStyle::DeselectActor() {
-    // change selectedActor color to white
-    attributes->selectedActor->GetProperty()->SetColor(1,1,1);
-
-    // change Selected flag
-    attributes->Selected = false;
-
-    // re-render the window
-    this->Interactor->Render();
 }
 
 void ModelingWindowStyle::RightSceneSelected() {
@@ -1100,15 +1129,53 @@ void ModelingWindowStyle::ZoomSelected() {
         // change back to false
         attributes->Zoom = false;
 
+        // change attributes value to default
+        attributes->poseToZoom = -1;
+
         // change renderer to be gray
         ChangeRenderer(.86,.86,.86);
     } else {
-        // change to true
-        attributes->Zoom = true;
-
         // change renderer to be green
         ChangeRenderer(0,1,0);
+
+        // prompt user to select a pose to zoom
+        std::cout << "Zoom Selected! \nEnter 0 for left pose, or 1 for right pose: ";
+
+        // grab value
+        int selectedPose;
+        std::cin >> selectedPose;
+
+        // make sure pose entered was valid
+        if (selectedPose != 0 && selectedPose != 1) {
+            // if invalid, prompt user
+            std::cout << "Invalid pose entered! Please try again." << std::endl;
+
+            // change renderer back to gray
+            ChangeRenderer(.86,.86,.86);
+        } else {
+            // save value in window attributes
+            attributes->poseToZoom = selectedPose;
+
+            // change flag to true
+            attributes->Zoom = true;
+        }
     }
+}
+
+void ModelingWindowStyle::ZoomInSelected() {
+    // if zoom is not preselected, do nothing
+    if (!attributes->Zoom) return;
+
+    // otherwise, zoom in by 10%
+    CameraZoom(.1);
+}
+
+void ModelingWindowStyle::ZoomOutSelected() {
+    // if zoom is not preselected, do nothing
+    if (!attributes->Zoom) return;
+
+    // otherwise, zoom out by 10%
+    CameraZoom(-.1);
 }
 
 void ModelingWindowStyle::ScaleSelected() {
@@ -1226,6 +1293,5 @@ void ModelingWindowStyle::SetWindow(ModelingWindow *window) { this->window = win
 void ModelingWindowStyle::SetRendererMap(std::map<int, vtkRenderer *> map) { attributes->rendererMap = map; }
 
 void ModelingWindowStyle::SetReaders(std::vector<vtkSmartPointer<vtkPNGReader> > pngReaders) { attributes->readers = pngReaders; }
-
 
 //vtkStandardNewMacro(ModelingWindowStyle);

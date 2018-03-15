@@ -43,7 +43,6 @@ class ModelingWindow {
         vtkSmartPointer<vtkRenderer> CreateOtherButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateDrawButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateScaleButtonRenderer();
-        vtkSmartPointer<vtkRenderer> CreateZoomButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateStretchButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateRotateButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateMoveButtonRenderer();
@@ -51,6 +50,9 @@ class ModelingWindow {
         vtkSmartPointer<vtkRenderer> CreateOutputButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateLeftArrowButtonRenderer();
         vtkSmartPointer<vtkRenderer> CreateRightArrowButtonRenderer();
+        vtkSmartPointer<vtkRenderer> CreateZoomButtonRenderer();
+        vtkSmartPointer<vtkRenderer> CreateZoomInButtonRenderer();
+        vtkSmartPointer<vtkRenderer> CreateZoomOutButtonRenderer();
 };
 
 #endif // MODELINGWINDOW_H
