@@ -20,6 +20,7 @@
 #include <vtkProperty.h>
 #include <vtkAbstractPicker.h>
 #include <vtkImageMapper3D.h>
+#include <vtkSphereSource.h>
 #include <sstream>
 
 #include "modelingwindow.h"
@@ -32,7 +33,7 @@ ModelingWindowStyle::ModelingWindowStyle() {
     // set default values
     attributes->Cube = false;
     attributes->Point = false;
-    attributes->Other = false;
+    attributes->Sphere = false;
     attributes->Draw = false;
     attributes->Rotate = false;
     attributes->RotateZ = false;
@@ -107,8 +108,8 @@ void ModelingWindowStyle::OnLeftButtonUp() {
         // change moving to false
         attributes->Moving = false;
 
-        // get cube data
-        CubeData *data = GetCube(attributes->selectedActor);
+        // get object data
+        ObjectData *data = GetObject(attributes->selectedActor);
 
         // update translation values (in world coordinates)
         data->translateX = attributes->selectedActor->GetPosition()[0];
@@ -116,7 +117,7 @@ void ModelingWindowStyle::OnLeftButtonUp() {
     }
 }
 
-void ModelingWindowStyle::MoveCube() {
+void ModelingWindowStyle::MoveObject() {
     // check if selected actor was under the mouse click
     vtkSmartPointer<vtkActor> actor = GetActorUnderClick();
 
@@ -150,8 +151,8 @@ void ModelingWindowStyle::RotateObject() {
         return;
     }
 
-    // get cube data to update rotation values
-    CubeData *data = GetCube(attributes->selectedActor);
+    // get object data to update rotation values
+    ObjectData *data = GetObject(attributes->selectedActor);
 
     // check if z rotation has been enabled
     if (attributes->RotateZ) {
@@ -207,8 +208,8 @@ void ModelingWindowStyle::StretchObject() {
         return;
     }
 
-    // get cube data to update scale values
-    CubeData *data = GetCube(attributes->selectedActor);
+    // get object data to update scale values
+    ObjectData *data = GetObject(attributes->selectedActor);
 
     // check if z rotation has been enabled
     if (attributes->StretchZ) {
@@ -278,8 +279,8 @@ void ModelingWindowStyle::ScaleObject() {
     // grab key pressed
     std::string key = this->Interactor->GetKeySym();
 
-    // get cube data to update scale values
-    CubeData *data = GetCube(attributes->selectedActor);
+    // get object data to update scale values
+    ObjectData *data = GetObject(attributes->selectedActor);
 
     // scale object equally for each axis for up/down arrows
     if (key == "Up") {
@@ -340,13 +341,13 @@ void ModelingWindowStyle::DrawCubeOntoImage() {
     // add actor to the current renderer
     this->CurrentRenderer->AddActor(actor);
 
-    // create CubeData object to store cube source and actor
-    CubeData *cube = new CubeData();
-    cube->actor = actor;
-    cube->cubeSource = cubeSource;
+    // create ObjectData object to store cube source and actor
+    ObjectData *object = new ObjectData();
+    object->actor = actor;
+    object->cubeSource = cubeSource;
 
-    // add to vector of cubes
-    currentPose->cubes.push_back(cube);
+    // add to vector of objects
+    currentPose->objects.push_back(object);
 }
 
 void ModelingWindowStyle::DrawPointOntoImage() {
@@ -385,13 +386,69 @@ void ModelingWindowStyle::DrawPointOntoImage() {
     this->CurrentRenderer->AddActor(data->actor);
 }
 
-void ModelingWindowStyle::PerformTransformations(CubeData *data) {
+void ModelingWindowStyle::DrawSphereOntoImage() {
+    // get click position (x,y)
+    double *position = GetClickPosition();
+
+    // Create a sphere
+    vtkSmartPointer<vtkSphereSource> sphereSource =
+      vtkSmartPointer<vtkSphereSource>::New();
+
+    // set center based on click (z = 0)
+    sphereSource->SetCenter(position[0], position[1], 0);
+
+    // set radius (match size of cube)
+    sphereSource->SetRadius(12.5);
+
+    // set phi and theta resolutions higher to smooth sphere
+    sphereSource->SetPhiResolution(20);
+    sphereSource->SetThetaResolution(20);
+
+    // map cube source to data set mapper
+    vtkSmartPointer<vtkDataSetMapper> mapper =
+      vtkSmartPointer<vtkDataSetMapper>::New();
+    mapper->SetInputConnection(sphereSource->GetOutputPort());
+
+    // create actor and set mapper
+    vtkSmartPointer<vtkActor> actor =
+      vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper(mapper);
+
+    // add actor to the current renderer
+    this->CurrentRenderer->AddActor(actor);
+
+    // create ObjectData object to store sphere source and actor
+    ObjectData *object = new ObjectData();
+    object->actor = actor;
+    object->sphereSource = sphereSource;
+
+    // add to vector of objects
+    currentPose->objects.push_back(object);
+}
+
+void ModelingWindowStyle::PerformTransformations(ObjectData *data) {
     // create transform object
     vtkSmartPointer<vtkTransform> transform =
         vtkSmartPointer<vtkTransform>::New();
 
-    // get the center position of the cube from CubeData
-    double *center = data->cubeSource->GetCenter();
+    // grab the center/output port of the object by checking the
+    // pointers to the cube/sphere source objects
+    double *center;
+    vtkAlgorithmOutput *outputPort;
+
+    if (data->cubeSource) {
+        // grab values from cube source
+        center = data->cubeSource->GetCenter();
+        outputPort = data->cubeSource->GetOutputPort();
+    } else if (data->sphereSource) {
+        // grab values from sphere source
+        center = data->sphereSource->GetCenter();
+        outputPort = data->sphereSource->GetOutputPort();
+    } else {
+        // prompt user of error and return
+        std::cout << "Unknown Error!\nPlease try again." << std::endl;
+        return;
+    }
 
     // apply initial translation to center the cube at the origin
     transform->Translate(center[0], center[1], center[2]);
@@ -420,7 +477,7 @@ void ModelingWindowStyle::PerformTransformations(CubeData *data) {
       vtkSmartPointer<vtkTransformFilter>::New();
 
     // add cube and transform, and update
-    filter->SetInputConnection(data->cubeSource->GetOutputPort());
+    filter->SetInputConnection(outputPort);
     filter->SetTransform(transform);
     filter->Update();
 
@@ -495,12 +552,12 @@ double *ModelingWindowStyle::GetClickPosition() {
     return position;
 }
 
-CubeData *ModelingWindowStyle::GetCube(vtkSmartPointer<vtkActor> actor) {
+ObjectData *ModelingWindowStyle::GetObject(vtkSmartPointer<vtkActor> actor) {
     // traverse through cubes and compare actors
-    for (unsigned int i = 0; i < currentPose->cubes.size(); i++) {
+    for (unsigned int i = 0; i < currentPose->objects.size(); i++) {
         // if actors match, return the CubeData reference
-        if (currentPose->cubes[i]->actor == actor) {
-            return currentPose->cubes[i];
+        if (currentPose->objects[i]->actor == actor) {
+            return currentPose->objects[i];
         }
     }
 
@@ -602,7 +659,7 @@ void ModelingWindowStyle::UpdateRightPoseEntities(PoseData *pose) {
     // find PoseData object of right pose
     PoseData *oldPose;
 
-    // loop through poses vector
+    // loop through poses vector and compare poses #'s
     for (unsigned int i = 0; i < poses.size(); i++) {
         // if rightPoseIdx matches pose #, break
         if (poses[i]->poseNum == rightPoseIdx) {
@@ -613,16 +670,16 @@ void ModelingWindowStyle::UpdateRightPoseEntities(PoseData *pose) {
 
     // check if pose was found
     if (oldPose) {
-        // if so, loop through each cube in this pose
-        for (unsigned int i = 0; i < oldPose->cubes.size(); i++) {
+        // if so, loop through each object in this pose
+        for (unsigned int i = 0; i < oldPose->objects.size(); i++) {
             // remove actor from the right pose renderer (idx = 10)
-            attributes->rendererMap[10]->RemoveActor(oldPose->cubes[i]->actor);
+            attributes->rendererMap[10]->RemoveActor(oldPose->objects[i]->actor);
         }
 
         // now, loop through each cube in the new pose
-        for (unsigned int i = 0; i < pose->cubes.size(); i++) {
+        for (unsigned int i = 0; i < pose->objects.size(); i++) {
             // add actor to the same renderer
-            attributes->rendererMap[10]->AddActor(pose->cubes[i]->actor);
+            attributes->rendererMap[10]->AddActor(pose->objects[i]->actor);
         }
 
     } // otherwise, do nothing
@@ -642,7 +699,7 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
     // set current matrix of new pose
     pose->currMatrix = GetMatrix(newPoseFile.str().c_str());
 
-    // set previous matrix of new pose to current matrix of current pose
+    // set previous matrix of new pose to initial pose matrix
     pose->prevMatrix = poses[0]->currMatrix;
 
     // find PoseData object of right pose
@@ -659,10 +716,10 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
 
     // check if pose was found
     if (oldPose) {
-        // if so, loop through each cube in this pose
-        for (unsigned int i = 0; i < oldPose->cubes.size(); i++) {
+        // if so, loop through each object in this pose
+        for (unsigned int i = 0; i < oldPose->objects.size(); i++) {
             // remove actor from the right pose renderer (idx = 10)
-            attributes->rendererMap[10]->RemoveActor(oldPose->cubes[i]->actor);
+            attributes->rendererMap[10]->RemoveActor(oldPose->objects[i]->actor);
         }
     } else return; // otherwise, do nothing
 
@@ -683,19 +740,20 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
 
 void ModelingWindowStyle::TransformEntities(PoseData *pose) {
     // loop through each cube drawn in the previous RF
-    for (unsigned int i = 0; i < currentPose->cubes.size(); i++) {
-        // create new CubeData object
-        CubeData *data = new CubeData();
+    for (unsigned int i = 0; i < currentPose->objects.size(); i++) {
+        // create new ObjectData object
+        ObjectData *data = new ObjectData();
 
-        // copy cube source and transformation values (except translation
-        // values) to new CubeData object
-        data->cubeSource = currentPose->cubes[i]->cubeSource;
-        data->rotationX = currentPose->cubes[i]->rotationX;
-        data->rotationY = currentPose->cubes[i]->rotationY;
-        data->rotationZ = currentPose->cubes[i]->rotationZ;
-        data->scaleX = currentPose->cubes[i]->scaleX;
-        data->scaleY = currentPose->cubes[i]->scaleY;
-        data->scaleZ = currentPose->cubes[i]->scaleZ;
+        // copy cube/sphere source and transformation values (except
+        // translation values) to new ObjectData object
+        data->cubeSource = currentPose->objects[i]->cubeSource;
+        data->sphereSource = currentPose->objects[i]->sphereSource;
+        data->rotationX = currentPose->objects[i]->rotationX;
+        data->rotationY = currentPose->objects[i]->rotationY;
+        data->rotationZ = currentPose->objects[i]->rotationZ;
+        data->scaleX = currentPose->objects[i]->scaleX;
+        data->scaleY = currentPose->objects[i]->scaleY;
+        data->scaleZ = currentPose->objects[i]->scaleZ;
 
         // initialize actor to be placed in right pose renderer
         data->actor = vtkSmartPointer<vtkActor>::New();
@@ -704,19 +762,35 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
         vtkSmartPointer<vtkTransform> transform =
             vtkSmartPointer<vtkTransform>::New();
 
-        // get the center position of the cube from CubeData
-        double *center = currentPose->cubes[i]->cubeSource->GetCenter();
+        // grab the center/output port of the object by checking the
+        // pointers to the cube/sphere source objects
+        double *center;
+        vtkAlgorithmOutput *outputPort;
+
+        if (currentPose->objects[i]->cubeSource) {
+            // grab values from cube source
+            center = currentPose->objects[i]->cubeSource->GetCenter();
+            outputPort = currentPose->objects[i]->cubeSource->GetOutputPort();
+        } else if (currentPose->objects[i]->sphereSource) {
+            // grab values from sphere source
+            center = currentPose->objects[i]->sphereSource->GetCenter();
+            outputPort = currentPose->objects[i]->sphereSource->GetOutputPort();
+        } else {
+            // prompt user of error and return
+            std::cout << "Unknown Error!\nPlease try again." << std::endl;
+            return;
+        }
 
         // apply initial translation to center the cube at the origin
         transform->Translate(center[0], center[1], center[2]);
 
         // apply rotations
-        transform->RotateX(currentPose->cubes[i]->rotationX);
-        transform->RotateY(currentPose->cubes[i]->rotationY);
-        transform->RotateZ(currentPose->cubes[i]->rotationZ);
+        transform->RotateX(currentPose->objects[i]->rotationX);
+        transform->RotateY(currentPose->objects[i]->rotationY);
+        transform->RotateZ(currentPose->objects[i]->rotationZ);
 
         // scale with appropriate values
-        transform->Scale(currentPose->cubes[i]->scaleX, currentPose->cubes[i]->scaleY, currentPose->cubes[i]->scaleZ);
+        transform->Scale(currentPose->objects[i]->scaleX, currentPose->objects[i]->scaleY, currentPose->objects[i]->scaleZ);
 
         // apply final translation
         transform->Translate(-center[0], -center[1], -center[2]);
@@ -731,7 +805,7 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
           vtkSmartPointer<vtkTransformFilter>::New();
 
         // add cube and transform, and update
-        filter->SetInputConnection(data->cubeSource->GetOutputPort());
+        filter->SetInputConnection(outputPort);
         filter->SetTransform(transform);
         filter->Update();
 
@@ -746,8 +820,8 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
         // add actor to the right renderer (i = 10)
         attributes->rendererMap[10]->AddActor(data->actor);
 
-        // add new CubeData to new PoseData
-        pose->cubes.push_back(data);
+        // add new ObjectData to new PoseData
+        pose->objects.push_back(data);
     }
 }
 
@@ -983,7 +1057,7 @@ void ModelingWindowStyle::PerformAction() {
         PointSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[13]) {
         // other selected
-        OtherSelected();
+        SphereSelected();
     } else if (this->CurrentRenderer == attributes->rendererMap[14]) {
         // zoom selected
         ZoomSelected();
@@ -1011,9 +1085,20 @@ void ModelingWindowStyle::LeftSceneSelected() {
 
             // done, so return
             return;
-        } else if (attributes->Point) {
+        } // check if point is selected
+        else if (attributes->Point) {
             // draw point
             DrawPointOntoImage();
+
+            // re-render
+            this->Interactor->Render();
+
+            // done, so return
+            return;
+        } // check if sphere is selected
+        else if (attributes->Sphere) {
+            // draw sphere
+            DrawSphereOntoImage();
 
             // re-render
             this->Interactor->Render();
@@ -1027,8 +1112,8 @@ void ModelingWindowStyle::LeftSceneSelected() {
     if (attributes->Selected) {
         // if so, check if move tool was selected
         if (attributes->Move) {
-            // if so, move cube
-            MoveCube();
+            // if so, move object
+            MoveObject();
         } else {
             // otherwise, deselect the actor
             DeselectActor();
@@ -1237,17 +1322,17 @@ void ModelingWindowStyle::PointSelected() {
     }
 }
 
-void ModelingWindowStyle::OtherSelected() {
+void ModelingWindowStyle::SphereSelected() {
     // change flag depending on selected or not
-    if (attributes->Other) {
+    if (attributes->Sphere) {
         // change back to false
-        attributes->Other = false;
+        attributes->Sphere = false;
 
         // change renderer to be gray
         ChangeRenderer(.86,.86,.86);
     } else {
         // change to true
-        attributes->Other = true;
+        attributes->Sphere = true;
 
         // change renderer to be green
         ChangeRenderer(0,1,0);

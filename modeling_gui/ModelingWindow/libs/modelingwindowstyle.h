@@ -23,22 +23,27 @@
 #include <vtkProperty.h>
 #include <vtkAbstractPicker.h>
 #include <vtkImageMapper3D.h>
+#include <vtkSphereSource.h>
 #include <sstream>
 
 #include "modelingwindow.h"
 
-// structure holding actor and cube source of each cube object
-struct CubeData {
-    // actor object
+// structure of an object holding actor, appropriate source objects, and transformation values
+struct ObjectData {
+    // pointer to actor object
     vtkSmartPointer<vtkActor> actor;
 
-    // cube source object
+    // pointer to cube source object
     vtkSmartPointer<vtkCubeSource> cubeSource;
 
-    // variables to store scale (start at 1), rotation, and translation values
+    // pointer to sphere source object
+    vtkSmartPointer<vtkSphereSource> sphereSource;
+
+    // transformation values for scale, rotation, translation
     double scaleX = 1, scaleY = 1, scaleZ = 1, rotationX, rotationY, rotationZ, translateX, translateY;
 };
 
+// structure of a point
 struct PointData {
     // actor object
     vtkSmartPointer<vtkActor> actor;
@@ -53,9 +58,11 @@ struct PointData {
     vtkSmartPointer<vtkCellArray> vertices;
 };
 
+// structure of a pose, containing objects, pose #, and appropriate
+// transformation matrices
 struct PoseData {
-    // store vector of CubeData objects
-    std::vector<CubeData*> cubes;
+    // store vector of ObjectData objects
+    std::vector<ObjectData*> objects;
 
     // store vector of PointData objects
     std::vector<PointData*> points;
@@ -74,7 +81,7 @@ struct WindowStyleAttributes {
     // private vars
     bool Cube;
     bool Point;
-    bool Other;
+    bool Sphere;
     bool Draw;
     bool Rotate;
     bool RotateZ;
@@ -113,13 +120,14 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void OnLeftButtonUp();
 
         // Operations
-        void MoveCube();
+        void MoveObject();
         void RotateObject();
         void StretchObject();
         void ScaleObject();
         void DrawCubeOntoImage();
         void DrawPointOntoImage();
-        void PerformTransformations(CubeData *data);
+        void DrawSphereOntoImage();
+        void PerformTransformations(ObjectData *data);
         void CameraZoom(double factor);
         void ChangePose(int direction);
         void RequestNewPose();
@@ -128,7 +136,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         vtkSmartPointer<vtkActor> GetActorUnderClick();
         void ChangeRenderer(double r, double g, double b);
         double *GetClickPosition();
-        CubeData *GetCube(vtkSmartPointer<vtkActor> actor);
+        ObjectData *GetObject(vtkSmartPointer<vtkActor> actor);
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
         void CreateNewPose(int newPose);
         void TransformEntities(PoseData *pose);
@@ -149,7 +157,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void StretchSelected();
         void MoveSelected();
         void PointSelected();
-        void OtherSelected();
+        void SphereSelected();
         void RequestSelected();
         void OutputSelected();
         void LeftArrowSelected();
