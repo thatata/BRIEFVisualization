@@ -21,6 +21,9 @@
 #include <vtkAbstractPicker.h>
 #include <vtkImageMapper3D.h>
 #include <vtkSphereSource.h>
+#include <vtkPLYWriter.h>
+#include <vtkSimplePointsWriter.h>
+#include <vtkSTLWriter.h>
 #include <sstream>
 
 #include "modelingwindow.h"
@@ -58,7 +61,7 @@ ModelingWindowStyle::ModelingWindowStyle() {
     currentPose = data;
 
     // set current transformation matrix
-    data->currMatrix = GetMatrix("0.txt");
+    data->matrix = GetMatrix("0.txt");
 
     // set pose idx to 0 (first element in the vector)
     poseIdx = 0;
@@ -111,9 +114,10 @@ void ModelingWindowStyle::OnLeftButtonUp() {
         // get object data
         ObjectData *data = GetObject(attributes->selectedActor);
 
-        // update translation values (in world coordinates)
-        data->translateX = attributes->selectedActor->GetPosition()[0];
-        data->translateY = attributes->selectedActor->GetPosition()[1];
+        // update translation values (in screen coordinates)
+        double *screenCoords = GetClickPosition();
+        data->translateX = screenCoords[0];
+        data->translateY = screenCoords[1];
     }
 }
 
@@ -427,27 +431,55 @@ void ModelingWindowStyle::DrawSphereOntoImage() {
 }
 
 void ModelingWindowStyle::PerformTransformations(ObjectData *data) {
+    // get output port of the object from GetOutputPort
+    vtkAlgorithmOutput *outputPort = GetOutputPort(data);
+
+    // generate transform object from GetTransform
+    vtkSmartPointer<vtkTransform> transform = GetTransform(data);
+
+    // set up transform filter
+    vtkSmartPointer<vtkTransformFilter> filter =
+      vtkSmartPointer<vtkTransformFilter>::New();
+
+    // add cube and transform, and update
+    filter->SetInputConnection(outputPort);
+    filter->SetTransform(transform);
+    filter->Update();
+
+    // set up new mapper
+    vtkSmartPointer<vtkPolyDataMapper> mapper =
+      vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputConnection(filter->GetOutputPort());
+
+    // set mapper to existing actor
+    this->attributes->selectedActor->SetMapper(mapper);
+
+    // save transform filter in ObjectData object
+    data->filter = filter;
+
+    // reset camera and update window
+    this->Interactor->Render();
+}
+
+vtkSmartPointer<vtkTransform> ModelingWindowStyle::GetTransform(ObjectData *data) {
     // create transform object
     vtkSmartPointer<vtkTransform> transform =
         vtkSmartPointer<vtkTransform>::New();
 
-    // grab the center/output port of the object by checking the
-    // pointers to the cube/sphere source objects
+    // grab the center of the object by checking the pointers
+    // to the cube/sphere source objects
     double *center;
-    vtkAlgorithmOutput *outputPort;
 
     if (data->cubeSource) {
         // grab values from cube source
         center = data->cubeSource->GetCenter();
-        outputPort = data->cubeSource->GetOutputPort();
     } else if (data->sphereSource) {
         // grab values from sphere source
         center = data->sphereSource->GetCenter();
-        outputPort = data->sphereSource->GetOutputPort();
     } else {
         // prompt user of error and return
         std::cout << "Unknown Error!\nPlease try again." << std::endl;
-        return;
+        return NULL;
     }
 
     // apply initial translation to center the cube at the origin
@@ -467,30 +499,29 @@ void ModelingWindowStyle::PerformTransformations(ObjectData *data) {
     // check pose number for initial pose
     if (currentPose->poseNum != 0) {
         // if not initial pose, concat transformation matrices
-        transform->Concatenate(currentPose->prevMatrix);
         transform->PostMultiply();
-        transform->Concatenate(currentPose->currMatrix);
+        transform->Concatenate(currentPose->matrix);
     } // otherwise, no need
 
-    // set up transform filter
-    vtkSmartPointer<vtkTransformFilter> filter =
-      vtkSmartPointer<vtkTransformFilter>::New();
+    // done, so return transform
+    return transform;
+}
 
-    // add cube and transform, and update
-    filter->SetInputConnection(outputPort);
-    filter->SetTransform(transform);
-    filter->Update();
+vtkAlgorithmOutput *ModelingWindowStyle::GetOutputPort(ObjectData *data) {
+    // check pointers in the ObjectData object to get the appropriate output port
+    vtkAlgorithmOutput *outputPort;
 
-    // set up new mapper
-    vtkSmartPointer<vtkPolyDataMapper> mapper =
-      vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper->SetInputConnection(filter->GetOutputPort());
-
-    // set mapper to existing actor
-    this->attributes->selectedActor->SetMapper(mapper);
-
-    // reset camera and update window
-    this->Interactor->Render();
+    if (data->cubeSource) {
+        // return value from cube source
+        return data->cubeSource->GetOutputPort();
+    } else if (data->sphereSource) {
+        // return value from sphere source
+        return data->sphereSource->GetOutputPort();
+    } else {
+        // prompt user of error and return
+        std::cout << "Unknown Error!\nPlease try again." << std::endl;
+        return NULL;
+    }
 }
 
 vtkSmartPointer<vtkActor> ModelingWindowStyle::GetActorUnderClick() {
@@ -603,7 +634,7 @@ void ModelingWindowStyle::RequestNewPose() {
         }
     }
 
-    // otherwise, check if dual window exists (check if pose idx is invalid)
+    // otherwise, check if pose idx is invalid
     if (rightPoseIdx != -1) {
         // if so, update image in the right pose renderer
         UpdateRightPoseImage(poseNum);
@@ -643,6 +674,95 @@ void ModelingWindowStyle::RequestNewPose() {
 
     // re-render window
     this->Interactor->Render();
+}
+
+void ModelingWindowStyle::Output() {
+    // prompt user to select their desired file format
+    std::cout << "Output Selected! \nEnter 0 for .ply, 1 for .xyz, or 2 for .stl: ";
+
+    // get selection from input
+    int outputFormat;
+    std::cin >> outputFormat;
+
+    // check if selection is valid
+    if (outputFormat < 0 || outputFormat > 2) {
+        // prompt user if invalid and return
+        std::cout << "Invalid Selection! Please try again." << std::endl;
+
+        return;
+    }
+
+    // prompt user to output one combined model, or separate models
+    std::cout << "Please enter 0 for a combined model, or 1 for separate models: ";
+
+    // get selection from input
+    int combined;
+    std::cin >> combined;
+
+    // check validity of the selection
+    if (combined < 0 || combined > 1) {
+        // prompt user if invalid and return
+        std::cout << "Invalid Selection! Please try again." << std::endl;
+
+        return;
+    }
+
+    // initialize writer based on the output format chosen
+    vtkSmartPointer<vtkPLYWriter> plyWriter;
+    vtkSmartPointer<vtkSimplePointsWriter> xyzWriter;
+    vtkSmartPointer<vtkSTLWriter> stlWriter;
+
+    if (outputFormat == 0) {
+        // print format selected to console
+        std::cout << ".PLY Selected!" << std::endl;
+
+        // initialize PLY writer
+        plyWriter = vtkSmartPointer<vtkPLYWriter>::New();
+    } else if (outputFormat == 1) {
+        // print format selected to console
+        std::cout << ".XYZ Selected!" << std::endl;
+
+        // initialize simple points (XYZ) writer
+        xyzWriter = vtkSmartPointer<vtkSimplePointsWriter>::New();
+    } else {
+        // print format selected to console
+        std::cout << ".STL Selected!" << std::endl;
+
+        // initialize STL writer
+        stlWriter = vtkSmartPointer<vtkSTLWriter>::New();
+    }
+
+    // combine objects into one cohesive model
+    if (combined == 0) {
+
+    } else {
+        // otherwise, output each object into its own file
+
+        // get the final requested pose
+        PoseData *lastPose = poses[poses.size() - 1];
+
+        // loop through each object in the pose to output
+        for (int i = 0; i < lastPose->objects.size(); i++) {
+            // get filename of the first object to output
+            std::stringstream filename;
+            filename << i << ".ply";
+
+            // set the filename, output, and write to file depending on the specified format
+            if (plyWriter) {
+                plyWriter->SetFileName(filename.str().c_str());
+                plyWriter->SetInputConnection(lastPose->objects[i]->filter->GetOutputPort());
+                plyWriter->Write();
+            } else if (xyzWriter) {
+                xyzWriter->SetFileName(filename.str().c_str());
+                xyzWriter->SetInputConnection(lastPose->objects[i]->filter->GetOutputPort());
+                xyzWriter->Write();
+            } else if (stlWriter) {
+                stlWriter->SetFileName(filename.str().c_str());
+                stlWriter->SetInputConnection(lastPose->objects[i]->filter->GetOutputPort());
+                stlWriter->Write();
+            }
+        }
+    }
 }
 
 void ModelingWindowStyle::UpdateRightPoseImage(int newPose) {
@@ -697,10 +817,7 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
     newPoseFile << newPose << ".txt";
 
     // set current matrix of new pose
-    pose->currMatrix = GetMatrix(newPoseFile.str().c_str());
-
-    // set previous matrix of new pose to initial pose matrix
-    pose->prevMatrix = poses[0]->currMatrix;
+    pose->matrix = GetMatrix(newPoseFile.str().c_str());
 
     // find PoseData object of right pose
     PoseData *oldPose;
@@ -739,21 +856,23 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
 }
 
 void ModelingWindowStyle::TransformEntities(PoseData *pose) {
+    PoseData *lastPose = poses[poses.size() - 1];
+
     // loop through each cube drawn in the previous RF
-    for (unsigned int i = 0; i < currentPose->objects.size(); i++) {
+    for (unsigned int i = 0; i < lastPose->objects.size(); i++) {
         // create new ObjectData object
         ObjectData *data = new ObjectData();
 
         // copy cube/sphere source and transformation values (except
         // translation values) to new ObjectData object
-        data->cubeSource = currentPose->objects[i]->cubeSource;
-        data->sphereSource = currentPose->objects[i]->sphereSource;
-        data->rotationX = currentPose->objects[i]->rotationX;
-        data->rotationY = currentPose->objects[i]->rotationY;
-        data->rotationZ = currentPose->objects[i]->rotationZ;
-        data->scaleX = currentPose->objects[i]->scaleX;
-        data->scaleY = currentPose->objects[i]->scaleY;
-        data->scaleZ = currentPose->objects[i]->scaleZ;
+        data->cubeSource = lastPose->objects[i]->cubeSource;
+        data->sphereSource = lastPose->objects[i]->sphereSource;
+        data->rotationX = lastPose->objects[i]->rotationX;
+        data->rotationY = lastPose->objects[i]->rotationY;
+        data->rotationZ = lastPose->objects[i]->rotationZ;
+        data->scaleX = lastPose->objects[i]->scaleX;
+        data->scaleY = lastPose->objects[i]->scaleY;
+        data->scaleZ = lastPose->objects[i]->scaleZ;
 
         // initialize actor to be placed in right pose renderer
         data->actor = vtkSmartPointer<vtkActor>::New();
@@ -767,14 +886,14 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
         double *center;
         vtkAlgorithmOutput *outputPort;
 
-        if (currentPose->objects[i]->cubeSource) {
+        if (lastPose->objects[i]->cubeSource) {
             // grab values from cube source
-            center = currentPose->objects[i]->cubeSource->GetCenter();
-            outputPort = currentPose->objects[i]->cubeSource->GetOutputPort();
-        } else if (currentPose->objects[i]->sphereSource) {
+            center = lastPose->objects[i]->cubeSource->GetCenter();
+            outputPort = lastPose->objects[i]->cubeSource->GetOutputPort();
+        } else if (lastPose->objects[i]->sphereSource) {
             // grab values from sphere source
-            center = currentPose->objects[i]->sphereSource->GetCenter();
-            outputPort = currentPose->objects[i]->sphereSource->GetOutputPort();
+            center = lastPose->objects[i]->sphereSource->GetCenter();
+            outputPort = lastPose->objects[i]->sphereSource->GetOutputPort();
         } else {
             // prompt user of error and return
             std::cout << "Unknown Error!\nPlease try again." << std::endl;
@@ -785,20 +904,19 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
         transform->Translate(center[0], center[1], center[2]);
 
         // apply rotations
-        transform->RotateX(currentPose->objects[i]->rotationX);
-        transform->RotateY(currentPose->objects[i]->rotationY);
-        transform->RotateZ(currentPose->objects[i]->rotationZ);
+        transform->RotateX(lastPose->objects[i]->rotationX);
+        transform->RotateY(lastPose->objects[i]->rotationY);
+        transform->RotateZ(lastPose->objects[i]->rotationZ);
 
         // scale with appropriate values
-        transform->Scale(currentPose->objects[i]->scaleX, currentPose->objects[i]->scaleY, currentPose->objects[i]->scaleZ);
+        transform->Scale(lastPose->objects[i]->scaleX, lastPose->objects[i]->scaleY, lastPose->objects[i]->scaleZ);
 
         // apply final translation
         transform->Translate(-center[0], -center[1], -center[2]);
 
-        // apply transformation matrices
-        transform->Concatenate(pose->prevMatrix);
+        // apply transformation matrix
         transform->PostMultiply();
-        transform->Concatenate(pose->currMatrix);
+        transform->Concatenate(pose->matrix);
 
         // set up transform filter
         vtkSmartPointer<vtkTransformFilter> filter =
@@ -819,6 +937,9 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
 
         // add actor to the right renderer (i = 10)
         attributes->rendererMap[10]->AddActor(data->actor);
+
+        // set filter of the object
+        data->filter = filter;
 
         // add new ObjectData to new PoseData
         pose->objects.push_back(data);
@@ -1350,7 +1471,16 @@ void ModelingWindowStyle::RequestSelected() {
     ChangeRenderer(.86,.86,.86);
 }
 
-void ModelingWindowStyle::OutputSelected() {}
+void ModelingWindowStyle::OutputSelected() {
+    // change renderer to be green
+    ChangeRenderer(0,1,0);
+
+    // call output
+    Output();
+
+    // close the window
+    Interactor->TerminateApp();
+}
 
 void ModelingWindowStyle::LeftArrowSelected() {
     // change pose in the negative direction

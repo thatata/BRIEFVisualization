@@ -606,6 +606,12 @@ vtkLinearTransform.h
 vtkMatrix4x4.h
 /home/thatata/workplace/source/sd/VTK/Common/Transforms/vtkMatrix4x4.h
 
+/home/thatata/workplace/source/sd/VTK/Filters/Core/vtkAppendPolyData.h
+vtkFiltersCoreModule.h
+/home/thatata/workplace/source/sd/VTK/Filters/Core/vtkFiltersCoreModule.h
+vtkPolyDataAlgorithm.h
+/home/thatata/workplace/source/sd/VTK/Filters/Core/vtkPolyDataAlgorithm.h
+
 /home/thatata/workplace/source/sd/VTK/Filters/General/vtkTransformFilter.h
 vtkFiltersGeneralModule.h
 /home/thatata/workplace/source/sd/VTK/Filters/General/vtkFiltersGeneralModule.h
@@ -624,6 +630,18 @@ vtkFiltersSourcesModule.h
 vtkPolyDataAlgorithm.h
 /home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkPolyDataAlgorithm.h
 
+/home/thatata/workplace/source/sd/VTK/IO/Core/vtkWriter.h
+vtkIOCoreModule.h
+/home/thatata/workplace/source/sd/VTK/IO/Core/vtkIOCoreModule.h
+vtkAlgorithm.h
+/home/thatata/workplace/source/sd/VTK/IO/Core/vtkAlgorithm.h
+
+/home/thatata/workplace/source/sd/VTK/IO/Geometry/vtkSTLWriter.h
+vtkIOGeometryModule.h
+/home/thatata/workplace/source/sd/VTK/IO/Geometry/vtkIOGeometryModule.h
+vtkWriter.h
+/home/thatata/workplace/source/sd/VTK/IO/Geometry/vtkWriter.h
+
 /home/thatata/workplace/source/sd/VTK/IO/Image/vtkImageReader2.h
 vtkIOImageModule.h
 /home/thatata/workplace/source/sd/VTK/IO/Image/vtkIOImageModule.h
@@ -635,6 +653,34 @@ vtkIOImageModule.h
 /home/thatata/workplace/source/sd/VTK/IO/Image/vtkIOImageModule.h
 vtkImageReader2.h
 /home/thatata/workplace/source/sd/VTK/IO/Image/vtkImageReader2.h
+
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkDataSetWriter.h
+vtkIOLegacyModule.h
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkIOLegacyModule.h
+vtkDataWriter.h
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkDataWriter.h
+
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkDataWriter.h
+vtkIOLegacyModule.h
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkIOLegacyModule.h
+vtkWriter.h
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkWriter.h
+
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkSimplePointsWriter.h
+vtkIOLegacyModule.h
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkIOLegacyModule.h
+vtkDataSetWriter.h
+/home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkDataSetWriter.h
+
+/home/thatata/workplace/source/sd/VTK/IO/PLY/vtkPLYWriter.h
+vtkIOPLYModule.h
+/home/thatata/workplace/source/sd/VTK/IO/PLY/vtkIOPLYModule.h
+vtkSmartPointer.h
+/home/thatata/workplace/source/sd/VTK/IO/PLY/vtkSmartPointer.h
+vtkWriter.h
+/home/thatata/workplace/source/sd/VTK/IO/PLY/vtkWriter.h
+string
+-
 
 /home/thatata/workplace/source/sd/VTK/Interaction/Style/vtkInteractorStyleTrackballActor.h
 vtkInteractionStyleModule.h
@@ -914,9 +960,19 @@ vtkFiltersCoreModule.h
 
 /home/thatata/workplace/source/sd/qt-build/Filters/Sources/vtkFiltersSourcesModule.h
 
+/home/thatata/workplace/source/sd/qt-build/IO/Core/vtkIOCoreModule.h
+
+/home/thatata/workplace/source/sd/qt-build/IO/Geometry/vtkIOGeometryModule.h
+vtkAutoInit.h
+/home/thatata/workplace/source/sd/qt-build/IO/Geometry/vtkAutoInit.h
+
 /home/thatata/workplace/source/sd/qt-build/IO/Image/vtkIOImageModule.h
 vtkAutoInit.h
 /home/thatata/workplace/source/sd/qt-build/IO/Image/vtkAutoInit.h
+
+/home/thatata/workplace/source/sd/qt-build/IO/Legacy/vtkIOLegacyModule.h
+
+/home/thatata/workplace/source/sd/qt-build/IO/PLY/vtkIOPLYModule.h
 
 /home/thatata/workplace/source/sd/qt-build/Interaction/Style/vtkInteractionStyleModule.h
 vtkRenderingCoreModule.h
@@ -1019,7 +1075,15 @@ vtkImageMapper3D.h
 -
 vtkSphereSource.h
 -
+vtkPLYWriter.h
+-
+vtkSimplePointsWriter.h
+-
+vtkSTLWriter.h
+-
 sstream
+-
+vtkAppendPolyData.h
 -
 modelingwindow.h
 /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/src/modelingwindow.h

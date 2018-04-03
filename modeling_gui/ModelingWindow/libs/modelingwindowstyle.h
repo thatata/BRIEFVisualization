@@ -41,6 +41,9 @@ struct ObjectData {
 
     // transformation values for scale, rotation, translation
     double scaleX = 1, scaleY = 1, scaleZ = 1, rotationX, rotationY, rotationZ, translateX, translateY;
+
+    // pointer to the transform filter
+    vtkSmartPointer<vtkTransformFilter> filter;
 };
 
 // structure of a point
@@ -67,11 +70,8 @@ struct PoseData {
     // store vector of PointData objects
     std::vector<PointData*> points;
 
-    // transformation matrix of this pose
-    vtkSmartPointer<vtkMatrix4x4> currMatrix;
-
-    // transformation matrix of previous pose
-    vtkSmartPointer<vtkMatrix4x4> prevMatrix;
+    // transformation matrix of the current pose
+    vtkSmartPointer<vtkMatrix4x4> matrix;
 
     // pose number
     int poseNum;
@@ -128,9 +128,12 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void DrawPointOntoImage();
         void DrawSphereOntoImage();
         void PerformTransformations(ObjectData *data);
+        vtkSmartPointer<vtkTransform> GetTransform(ObjectData *data);
+        vtkAlgorithmOutput *GetOutputPort(ObjectData *data);
         void CameraZoom(double factor);
         void ChangePose(int direction);
         void RequestNewPose();
+        void Output();
 
         // Utils
         vtkSmartPointer<vtkActor> GetActorUnderClick();

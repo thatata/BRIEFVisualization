@@ -331,11 +331,18 @@ CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o
  /home/thatata/workplace/source/sd/VTK/Common/Transforms/vtkHomogeneousTransform.h
  /home/thatata/workplace/source/sd/VTK/Common/Transforms/vtkLinearTransform.h
  /home/thatata/workplace/source/sd/VTK/Common/Transforms/vtkTransform.h
+ /home/thatata/workplace/source/sd/VTK/Filters/Core/vtkAppendPolyData.h
  /home/thatata/workplace/source/sd/VTK/Filters/General/vtkTransformFilter.h
  /home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkCubeSource.h
  /home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkSphereSource.h
+ /home/thatata/workplace/source/sd/VTK/IO/Core/vtkWriter.h
+ /home/thatata/workplace/source/sd/VTK/IO/Geometry/vtkSTLWriter.h
  /home/thatata/workplace/source/sd/VTK/IO/Image/vtkImageReader2.h
  /home/thatata/workplace/source/sd/VTK/IO/Image/vtkPNGReader.h
+ /home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkDataSetWriter.h
+ /home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkDataWriter.h
+ /home/thatata/workplace/source/sd/VTK/IO/Legacy/vtkSimplePointsWriter.h
+ /home/thatata/workplace/source/sd/VTK/IO/PLY/vtkPLYWriter.h
  /home/thatata/workplace/source/sd/VTK/Interaction/Style/vtkInteractorStyleTrackballActor.h
  /home/thatata/workplace/source/sd/VTK/Rendering/Core/vtkAbstractMapper.h
  /home/thatata/workplace/source/sd/VTK/Rendering/Core/vtkAbstractMapper3D.h
@@ -383,7 +390,11 @@ CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o
  /home/thatata/workplace/source/sd/qt-build/Filters/Core/vtkFiltersCoreModule.h
  /home/thatata/workplace/source/sd/qt-build/Filters/General/vtkFiltersGeneralModule.h
  /home/thatata/workplace/source/sd/qt-build/Filters/Sources/vtkFiltersSourcesModule.h
+ /home/thatata/workplace/source/sd/qt-build/IO/Core/vtkIOCoreModule.h
+ /home/thatata/workplace/source/sd/qt-build/IO/Geometry/vtkIOGeometryModule.h
  /home/thatata/workplace/source/sd/qt-build/IO/Image/vtkIOImageModule.h
+ /home/thatata/workplace/source/sd/qt-build/IO/Legacy/vtkIOLegacyModule.h
+ /home/thatata/workplace/source/sd/qt-build/IO/PLY/vtkIOPLYModule.h
  /home/thatata/workplace/source/sd/qt-build/Interaction/Style/vtkInteractionStyleModule.h
  /home/thatata/workplace/source/sd/qt-build/Rendering/Core/vtkRenderingCoreModule.h
  /home/thatata/workplace/source/sd/qt-build/Utilities/KWIML/vtk_kwiml.h
