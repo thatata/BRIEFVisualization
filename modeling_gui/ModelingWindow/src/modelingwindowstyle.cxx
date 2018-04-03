@@ -25,6 +25,8 @@
 #include <vtkSimplePointsWriter.h>
 #include <vtkSTLWriter.h>
 #include <sstream>
+#include <vtkAppendPolyData.h>
+#include <vtkCleanPolyData.h>
 
 #include "modelingwindow.h"
 #include "modelingwindowstyle.h"
@@ -734,7 +736,41 @@ void ModelingWindowStyle::Output() {
 
     // combine objects into one cohesive model
     if (combined == 0) {
+        // initialize append poly data object to attach the objects
+        vtkSmartPointer<vtkAppendPolyData> appendFilter =
+            vtkSmartPointer<vtkAppendPolyData>::New();
 
+        // loop through each object in the final pose
+        PoseData *lastPose = poses[poses.size() - 1];
+
+        for (int i = 0; i < lastPose->objects.size(); i++) {
+            // grab the poly data from the filter
+            vtkPolyData *data = lastPose->objects[i]->filter->GetPolyDataOutput();
+
+            // append to the filter
+            appendFilter->AddInputData(data);
+        }
+
+        // initialize clean poly data object to remove duplicate points
+        vtkSmartPointer<vtkCleanPolyData> cleanFilter =
+            vtkSmartPointer<vtkCleanPolyData>::New();
+        cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
+        cleanFilter->Update();
+
+        // set the filename, output, and write to file depending on the specified format
+        if (plyWriter) {
+            plyWriter->SetFileName("combined.ply");
+            plyWriter->SetInputConnection(cleanFilter->GetOutputPort());
+            plyWriter->Write();
+        } else if (xyzWriter) {
+            xyzWriter->SetFileName("combined.xyz");
+            xyzWriter->SetInputConnection(cleanFilter->GetOutputPort());
+            xyzWriter->Write();
+        } else if (stlWriter) {
+            stlWriter->SetFileName("combined.stl");
+            stlWriter->SetInputConnection(cleanFilter->GetOutputPort());
+            stlWriter->Write();
+        }
     } else {
         // otherwise, output each object into its own file
 
@@ -743,20 +779,31 @@ void ModelingWindowStyle::Output() {
 
         // loop through each object in the pose to output
         for (int i = 0; i < lastPose->objects.size(); i++) {
-            // get filename of the first object to output
-            std::stringstream filename;
-            filename << i << ".ply";
-
             // set the filename, output, and write to file depending on the specified format
             if (plyWriter) {
+                // create filename string
+                std::stringstream filename;
+                filename << i << ".ply";
+
+                // set filename, input, and write file
                 plyWriter->SetFileName(filename.str().c_str());
                 plyWriter->SetInputConnection(lastPose->objects[i]->filter->GetOutputPort());
                 plyWriter->Write();
             } else if (xyzWriter) {
+                // create filename string
+                std::stringstream filename;
+                filename << i << ".xyz";
+
+                // set filename, input, and write file
                 xyzWriter->SetFileName(filename.str().c_str());
                 xyzWriter->SetInputConnection(lastPose->objects[i]->filter->GetOutputPort());
                 xyzWriter->Write();
             } else if (stlWriter) {
+                // create filename string
+                std::stringstream filename;
+                filename << i << ".stl";
+
+                // set filename, input, and write file
                 stlWriter->SetFileName(filename.str().c_str());
                 stlWriter->SetInputConnection(lastPose->objects[i]->filter->GetOutputPort());
                 stlWriter->Write();

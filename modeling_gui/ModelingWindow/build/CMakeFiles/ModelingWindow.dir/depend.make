@@ -331,6 +331,7 @@ CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workp
 CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Common/Transforms/vtkLinearTransform.h
 CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Common/Transforms/vtkTransform.h
 CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Filters/Core/vtkAppendPolyData.h
+CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Filters/Core/vtkCleanPolyData.h
 CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Filters/General/vtkTransformFilter.h
 CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkCubeSource.h
 CMakeFiles/ModelingWindow.dir/src/modelingwindowstyle.cxx.o: /home/thatata/workplace/source/sd/VTK/Filters/Sources/vtkSphereSource.h

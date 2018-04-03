@@ -612,6 +612,12 @@ vtkFiltersCoreModule.h
 vtkPolyDataAlgorithm.h
 /home/thatata/workplace/source/sd/VTK/Filters/Core/vtkPolyDataAlgorithm.h
 
+/home/thatata/workplace/source/sd/VTK/Filters/Core/vtkCleanPolyData.h
+vtkFiltersCoreModule.h
+/home/thatata/workplace/source/sd/VTK/Filters/Core/vtkFiltersCoreModule.h
+vtkPolyDataAlgorithm.h
+/home/thatata/workplace/source/sd/VTK/Filters/Core/vtkPolyDataAlgorithm.h
+
 /home/thatata/workplace/source/sd/VTK/Filters/General/vtkTransformFilter.h
 vtkFiltersGeneralModule.h
 /home/thatata/workplace/source/sd/VTK/Filters/General/vtkFiltersGeneralModule.h
@@ -1084,6 +1090,8 @@ vtkSTLWriter.h
 sstream
 -
 vtkAppendPolyData.h
+-
+vtkCleanPolyData.h
 -
 modelingwindow.h
 /home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/src/modelingwindow.h
