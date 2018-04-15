@@ -27,9 +27,20 @@
 #include <sstream>
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
+#include <vtkInteractorStyleRubberBandZoom.h>
+#include <vtkInteractorStyleRubberBandPick.h>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <boost/thread/thread.hpp>
+#include <pcl/io/pcd_io.h>
 
 #include "modelingwindow.h"
 #include "modelingwindowstyle.h"
+
+//using namespace cv;
+typedef pcl::PointXYZ PointType;
 
 ModelingWindowStyle::ModelingWindowStyle() {
     // initialize struct for attributes
@@ -49,6 +60,15 @@ ModelingWindowStyle::ModelingWindowStyle() {
     attributes->Stretch = false;
     attributes->StretchZ = false;
     attributes->Zoom = false;
+
+    // set values for bounding box vars
+    attributes->DrawBox = false;
+    attributes->DrawingBox = false;
+    attributes->Snap = false;
+    attributes->PointsDrawn = 0;
+    attributes->StartPosition[0] = attributes->StartPosition[1] = 0;
+    attributes->EndPosition[0] = attributes->EndPosition[1] = 0;
+    attributes->PixelArray = vtkUnsignedCharArray::New();
 
     // set default value for pose to zoom (-1)
     attributes->poseToZoom = -1;
@@ -105,6 +125,40 @@ void ModelingWindowStyle::OnKeyPress() {
 }
 
 void ModelingWindowStyle::OnLeftButtonUp() {
+    // check if user was drawing bounding box
+    if (attributes->DrawingBox) {
+        // if so, end drawing
+        attributes->DrawingBox = false;
+
+        // if start and end positions aren't the same, snap!
+        if ((attributes->StartPosition[0] != attributes->EndPosition[0]) ||
+            (attributes->StartPosition[1] != attributes->EndPosition[1])) {
+            // set flag to true
+            attributes->Snap = true;
+
+            // save start and end positions (in screen coords) for snapping
+            attributes->StartBox[0] = attributes->StartPosition[0];
+            attributes->StartBox[1] = attributes->StartPosition[1];
+            attributes->EndBox[0] = attributes->EndPosition[0];
+            attributes->EndBox[1] = attributes->EndPosition[1];
+
+            // prompt user to identify a plane on the object, and click on
+            // (1) the bottom left corner
+            std::cout << "\n----LET'S SNAP!---- \n\nIdentify a plane on the object to model, "
+                      << "and click on the bottom left corner to start." << std::endl;
+        }
+
+        // remove bounding box on the window
+        attributes->StartPosition[0] = attributes->StartPosition[1] = 0;
+        attributes->EndPosition[0] = attributes->EndPosition[1] = 0;
+        RedrawBoundingBox();
+
+        // change draw flag since the bounding box only happens once
+        attributes->DrawBox = false;
+
+        return;
+    }
+
     // check if moving, if so finish
     if (attributes->Moving) {
         // end pan
@@ -121,6 +175,383 @@ void ModelingWindowStyle::OnLeftButtonUp() {
         data->translateX = screenCoords[0];
         data->translateY = screenCoords[1];
     }
+}
+
+void ModelingWindowStyle::OnMouseMove() {
+    // check if user is drawing bounding box
+    if (!attributes->DrawingBox) {
+        // if not, let parent class handle it
+        this->Superclass::OnMouseMove();
+
+        return;
+    }
+
+    // otherwise, update end position coordinates
+    attributes->EndPosition[0] = this->Interactor->GetEventPosition()[0];
+    attributes->EndPosition[1] = this->Interactor->GetEventPosition()[1];
+    int *size = this->Interactor->GetRenderWindow()->GetSize();
+
+    // update position values depending on size of the render window
+    if (attributes->EndPosition[0] > (size[0]-1)) {
+        attributes->EndPosition[0] = size[0]-1;
+    }
+    if (attributes->EndPosition[0] < 0) {
+        attributes->EndPosition[0] = 0;
+    }
+    if (attributes->EndPosition[1] > (size[1]-1)) {
+        attributes->EndPosition[1] = size[1]-1;
+    }
+    if (attributes->EndPosition[1] < 0) {
+        attributes->EndPosition[1] = 0;
+    }
+
+    // redraw bounding box
+    RedrawBoundingBox();
+}
+
+void ModelingWindowStyle::PromptBoundingBox() {
+    // prompt user to draw a bounding box around the cube to model
+    std::cout << "Cube Selected! \n\nSelect the cube to model by click and dragging a box around the cube."
+              << std::endl;
+
+    // set bounding box flag to true
+    attributes->DrawBox = true;
+}
+
+void ModelingWindowStyle::RedrawBoundingBox() {
+    // update the rubber band on the screen
+    int *size = this->Interactor->GetRenderWindow()->GetSize();
+
+    // copy the original pixel array
+    vtkUnsignedCharArray *tmpPixelArray = vtkUnsignedCharArray::New();
+    tmpPixelArray->DeepCopy(attributes->PixelArray);
+    unsigned char *pixels = tmpPixelArray->GetPointer(0);
+
+    // get the max coordinate for the x coordinate of the pixel array
+    int min[2], max[2];
+    min[0] = attributes->StartPosition[0] <= attributes->EndPosition[0] ?
+             attributes->StartPosition[0] : attributes->EndPosition[0];
+
+    // check if min is out of bounds
+    if (min[0] < 0) { min[0] = 0; }
+    if (min[0] >= size[0]) { min[0] = size[0] - 1; }
+
+    // repeat process for y coordinate
+    min[1] = attributes->StartPosition[1] <= attributes->EndPosition[1] ?
+             attributes->StartPosition[1] : attributes->EndPosition[1];
+
+    // check OOB
+    if (min[1] < 0) { min[1] = 0; }
+    if (min[1] >= size[1]) { min[1] = size[1] - 1; }
+
+    // repeat process for maximum coordinate
+    max[0] = attributes->EndPosition[0] > attributes->StartPosition[0] ?
+             attributes->EndPosition[0] : attributes->StartPosition[0];
+
+    // check OOB
+    if (max[0] < 0) { max[0] = 0; }
+    if (max[0] >= size[0]) { max[0] = size[0] - 1; }
+
+    // repeat for y
+    max[1] = attributes->EndPosition[1] > attributes->StartPosition[1] ?
+             attributes->EndPosition[1] : attributes->StartPosition[1];
+
+    if (max[1] < 0) { max[1] = 0; }
+    if (max[1] >= size[1]) { max[1] = size[1] - 1; }
+
+    // loop through minimum and maximum coordinates for x/y to update/redraw pixel array
+    int i;
+    for (i = min[0]; i <= max[0]; i++) {
+        pixels[4*(min[1]*size[0]+i)] = 255 ^ pixels[4*(min[1]*size[0]+i)];
+        pixels[4*(min[1]*size[0]+i)+1] = 255 ^ pixels[4*(min[1]*size[0]+i)+1];
+        pixels[4*(min[1]*size[0]+i)+2] = 255 ^ pixels[4*(min[1]*size[0]+i)+2];
+        pixels[4*(max[1]*size[0]+i)] = 255 ^ pixels[4*(max[1]*size[0]+i)];
+        pixels[4*(max[1]*size[0]+i)+1] = 255 ^ pixels[4*(max[1]*size[0]+i)+1];
+        pixels[4*(max[1]*size[0]+i)+2] = 255 ^ pixels[4*(max[1]*size[0]+i)+2];
+    }
+    for (i = min[1]+1; i < max[1]; i++)
+    {
+        pixels[4*(i*size[0]+min[0])] = 255 ^ pixels[4*(i*size[0]+min[0])];
+        pixels[4*(i*size[0]+min[0])+1] = 255 ^ pixels[4*(i*size[0]+min[0])+1];
+        pixels[4*(i*size[0]+min[0])+2] = 255 ^ pixels[4*(i*size[0]+min[0])+2];
+        pixels[4*(i*size[0]+max[0])] = 255 ^ pixels[4*(i*size[0]+max[0])];
+        pixels[4*(i*size[0]+max[0])+1] = 255 ^ pixels[4*(i*size[0]+max[0])+1];
+        pixels[4*(i*size[0]+max[0])+2] = 255 ^ pixels[4*(i*size[0]+max[0])+2];
+    }
+
+    // set proper pixel data and update
+    this->Interactor->GetRenderWindow()->SetRGBACharPixelData(0, 0, size[0]-1, size[1]-1, pixels, 0);
+    this->Interactor->GetRenderWindow()->Frame();
+
+    tmpPixelArray->Delete();
+}
+
+void ModelingWindowStyle::Snap() {
+    // IMPLEMENTING KABSCH ALGORITHM TO FIND OPTIMAL ROTATION BETWEEN SETS OF POINTS
+
+    // STEP 1: get center x,y position (in sc) of the new cube from the bounding box positions (z = 0)
+
+    // find lower left, upper right corners and center (make sure bounding box doesn't
+    // exceed the render window dimensions)
+    int center[2];
+    int *size = this->Interactor->GetRenderWindow()->GetSize();
+    int min[2], max[2];
+
+    // get min x,y values
+    min[0] = attributes->StartBox[0] <= attributes->EndBox[0] ?
+      attributes->StartBox[0] : attributes->EndBox[0];
+    if (min[0] < 0) { min[0] = 0; }
+    if (min[0] >= size[0]) { min[0] = size[0] - 2; }
+
+    min[1] = attributes->StartBox[1] <= attributes->EndBox[1] ?
+      attributes->StartBox[1] : attributes->EndBox[1];
+    if (min[1] < 0) { min[1] = 0; }
+    if (min[1] >= size[1]) { min[1] = size[1] - 2; }
+
+    // get max x,y values
+    max[0] = attributes->EndBox[0] > attributes->StartBox[0] ?
+      attributes->EndBox[0] : attributes->StartBox[0];
+    if (max[0] < 0) { max[0] = 0; }
+    if (max[0] >= size[0]) { max[0] = size[0] - 2; }
+
+    max[1] = attributes->EndBox[1] > attributes->StartBox[1] ?
+      attributes->EndBox[1] : attributes->StartBox[1];
+    if (max[1] < 0) { max[1] = 0; }
+    if (max[1] >= size[1]) { max[1] = size[1] - 2; }
+
+    // set center position by averaging min/max values
+    center[0] = (min[0] + max[0])/2;
+    center[1] = (min[1] + max[1])/2;
+
+    // STEP 2: calculate the side length of the cube (use shortest x or y length based on center)
+    int sideLength = (max[0] - min[0]) > (max[1] - min[1]) ?
+                    (max[1] - min[1]) : (max[0] - min[0]);
+
+    // STEP 3: draw a cube at the center with side lengths
+    DrawCubeOntoImage(center, sideLength);
+
+    // STEP 4: get the bounds of the actor of the drawn cube to calculate the
+    // corresponding corners of the front face of the cube
+    double *bounds = currentPose->objects[0]->actor->GetBounds();
+
+    // Note: bounds are (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax)
+
+    // get the bottom left corner coordinates (xmin,ymin,zmax)
+    double blCube[3];
+    blCube[0] = bounds[0];
+    blCube[1] = bounds[2];
+    blCube[2] = bounds[5];
+
+    // get the top left corner coordinates (xmin,ymax,zmax)
+    double tlCube[3];
+    tlCube[0] = bounds[0];
+    tlCube[1] = bounds[3];
+    tlCube[2] = bounds[5];
+
+    // get the top right corner coordinates (xmax,ymax,zmax)
+    double trCube[3];
+    trCube[0] = bounds[1];
+    trCube[1] = bounds[3];
+    trCube[2] = bounds[5];
+
+    // get the bottom right corner coordinates (xmax,ymin,zmax)
+    double brCube[3];
+    brCube[0] = bounds[1];
+    brCube[1] = bounds[2];
+    brCube[2] = bounds[5];
+
+    // STEP 5: get x,y data from the points drawn
+
+    // first point drawn is bottom left corner (idx = 0)
+    double blDrawn[3];
+    currentPose->points[0]->points->GetPoint(0, blDrawn);
+
+    // second point drawn is top left corner (idx = 1)
+    double tlDrawn[3];
+    currentPose->points[1]->points->GetPoint(0, tlDrawn);
+
+    // third point drawn is top right corner (idx = 2)
+    double trDrawn[3];
+    currentPose->points[2]->points->GetPoint(0, trDrawn);
+
+    // fourth point drawn is the bottom right corner (idx = 3)
+    double brDrawn[3];
+    currentPose->points[3]->points->GetPoint(0, brDrawn);
+
+    // STEP 6: get the depth value from the point cloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>& point_cloud = *point_cloud_ptr;
+
+    // attempt to load the PCD
+    if (pcl::io::loadPCDFile("0000.pcd", point_cloud) == -1) {
+        // error
+        return;
+    }
+
+    // use the x,y values of the drawn points to get the corresponding point in the point cloud
+    pcl::PointXYZ bl = point_cloud.at(blDrawn[0], blDrawn[1]);
+    pcl::PointXYZ tl = point_cloud.at(tlDrawn[0], tlDrawn[1]);
+    pcl::PointXYZ tr = point_cloud.at(trDrawn[0], trDrawn[1]);
+    pcl::PointXYZ br = point_cloud.at(brDrawn[0], brDrawn[1]);
+
+    // set z values for each drawn point
+    blDrawn[2] = bl.z;
+    tlDrawn[2] = tl.z;
+    trDrawn[2] = tr.z;
+    brDrawn[2] = br.z;
+
+    // get max z coordinate to calculate relative depth
+    double temp = bl.z > tl.z ? bl.z : tl.z;
+    temp = temp > tr.z ? temp : tr.z;
+    double maxZ = temp > br.z ? temp : br.z;
+
+    // set the relative z coordinate based on max z
+    blDrawn[2] -= maxZ;
+    tlDrawn[2] -= maxZ;
+    trDrawn[2] -= maxZ;
+    brDrawn[2] -= maxZ;
+
+    // STEP 6: find centroids for the two sets of points (cube = A, drawn = B)
+    double centA[3], centB[3];
+    for (int i = 0; i < 3; i++) {
+        double aVal = (blCube[i] + tlCube[i] + trCube[i] + brCube[i]) / 4;
+        double bVal = (blDrawn[i] + tlDrawn[i] + trDrawn[i] + brDrawn[i]) / 4;
+
+        centA[i] = aVal;
+        centB[i] = bVal;
+    }
+
+    // STEP 7: recenter each point in both sets so centroids are at the origin
+    blCube[0] -= centA[0];
+    tlCube[0] -= centA[0];
+    trCube[0] -= centA[0];
+    brCube[0] -= centA[0];
+
+    blCube[1] -= centA[1];
+    tlCube[1] -= centA[1];
+    trCube[1] -= centA[1];
+    brCube[1] -= centA[1];
+
+    blCube[2] -= centA[2];
+    tlCube[2] -= centA[2];
+    trCube[2] -= centA[2];
+    brCube[2] -= centA[2];
+
+    blDrawn[0] -= centB[0];
+    tlDrawn[0] -= centB[0];
+    trDrawn[0] -= centB[0];
+    brDrawn[0] -= centB[0];
+
+    blDrawn[1] -= centB[1];
+    tlDrawn[1] -= centB[1];
+    trDrawn[1] -= centB[1];
+    brDrawn[1] -= centB[1];
+
+    blDrawn[2] -= centB[2];
+    tlDrawn[2] -= centB[2];
+    trDrawn[2] -= centB[2];
+    brDrawn[2] -= centB[2];
+
+    // STEP 8: Create Mat objects using these values
+    cv::Mat a = (cv::Mat_<double>(3,4) << blCube[0], tlCube[0], trCube[0], brCube[0], blCube[1], tlCube[1], trCube[1], brCube[1], blCube[2], tlCube[2], trCube[2], brCube[2]);
+    cv::Mat b = (cv::Mat_<double>(3,4) << blDrawn[0], tlDrawn[0], trDrawn[0], brDrawn[0], blDrawn[1], tlDrawn[1], trDrawn[1], brDrawn[1], blDrawn[2], tlDrawn[2], trDrawn[2], brDrawn[2]);
+
+    // STEP 9: transpose B to calculate matrix H (H = A*Bt) for SVD
+    b = b.t();
+    cv::Mat h = a * b;
+
+    // STEP 10: plug H into SVD to find [U,S,Vt], then calculate R (R = VUt)
+    cv::Mat s,u,vt;
+    cv::SVD::compute(h,s,u,vt);
+    cv::Mat r = vt.t() * u.t();
+
+    // calculate the translation vector (t = -R*centA + centB)
+    cv::Mat negCentroidA = (cv::Mat_<double>(3,1) << -centA[0], -centA[1], -centA[2]);
+    cv::Mat centroidB = (cv::Mat_<double>(3,1) << centB[0], centB[1], centB[2]);
+    cv::Mat t = (r * negCentroidA) + centroidB;
+
+    double tX = *t.ptr<double>(0);
+    double tY = *t.ptr<double>(1);
+
+    // STEP 11: now that we have the optimal rotation matrix, apply it to the cube
+    // convert matrix of uchar data to double data
+    cv::Mat rDouble;
+    r.convertTo(rDouble, CV_64F);
+
+    double rData[9];
+    double *vals[rDouble.rows];
+    int idx = 0;
+
+    // loop through rows/columns of the double matrix
+    for (int i = 0; i < rDouble.rows; ++i) {
+        vals[i] = rDouble.ptr<double>(i);
+
+        for (int j = 0; j < rDouble.cols; ++j) {
+            // save to the rData array and increment idx
+            rData[idx] = vals[i][j];
+            idx++;
+        }
+    }
+
+    // create 4x4 matrix to represent Transformation Matrix
+    vtkSmartPointer<vtkMatrix4x4> matrix =
+        vtkSmartPointer<vtkMatrix4x4>::New();
+
+    // reset idx for iterating through array
+    idx = 0;
+
+    // use r matrix to fill out 4x4 matrix (last column --> 0 0 0 1)
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            // check if the last row is reached
+            if (i == 3) {
+                // set last line for homogeneous coords
+                matrix->SetElement(i, 0, 0);
+                matrix->SetElement(i, 1, 0);
+                matrix->SetElement(i, 2, 0);
+                matrix->SetElement(i, 3, 1);
+                break;
+            } else if (j == 3) { // check for last column
+                // set element to 0
+                matrix->SetElement(i, j, 0);
+            } else {
+                // otherwise, set the next element in the matrix and increment idx
+                matrix->SetElement(i, j, rData[idx]);
+                idx++;
+            }
+        }
+    }
+
+    // create transform object and apply it to the cube
+    vtkSmartPointer<vtkTransform> transform =
+        vtkSmartPointer<vtkTransform>::New();
+
+    // concatenate matrix
+    transform->Concatenate(matrix);
+    transform->Translate(tX, tY, 0);
+
+    // set up transform filter
+    vtkSmartPointer<vtkTransformFilter> filter =
+        vtkSmartPointer<vtkTransformFilter>::New();
+
+    // add cube and transform, and update
+    filter->SetInputConnection(currentPose->objects[0]->cubeSource->GetOutputPort());
+    filter->SetTransform(transform);
+    filter->Update();
+
+    // set up new mapper
+    vtkSmartPointer<vtkPolyDataMapper> mapper =
+        vtkSmartPointer<vtkPolyDataMapper>::New();
+    mapper->SetInputConnection(filter->GetOutputPort());
+
+    // set mapper to existing actor
+    currentPose->objects[0]->actor->SetMapper(mapper);
+
+    // save transform filter in ObjectData object
+    currentPose->objects[0]->filter = filter;
+
+    // update window
+    this->Interactor->Render();
 }
 
 void ModelingWindowStyle::MoveObject() {
@@ -356,12 +787,56 @@ void ModelingWindowStyle::DrawCubeOntoImage() {
     currentPose->objects.push_back(object);
 }
 
+void ModelingWindowStyle::DrawCubeOntoImage(int *center, int sideLength) {
+    // get center position in world coordinates
+    double *centerWc = GetClickPosition(center[0], center[1]);
+
+    // set z coordinate to 0
+    centerWc[2] = 0.0;
+
+    // Create a cube
+    vtkSmartPointer<vtkCubeSource> cubeSource =
+      vtkSmartPointer<vtkCubeSource>::New();
+
+    // set center in world coordinates
+    cubeSource->SetCenter(centerWc);
+
+    // set length/width/height from parameters
+    cubeSource->SetXLength(sideLength);
+    cubeSource->SetYLength(sideLength);
+    cubeSource->SetZLength(sideLength);
+
+    // map cube source to data set mapper
+    vtkSmartPointer<vtkDataSetMapper> mapper =
+      vtkSmartPointer<vtkDataSetMapper>::New();
+    mapper->SetInputConnection(cubeSource->GetOutputPort());
+
+    // create actor and set mapper
+    vtkSmartPointer<vtkActor> actor =
+      vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper(mapper);
+
+    // add actor to the current renderer
+    this->CurrentRenderer->AddActor(actor);
+
+    // create ObjectData object to store cube source and actor
+    ObjectData *object = new ObjectData();
+    object->actor = actor;
+    object->cubeSource = cubeSource;
+
+    // add to vector of objects
+    currentPose->objects.push_back(object);
+}
+
 void ModelingWindowStyle::DrawPointOntoImage() {
     // create PointData object
     PointData *data = new PointData();
 
     // get click position
     double *position = GetClickPosition();
+
+    // change z coordinate to 0
+    position[2] = 0;
 
     // initialize points and insert point
     data->points = vtkSmartPointer<vtkPoints>::New();
@@ -390,6 +865,9 @@ void ModelingWindowStyle::DrawPointOntoImage() {
 
     // add actor to the current renderer
     this->CurrentRenderer->AddActor(data->actor);
+
+    // add point data to the pose
+    currentPose->points.push_back(data);
 }
 
 void ModelingWindowStyle::DrawSphereOntoImage() {
@@ -572,7 +1050,19 @@ double *ModelingWindowStyle::GetClickPosition() {
     int x = this->Interactor->GetEventPosition()[0];
     int y = this->Interactor->GetEventPosition()[1];
 
+    // use picker to select correct pixel location
+    this->Interactor->GetPicker()->Pick(x,
+                                        y,
+                                        0, // always zero
+                                        this->CurrentRenderer);
 
+    // get the pick position
+    double *position = this->Interactor->GetPicker()->GetPickPosition();
+
+    return position;
+}
+
+double *ModelingWindowStyle::GetClickPosition(int x, int y) {
     // use picker to select correct pixel location
     this->Interactor->GetPicker()->Pick(x,
                                         y,
@@ -1141,7 +1631,7 @@ vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileNam
     // use r matrix and t vector to fill out 4x4 matrix
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            // check if the last column is reached
+            // check if the last row is reached
             if (i == 3) {
                 // set last line for homogeneous coords
                 matrix->SetElement(i, 0, 0);
@@ -1241,6 +1731,69 @@ void ModelingWindowStyle::PerformAction() {
 }
 
 void ModelingWindowStyle::LeftSceneSelected() {
+    // check if user is drawing a bounding box
+    if (attributes->DrawBox) {
+        // if so, set drawing flag to true
+        attributes->DrawingBox = true;
+
+        // set start and end positions
+        attributes->StartPosition[0] = this->Interactor->GetEventPosition()[0];
+        attributes->StartPosition[1] = this->Interactor->GetEventPosition()[1];
+        attributes->EndPosition[0] = attributes->StartPosition[0];
+        attributes->EndPosition[1] = attributes->StartPosition[1];
+
+        // initialize pixel array
+        attributes->PixelArray->Initialize();
+        attributes->PixelArray->SetNumberOfComponents(4);
+        int *size = this->Interactor->GetRenderWindow()->GetSize();
+        attributes->PixelArray->SetNumberOfTuples(size[0] * size[1]);
+
+        // set data from the render window
+        this->Interactor->GetRenderWindow()->GetRGBACharPixelData(0,0,size[0]-1, size[1]-1,1,attributes->PixelArray);
+
+        return;
+    }
+
+    // check if snapping is occurring
+    if (attributes->Snap) {
+        // draw point for the user
+        DrawPointOntoImage();
+
+        this->CurrentRenderer->ResetCamera();
+        this->Interactor->Render();
+
+        // check how many points have been drawn
+        if (attributes->PointsDrawn == 0) {
+            // none --> top left corner next
+            std::cout << "Bottom Left Corner point drawn."
+                      << "\nClick on the top left corner." << std::endl;
+        } else if (attributes->PointsDrawn == 1) {
+            // 1 --> top right corner next
+            std::cout << "Top Left Corner point drawn."
+                      << "\nClick on the top right corner." << std::endl;
+        } else if (attributes->PointsDrawn == 2) {
+            // 2 --> bottom right corner next
+            std::cout << "Top Right Corner point drawn."
+                      << "\nClick on the bottom right corner." << std::endl;
+        } else {
+            // we have all the points required, so draw cube and snap!
+            std::cout << "Bottom Right Corner point drawn."
+                      << "\n\n------Snapping------" << std::endl;
+
+            // call Snap function
+            Snap();
+
+            // change flag back to false and reset points drawn
+            attributes->Snap = false;
+            attributes->PointsDrawn = 0;
+        }
+
+        // increment points drawn
+        attributes->PointsDrawn++;
+
+        return;
+    }
+
     // check if draw is selected
     if (attributes->Draw) {
         // check if cube is selected, if so draw a cube
@@ -1248,15 +1801,22 @@ void ModelingWindowStyle::LeftSceneSelected() {
             // if so, draw cube
             DrawCubeOntoImage();
 
+            // reset camera
+            this->CurrentRenderer->ResetCamera();
+
             // re-render
             this->Interactor->Render();
 
             // done, so return
             return;
+
         } // check if point is selected
         else if (attributes->Point) {
             // draw point
             DrawPointOntoImage();
+
+            // reset camera
+            this->CurrentRenderer->ResetCamera();
 
             // re-render
             this->Interactor->Render();
@@ -1267,6 +1827,9 @@ void ModelingWindowStyle::LeftSceneSelected() {
         else if (attributes->Sphere) {
             // draw sphere
             DrawSphereOntoImage();
+
+            // reset camera
+            this->CurrentRenderer->ResetCamera();
 
             // re-render
             this->Interactor->Render();
@@ -1323,12 +1886,18 @@ void ModelingWindowStyle::CubeSelected() {
 
         // change renderer to be gray
         ChangeRenderer(.86,.86,.86);
+
+        // change bounding box flag to false
+        attributes->DrawBox = false;
     } else {
         // change to true
         attributes->Cube = true;
 
         // change renderer to be green
         ChangeRenderer(0,1,0);
+
+        // prompt user to draw bounding box around the cube
+        PromptBoundingBox();
     }
 }
 

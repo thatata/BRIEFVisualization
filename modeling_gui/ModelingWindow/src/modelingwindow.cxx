@@ -206,7 +206,12 @@ std::vector<vtkSmartPointer<vtkPNGReader>> ModelingWindow::GetReaders(int numIma
 
         // get filename
         std::stringstream filename;
-        filename << i << ".png";
+
+        if (i < 10) {
+            filename << "000" << i << ".png";
+        } else {
+            filename << "00" << i << ".png";
+        }
 
         // read image by setting filename
         reader->SetFileName(filename.str().c_str());

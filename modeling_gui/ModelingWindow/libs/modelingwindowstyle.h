@@ -93,6 +93,17 @@ struct WindowStyleAttributes {
     bool StretchZ;
     bool Zoom;
 
+    // vars for drawing a bounding box around the object/snapping
+    bool DrawingBox;
+    bool DrawBox;
+    bool Snap;
+    int PointsDrawn;
+    int StartPosition[2];
+    int EndPosition[2];
+    vtkUnsignedCharArray *PixelArray;
+    int StartBox[2];
+    int EndBox[2];
+
     // value to determine which pose to zoom in/out
     int poseToZoom;
 
@@ -118,6 +129,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void OnLeftButtonDown();
         void OnKeyPress();
         void OnLeftButtonUp();
+        void OnMouseMove();
 
         // Operations
         void MoveObject();
@@ -125,6 +137,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void StretchObject();
         void ScaleObject();
         void DrawCubeOntoImage();
+        void DrawCubeOntoImage(int *center, int sideLength);
         void DrawPointOntoImage();
         void DrawSphereOntoImage();
         void PerformTransformations(ObjectData *data);
@@ -134,11 +147,13 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void ChangePose(int direction);
         void RequestNewPose();
         void Output();
+        void Snap();
 
         // Utils
         vtkSmartPointer<vtkActor> GetActorUnderClick();
         void ChangeRenderer(double r, double g, double b);
         double *GetClickPosition();
+        double *GetClickPosition(int x, int y);
         ObjectData *GetObject(vtkSmartPointer<vtkActor> actor);
         vtkSmartPointer<vtkMatrix4x4> GetMatrix(std::string fileName);
         void CreateNewPose(int newPose);
@@ -147,6 +162,8 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void UpdateRightPoseEntities(PoseData *pose);
         void DeselectActor();
         void SelectActor(vtkSmartPointer<vtkActor> actor);
+        void PromptBoundingBox();
+        void RedrawBoundingBox();
 
         // Button handling
         void PerformAction();
