@@ -209,9 +209,31 @@ void ModelingWindowStyle::OnMouseMove() {
     RedrawBoundingBox();
 }
 
+void ModelingWindowStyle::PromptSnapping() {
+    // prompt user if they'd like to perform snapping on the cube
+    std::cout << "Cube Selected! \n\nWould you like to perform snapping (0 = no, 1 = yes)? ";
+
+    // get the response from the console
+    int response;
+    std::cin >> response;
+
+    // perform based on response
+    if (response == 1) {
+        // set snap attribute flag to true
+        attributes->Snap = true;
+
+        // snap! --> prompt bounding box
+        PromptBoundingBox();
+    } else {
+        // otherwise, tell user to draw manually
+        std::cout << "\nNo snapping! :(\n\nUse the manipulation tools to draw and manipulate the objects manually."
+                  << std::endl;
+    }
+}
+
 void ModelingWindowStyle::PromptBoundingBox() {
     // prompt user to draw a bounding box around the cube to model
-    std::cout << "Cube Selected! \n\nSelect the cube to model by click and dragging a box around the cube."
+    std::cout << "\nSnapping Selected! \n\nSelect the cube to model by click and dragging a box around the cube."
               << std::endl;
 
     // set bounding box flag to true
@@ -511,9 +533,15 @@ void ModelingWindowStyle::Snap() {
                 matrix->SetElement(i, 2, 0);
                 matrix->SetElement(i, 3, 1);
                 break;
-            } else if (j == 3) { // check for last column
-                // set element to 0
-                matrix->SetElement(i, j, 0);
+            } else if (j == 3) { // check for last column to set translation vector
+                // set element depending on which row we're on
+                if (i == 0) {
+                    matrix->SetElement(i, j, tX);
+                } else if (i == 1) {
+                    matrix->SetElement(i, j, tY);
+                } else {
+                    matrix->SetElement(i, j, 0);
+                }
             } else {
                 // otherwise, set the next element in the matrix and increment idx
                 matrix->SetElement(i, j, rData[idx]);
@@ -528,7 +556,6 @@ void ModelingWindowStyle::Snap() {
 
     // concatenate matrix
     transform->Concatenate(matrix);
-    transform->Translate(tX, tY, 0);
 
     // set up transform filter
     vtkSmartPointer<vtkTransformFilter> filter =
@@ -549,6 +576,24 @@ void ModelingWindowStyle::Snap() {
 
     // save transform filter in ObjectData object
     currentPose->objects[0]->filter = filter;
+
+    // save snapping transformation matrix
+    currentPose->objects[0]->snapMatrix = matrix;
+
+    // remove drawn points from the window
+    for (int i = 0; i < 4; i++) {
+        // retrieve point from the vector of point data objects
+        PointData *point = currentPose->points[i];
+
+        // remove actor from the current renderer
+        this->CurrentRenderer->RemoveActor(point->actor);
+
+        // if last point is reached, remove all points from the vector
+        if (i == 3) {
+            // erase
+            currentPose->points.erase(currentPose->points.begin(), currentPose->points.end());
+        }
+    }
 
     // update window
     this->Interactor->Render();
@@ -721,10 +766,10 @@ void ModelingWindowStyle::ScaleObject() {
 
     // scale object equally for each axis for up/down arrows
     if (key == "Up") {
-        // scale +10%
-        data->scaleX += .1;
-        data->scaleY += .1;
-        data->scaleZ += .1;
+        // scale +5%
+        data->scaleX += .05;
+        data->scaleY += .05;
+        data->scaleZ += .05;
     } else if (key == "Down") {
         // make sure scale values don't fall to 0.3 or below
         if (data->scaleX - .1 <= .3 || data->scaleY - .1 <= .3 ||
@@ -735,10 +780,10 @@ void ModelingWindowStyle::ScaleObject() {
                       << std::endl;
             return;
         } else {
-            // scale -10%
-            data->scaleX -= .1;
-            data->scaleY -= .1;
-            data->scaleZ -= .1;
+            // scale -5%
+            data->scaleX -= .05;
+            data->scaleY -= .05;
+            data->scaleZ -= .05;
         }
     } else {
         // otherwise don't scale and return
@@ -976,10 +1021,18 @@ vtkSmartPointer<vtkTransform> ModelingWindowStyle::GetTransform(ObjectData *data
     // apply final translation
     transform->Translate(-center[0], -center[1], -center[2]);
 
+    // set to post multiply to append potential transformation matrices
+    transform->PostMultiply();
+
+    // check if snapping has been applied
+    if (data->snapMatrix) {
+        // if so, concat matrix
+        transform->Concatenate(data->snapMatrix);
+    }
+
     // check pose number for initial pose
     if (currentPose->poseNum != 0) {
-        // if not initial pose, concat transformation matrices
-        transform->PostMultiply();
+        // if not initial pose, concat transformation matrix
         transform->Concatenate(currentPose->matrix);
     } // otherwise, no need
 
@@ -1759,25 +1812,26 @@ void ModelingWindowStyle::LeftSceneSelected() {
         // draw point for the user
         DrawPointOntoImage();
 
+        // update window
         this->CurrentRenderer->ResetCamera();
         this->Interactor->Render();
 
         // check how many points have been drawn
         if (attributes->PointsDrawn == 0) {
             // none --> top left corner next
-            std::cout << "Bottom Left Corner point drawn."
-                      << "\nClick on the top left corner." << std::endl;
+            std::cout << "\nBottom Left Corner point drawn."
+                      << "\n\nClick on the top left corner." << std::endl;
         } else if (attributes->PointsDrawn == 1) {
             // 1 --> top right corner next
-            std::cout << "Top Left Corner point drawn."
-                      << "\nClick on the top right corner." << std::endl;
+            std::cout << "\nTop Left Corner point drawn."
+                      << "\n\nClick on the top right corner." << std::endl;
         } else if (attributes->PointsDrawn == 2) {
             // 2 --> bottom right corner next
-            std::cout << "Top Right Corner point drawn."
-                      << "\nClick on the bottom right corner." << std::endl;
+            std::cout << "\nTop Right Corner point drawn."
+                      << "\n\nClick on the bottom right corner." << std::endl;
         } else {
             // we have all the points required, so draw cube and snap!
-            std::cout << "Bottom Right Corner point drawn."
+            std::cout << "\nBottom Right Corner point drawn."
                       << "\n\n------Snapping------" << std::endl;
 
             // call Snap function
@@ -1786,6 +1840,10 @@ void ModelingWindowStyle::LeftSceneSelected() {
             // change flag back to false and reset points drawn
             attributes->Snap = false;
             attributes->PointsDrawn = 0;
+
+            // prompt user that snapping has been performed
+            std::cout << "\nSnapping Occurred! If you don't like the results, use the manipulation tools"
+                      << " to tweak the model to your preference" << std::endl;
         }
 
         // increment points drawn
@@ -1896,8 +1954,8 @@ void ModelingWindowStyle::CubeSelected() {
         // change renderer to be green
         ChangeRenderer(0,1,0);
 
-        // prompt user to draw bounding box around the cube
-        PromptBoundingBox();
+        // prompt user to snap!
+        PromptSnapping();
     }
 }
 

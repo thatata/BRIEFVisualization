@@ -44,6 +44,9 @@ struct ObjectData {
 
     // pointer to the transform filter
     vtkSmartPointer<vtkTransformFilter> filter;
+
+    // transformation matrix from snapping
+    vtkSmartPointer<vtkMatrix4x4> snapMatrix;
 };
 
 // structure of a point
@@ -162,6 +165,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
         void UpdateRightPoseEntities(PoseData *pose);
         void DeselectActor();
         void SelectActor(vtkSmartPointer<vtkActor> actor);
+        void PromptSnapping();
         void PromptBoundingBox();
         void RedrawBoundingBox();
 
