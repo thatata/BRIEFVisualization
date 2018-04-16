@@ -1,6 +1,8 @@
 #include "modelingwindowstyle.h"
 #include "modelingwindow.h"
 
+#include <vtkObjectFactory.h>
+
 /**
   * TH: Operations Overview
   *
