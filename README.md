@@ -2,7 +2,7 @@
 
 Authors: A. Tarek Hatata & Thomas Magnan
 
-![BRIEF Modeling](https://github.com/gw-cs-sd/sd-18-hatata_magnan/tree/master/BRIEF_modeling.png)
+![BRIEF](BRIEF_modeling.png)
 
 This proposed project is an extension of a pre-existing “human-in-the-loop” application utilizing two robots and a turntable to image and grasp objects within a predetermined region. This project is referred to as the [Biological Robotic Imaging Experimentation Framework (BRIEF)](https://github.com/gw-cs-sd/sd-2017-BRIEF-Crandall).
 
@@ -24,9 +24,7 @@ Please refer to each respective subfolder for a deeper look into the functionali
 
 For a deeper look into the architecture of our system please refer to our [Design Document](https://docs.google.com/document/d/15gEI3p_kkgORwE-nCUjNehDNtyYY_CgFskas9DObcVs/edit?usp=sharing)
 
-### Modeling GUI integrated with BRIEF System
-About:
-
+## Modeling GUI integrated with BRIEF System
 #### 1. Building
 
 Note: Update ```DVTK_DIR``` with correct path if not using lab machine
@@ -38,7 +36,7 @@ $ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
 $ make
 ```
 
-#### 2. Connecting to the Rasperry Pi
+#### 2. Connecting to the Raspberry Pi
 1. Power on the Ubuntu 14.04 machine and log in.
 2. Plug in the Raspberry Pi (RPi). Also, make sure that it is connected to the Ubuntu machine via ethernet cable. In the Wifi menu at the top right of the Ubuntu machine, make sure that 'RPi' is selected.
 3. Plug in the XBox Kinect. A green LED on the Kinect should light up. If this light  does not appear, trace the wire and check its connection. Also, make sure that it is connected to the Ubuntu machine via USB.
@@ -71,7 +69,7 @@ Upon initialization of the GUI ```move.py``` is called from within ```ModelingWi
   	4. Close the terminal window on the Ubuntu machine.
   	5. Wait 10 seconds, double check that you have completed Step 1, then unplug the RPi.
   3. Unplug the XBox Kinect.
-  ## Important Tips:
+  ###### Important Tips:
   **1. Do not turn on/off linear actuator power strip without having RPi plugged in.**
   * The RPi powers the Arduino Uno via its USB connection. The Arduino's setup() method (which is called when the Arduino is first powered on) tells the linear actuators what their default positions should be. If the linear actuators do not have this constant signal from the Arduino Uno, the actuators default to 90 degrees.
   * Likewise, if you turn off the RPi (which will also turn off the Arduino Uno) before shutting off the power to the actuators, the actuators will default to 90 degrees because they will not have the signal from the Arduino.
@@ -79,7 +77,7 @@ Upon initialization of the GUI ```move.py``` is called from within ```ModelingWi
   **2. Follow proper steps for powering off the RPi.**
   * If you do not do this, the RPi may be stuck in recovery mode. If this happens, you will need to plug a keyboard, monitor, and mouse into the RPi to diagnose the issue and escape recovery mode.
 
-### Using the Modeling GUI with static images
+## Using the Modeling GUI with static images
 
 ## Tips
 
