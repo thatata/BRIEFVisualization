@@ -5,7 +5,7 @@
       <Option title="ModelingWindow" />
       <Option makefile_is_custom="1" />
       <Option compiler="gcc" />
-      <Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\vtk-6.2\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\vtk-6.2\Modules\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5OpenGL\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5WebKitWidgets\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5WebKit\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Network\;CMake Files\..\..\..\..\..\..\..\..\usr\local\;CMake Files\..\..\..\..\..\..\..\..\usr\local\share\;CMake Files\..\..\..\..\..\..\..\..\usr\local\share\pcl-1.8\;CMake Files\..\..\..\..\..\..\..\..\usr\local\share\pcl-1.8\Modules\;CMake Files\..\..\..\..\..\..\..\..\usr\share\;CMake Files\..\..\..\..\..\..\..\..\usr\share\OpenCV\;CMake Files\..\..\..\..\..\..\Qt5.10.0\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Core\;CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Sql\;" />
+      <Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\vtk-6.2\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\vtk-6.2\Modules\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Gui\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Core\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Sql\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5OpenGL\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5WebKitWidgets\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5WebKit\;CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Network\;CMake Files\..\..\..\..\..\..\..\..\usr\local\;CMake Files\..\..\..\..\..\..\..\..\usr\local\share\;CMake Files\..\..\..\..\..\..\..\..\usr\local\share\pcl-1.8\;CMake Files\..\..\..\..\..\..\..\..\usr\local\share\pcl-1.8\Modules\;CMake Files\..\..\..\..\..\..\..\..\usr\share\;CMake Files\..\..\..\..\..\..\..\..\usr\share\OpenCV\;" />
       <Build>
       <Target title="all">
          <Option working_dir="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/build" />
@@ -60,11 +60,6 @@
             <Add option="-DQT_WIDGETS_LIB" />
             <Add option="-DQT_GUI_LIB" />
             <Add option="-DQT_CORE_LIB" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/./mkspecs/linux-g++" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtCore" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtGui" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtWidgets" />
             <Add directory="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/libs" />
             <Add directory="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/src" />
             <Add directory="/usr/include" />
@@ -83,12 +78,17 @@
             <Add directory="/usr/include/x86_64-linux-gnu" />
             <Add directory="/usr/include/x86_64-linux-gnu/c++/5" />
             <Add directory="/usr/include/x86_64-linux-gnu/freetype2" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5/QtCore" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5/QtGui" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5/QtWidgets" />
             <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include" />
             <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
             <Add directory="/usr/lib/openmpi/include" />
             <Add directory="/usr/lib/openmpi/include/openmpi" />
             <Add directory="/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent" />
             <Add directory="/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent/include" />
+            <Add directory="/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64" />
             <Add directory="/usr/local/include" />
             <Add directory="/usr/local/include/pcl-1.8" />
          </Compiler>
@@ -122,11 +122,6 @@
             <Add option="-DQT_WIDGETS_LIB" />
             <Add option="-DQT_GUI_LIB" />
             <Add option="-DQT_CORE_LIB" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/./mkspecs/linux-g++" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtCore" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtGui" />
-            <Add directory="/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtWidgets" />
             <Add directory="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/libs" />
             <Add directory="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/src" />
             <Add directory="/usr/include" />
@@ -145,12 +140,17 @@
             <Add directory="/usr/include/x86_64-linux-gnu" />
             <Add directory="/usr/include/x86_64-linux-gnu/c++/5" />
             <Add directory="/usr/include/x86_64-linux-gnu/freetype2" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5/QtCore" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5/QtGui" />
+            <Add directory="/usr/include/x86_64-linux-gnu/qt5/QtWidgets" />
             <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include" />
             <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
             <Add directory="/usr/lib/openmpi/include" />
             <Add directory="/usr/lib/openmpi/include/openmpi" />
             <Add directory="/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent" />
             <Add directory="/usr/lib/openmpi/include/openmpi/opal/mca/event/libevent2021/libevent/include" />
+            <Add directory="/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64" />
             <Add directory="/usr/local/include" />
             <Add directory="/usr/local/include/pcl-1.8" />
          </Compiler>
@@ -693,6 +693,66 @@
       <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/cmake/vtk-6.2/Modules/vtkRenderingTk.cmake">
           <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\cmake\vtk-6.2\Modules\" />
       </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfigExtras.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsMacros.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Widgets\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Gui/Qt5GuiConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Gui\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Gui/Qt5GuiConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Gui\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Gui/Qt5GuiConfigExtras.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Gui\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Core\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Core\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreConfigExtras.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Core\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreConfigExtrasMkspecDir.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Core\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreMacros.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Core\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Sql/Qt5SqlConfigVersion.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Sql\" />
+      </Unit>
+      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5Sql/Qt5SqlConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5Sql\" />
+      </Unit>
       <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/lib/x86_64-linux-gnu/cmake/Qt5OpenGL/Qt5OpenGLConfigVersion.cmake">
           <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Qt5OpenGL\" />
       </Unit>
@@ -740,165 +800,6 @@
       </Unit>
       <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../../../usr/share/OpenCV/OpenCVModules-release.cmake">
           <Option virtualFolder="CMake Files\..\..\..\..\..\..\..\..\usr\share\OpenCV\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfigExtras.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsMacros.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Widgets\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5GuiConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5GuiConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QXcbEglIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QGifPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QLinuxFbIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QICOPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QTgaPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEvdevMousePlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QGtk3ThemePlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QICNSPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QComposePlatformInputContextPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEvdevTabletPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QVncIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QTuioTouchPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEglFSX11IntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEglFSEmulatorIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEglFSKmsEglDeviceIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEvdevKeyboardPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QWbmpPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QXcbGlxIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QVirtualKeyboardPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QOffscreenIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QJpegPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEvdevTouchScreenPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QXcbIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QMinimalIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QWebpPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QWebGLIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QMinimalEglIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QEglFSIntegrationPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QIbusPlatformInputContextPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5Gui_QTiffPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Gui/Qt5GuiConfigExtras.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Gui\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Core/Qt5CoreConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Core\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Core/Qt5CoreConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Core\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Core/Qt5CoreConfigExtras.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Core\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Core/Qt5CoreConfigExtrasMkspecDir.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Core\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Core/Qt5CoreMacros.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Core\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Sql/Qt5SqlConfigVersion.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Sql\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Sql/Qt5SqlConfig.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Sql\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Sql/Qt5Sql_QSQLiteDriverPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Sql\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Sql/Qt5Sql_QPSQLDriverPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Sql\" />
-      </Unit>
-      <Unit filename="/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/../../../../../../Qt5.10.0/5.10.0/gcc_64/lib/cmake/Qt5Sql/Qt5Sql_QMYSQLDriverPlugin.cmake">
-          <Option virtualFolder="CMake Files\..\..\..\..\..\..\Qt5.10.0\5.10.0\gcc_64\lib\cmake\Qt5Sql\" />
       </Unit>
    </Project>
 </CodeBlocks_project_file>

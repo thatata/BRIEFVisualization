@@ -173,6 +173,8 @@ vtkSTLWriter.h
 -
 sstream
 -
+iostream
+-
 vtkAppendPolyData.h
 -
 vtkCleanPolyData.h
