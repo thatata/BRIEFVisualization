@@ -10,10 +10,6 @@ This project focuses on advancement of the applications of the optical robotic a
 
 The next stage of the project includes taking a series of images of this object over time and connecting the 3D models to create a 4D model where one can see the changes over time (the 4th dimension). An ideal object to model in three dimensional space over time is a plant, specifically a flower.
 
-## Current Stage of Development
-
-TODO: Chat about where we are here.
-
 ## Installation
 
 ### Hardware Components
@@ -24,7 +20,7 @@ Please refer to [BRIEF's other site](https://github.com/gw-cs-sd/sd-2017-BRIEF-C
 
 - OpenCV (3.3.0)
   - Easy installation guide [here](https://medium.com/@debugvn/installing-opencv-3-3-0-on-ubuntu-16-04-lts-7db376f9396)
-  **Must install additional contribution packages (Aruco)**
+  - **Must install additional contribution packages (Aruco)**
 - VTK (6.3)
   - Install [here](https://www.vtk.org/Wiki/VTK/Configure_and_Build)
 - Point Cloud Library (PCL)
@@ -104,9 +100,11 @@ Refer to ```/cameraarm/app/modeling_static/``` for a README with specific instru
 ### Working on the Project from Home :: Remote Desktop, SSH, Remote Atom
 For the purposes of the project it is best to keep the source code on the one lab machine that operates the robot. This can make things difficult to work on the project and using a [**Remote Desktop**](https://www.tecmint.com/enable-desktop-sharing-in-ubuntu-linux-mint/) or [**SSH combined with remote atom**](https://atom.io/packages/remote-atom) makes it much easier.
 
-### Other
+## Current Stages of Development and Next Steps
 
-## Furthering the Research
+Over the past year we have made advances towards efficient modeling. We have created an easy to use GUI, efficient architecture, and base algorithms regarding modeling, calibration, and actuation.  
+
+Further research would be best focused on optimizing the snapping technology and location determination. We believe that the snapping is not as accurate as it could be due to inaccurate location data. And due to this data also facing troubles with requesting actuation to certain points in space. Movement is believed to be functional but minimal physical tests have been done to confirm that such is the case due to time.
 
 ###### Understanding the code base
 Read through all of the code in ```cameraarm``` directory and read through our [Design Document](https://docs.google.com/document/d/15gEI3p_kkgORwE-nCUjNehDNtyYY_CgFskas9DObcVs/edit?usp=sharing)
