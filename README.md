@@ -1,8 +1,8 @@
 # BRIEF Visualization
 
-Authors: A. Tarek Hatata & Thomas Magnan
-
 ![BRIEF](BRIEF_modeling.png)
+
+Authors: A. Tarek Hatata & Thomas Magnan
 
 This proposed project is an extension of a pre-existing “human-in-the-loop” application utilizing two robots and a turntable to image and grasp objects within a predetermined region. This project is referred to as the [Biological Robotic Imaging Experimentation Framework (BRIEF)](https://github.com/gw-cs-sd/sd-2017-BRIEF-Crandall).
 
@@ -12,11 +12,28 @@ The next stage of the project includes taking a series of images of this object 
 
 ## Current Stage of Development
 
+TODO: Chat about where we are here.
+
 ## Installation
 
 ### Hardware Components
+- Turntable
+Please refer to [BRIEF's other site](https://github.com/gw-cs-sd/sd-2017-BRIEF-Crandall) for details on installation of the hardware. It was not a relevant part of this addition as it is already setup and operational on the primary machine.
 
 ### Software & System Requirements
+
+- OpenCV (3.3.0)
+  - Easy installation guide [here](https://medium.com/@debugvn/installing-opencv-3-3-0-on-ubuntu-16-04-lts-7db376f9396)
+  **Must install additional contribution packages (Aruco)**
+- VTK (6.3)
+  - Install [here](https://www.vtk.org/Wiki/VTK/Configure_and_Build)
+- Point Cloud Library (PCL)
+  - Install [here](http://pointclouds.org/downloads/linux.html)
+- Ubuntu Based Machine (14.04)
+
+**Warning about using newer versions of libraries:** It caused a variety of issues when building out and these are what is already installed on the lab machine.
+
+**Note:** The Microsoft Kinect Camera is **NOT** compatible with a Virtual Machine. If you are to do specific tests you must Utilize an Ubuntu-based machine.
 
 ## Source
 
@@ -78,6 +95,9 @@ Upon initialization of the GUI ```move.py``` is called from within ```ModelingWi
   * If you do not do this, the RPi may be stuck in recovery mode. If this happens, you will need to plug a keyboard, monitor, and mouse into the RPi to diagnose the issue and escape recovery mode.
 
 ## Using the Modeling GUI with static images
+This version of the application allows a user to utilize the modeling technology given any set of images from a scan to build the model.
+
+Refer to ```/cameraarm/app/modeling_static/``` for a README with specific instructions for this application.
 
 ## Tips
 
@@ -91,12 +111,5 @@ For the purposes of the project it is best to keep the source code on the one la
 ###### Understanding the code base
 Read through all of the code in ```cameraarm``` directory and read through our [Design Document](https://docs.google.com/document/d/15gEI3p_kkgORwE-nCUjNehDNtyYY_CgFskas9DObcVs/edit?usp=sharing)
 
-###### Printing additional Markers:
-Markers that are saved and currently recognizable by the system are saved at
-```
-cameraarm/app/calibration_actuation/testing/aruco_markers/
-```
-**For proper analysis all markers must be .16m, or 16cm, when printed**
-
-**Do not forget to update the code if more markers are added:**
-In ```cameraarm/app/modeling_gui/ModelingWindow/src/calibration_actuation.cxx``` update to add ```Vec3d mki (x, y, z);``` for each marker ```i``` added with location in modeling world.
+###### Additional README's
+Additional README's can be found within [```/cameraarm/app/modeling_static/```](https://github.com/gw-cs-sd/sd-18-hatata_magnan/tree/master/cameraarm/app/modeling_static/),  [```/cameraarm/app/calibration_actuation/```](https://github.com/gw-cs-sd/sd-18-hatata_magnan/tree/master/cameraarm/app/calibration_actuation/), and [```/cameraarm/app/modeling_gui/```](https://github.com/gw-cs-sd/sd-18-hatata_magnan/tree/master/cameraarm/app/modeling_gui) to describe some of the functionality of each section in further detail

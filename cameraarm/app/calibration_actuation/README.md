@@ -1,14 +1,37 @@
-# GW CS Senior Design Project Template
+### Here is a basic overview of the functionality related specifically to Calibration & Actuation
 
-Use the master branch of this repository for your **working** code.  You should use the [Feature Branch](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) or [Git Flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) structure for your code and branches.
+**Note:**
+Up to date code for calibration and actuation can be found in:
+```
+cameraarm/app/modeling_gui/ModelingWindow/src/
 
-The gh-pages branch of this repository has starter files for your web page. You should upload PDF versions of all your assignments and keep your web page up to date.
+calibration_actuation.cxx
+calibration_actuation.h
+move.py
+```
 
-**Once you understand the structure listed above, you should replace this readme with something specific to your project.**
+### Refer to ```calibration_actuation.h``` for commented descriptions of each function
+### Move.py
+This is an integrated script with a greedy scan that operates the Kinect via PCL to get photos (Functionality can be replaced and use obtainLiveImage function within API). It initiates these services and waits for API calls to move the robot
 
-Release Update Notes:
-- OpenCV moved to root directory for compilation. No longer stored in git folder.
 
-**Saving images:**
-Run `save` within `calibration_actuation/` 
+### Supporting Tests
+
+##### Printing additional Markers:
+Markers that are saved and currently recognizable by the system are saved at
+```
+cameraarm/app/calibration_actuation/testing/aruco_markers/
+```
+**For proper analysis all markers must be .16m, or 16cm, when printed**
+
+**Do not forget to update the code if more markers are added:**
+In ```cameraarm/app/modeling_gui/ModelingWindow/src/calibration_actuation.cxx``` update to add ```Vec3d mki (x, y, z);``` for each marker ```i``` added with location in modeling world.
+
+
+#### Saving images:
+Run `save` within `calibration_actuation/`
 with command: `$ ./save [fileName.png]`
+
+#### Camera Calibration
+
+####
