@@ -1,0 +1,4 @@
+/home/john/cameraarm/src/Kinect_code/CMakeFiles/rebuild_cache.dir
+/home/john/cameraarm/src/Kinect_code/CMakeFiles/edit_cache.dir
+/home/john/cameraarm/src/Kinect_code/CMakeFiles/KinectScan2.dir
+/home/john/cameraarm/src/Kinect_code/CMakeFiles/KinectScan.dir

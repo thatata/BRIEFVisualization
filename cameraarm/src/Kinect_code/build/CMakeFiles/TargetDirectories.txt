@@ -1,0 +1,2 @@
+/home/workstation5/Tom/cameraarm/src/Kinect_code/build/CMakeFiles/KinectScan.dir
+/home/workstation5/Tom/cameraarm/src/Kinect_code/build/CMakeFiles/KinectScan2.dir

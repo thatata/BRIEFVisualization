@@ -1,0 +1,11 @@
+To view a single pcd file:
+pcl_viewer 149061450917.pcd 
+
+
+
+From anywhere, to view what the camera is currently seeing:
+pcl_openni_viewer
+
+
+From within a specific scan's folder, view a gif of the scan:
+pcl_pcd_grabber_viewer -dir . -fps 30 -repeat 1
