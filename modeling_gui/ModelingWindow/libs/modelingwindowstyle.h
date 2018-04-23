@@ -40,13 +40,22 @@ struct ObjectData {
     vtkSmartPointer<vtkSphereSource> sphereSource;
 
     // transformation values for scale, rotation, translation
-    double scaleX = 1, scaleY = 1, scaleZ = 1, rotationX, rotationY, rotationZ, translateX, translateY;
+    double scaleX, scaleY, scaleZ, rotationX, rotationY, rotationZ, translateX, translateY;
 
     // pointer to the transform filter
     vtkSmartPointer<vtkTransformFilter> filter;
 
     // transformation matrix from snapping
     vtkSmartPointer<vtkMatrix4x4> snapMatrix;
+
+    // constructor to initialize transformation values
+    ObjectData() {
+        // scale values start at 1
+        scaleX = scaleY = scaleZ = 1;
+
+        // all other values start at 0
+        rotationX = rotationY = rotationZ = translateX = translateY = 0;
+    }
 };
 
 // structure of a point
@@ -117,7 +126,7 @@ struct WindowStyleAttributes {
     std::map<int,vtkRenderer*> rendererMap;
 
     // PNG readers
-    std::vector<vtkSmartPointer<vtkPNGReader>> readers;
+    std::vector<vtkSmartPointer<vtkPNGReader> > readers;
 };
 
 class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
@@ -191,7 +200,7 @@ class ModelingWindowStyle : public vtkInteractorStyleTrackballActor {
 
         // Setter for renderer map
         void SetRendererMap(std::map<int,vtkRenderer*> map);
-        void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader>> pngReaders);
+        void SetReaders(std::vector<vtkSmartPointer<vtkPNGReader> > pngReaders);
 
     private:
         // window attributes

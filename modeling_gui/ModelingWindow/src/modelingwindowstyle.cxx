@@ -25,6 +25,7 @@
 #include <vtkSimplePointsWriter.h>
 #include <vtkSTLWriter.h>
 #include <sstream>
+#include <iostream>
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
 #include <vtkInteractorStyleRubberBandZoom.h>
@@ -404,34 +405,47 @@ void ModelingWindowStyle::Snap() {
     pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>());
     pcl::PointCloud<pcl::PointXYZ>& point_cloud = *point_cloud_ptr;
 
+    // build the filename of the PCD
+    std::stringstream filename;
+
+    if (currentPose->poseNum < 10) {
+        filename << "000" << currentPose->poseNum << ".pcd";
+    } else {
+        filename << "00" << currentPose->poseNum << ".pcd";
+    }
+
     // attempt to load the PCD
-    if (pcl::io::loadPCDFile("0000.pcd", point_cloud) == -1) {
+    if (pcl::io::loadPCDFile(filename.str().c_str(), point_cloud) == -1) {
         // error
         return;
     }
 
     // use the x,y values of the drawn points to get the corresponding point in the point cloud
-    pcl::PointXYZ bl = point_cloud.at(blDrawn[0], blDrawn[1]);
-    pcl::PointXYZ tl = point_cloud.at(tlDrawn[0], tlDrawn[1]);
-    pcl::PointXYZ tr = point_cloud.at(trDrawn[0], trDrawn[1]);
-    pcl::PointXYZ br = point_cloud.at(brDrawn[0], brDrawn[1]);
+//    pcl::PointXYZ bl = point_cloud.at(blDrawn[0], blDrawn[1]);
+//    pcl::PointXYZ tl = point_cloud.at(tlDrawn[0], tlDrawn[1]);
+//    pcl::PointXYZ tr = point_cloud.at(trDrawn[0], trDrawn[1]);
+//    pcl::PointXYZ br = point_cloud.at(brDrawn[0], brDrawn[1]);
+
+    pcl::PointXYZ bl = point_cloud.at(106166);
+    pcl::PointXYZ tl = point_cloud.at(76971);
+    pcl::PointXYZ tr = point_cloud.at(98950);
+    pcl::PointXYZ br = point_cloud.at(127512);
 
     // set z values for each drawn point
+    blDrawn[0] = bl.x;
+    tlDrawn[0] = tl.x;
+    trDrawn[0] = tr.x;
+    brDrawn[0] = br.x;
+
+    blDrawn[1] = bl.y;
+    tlDrawn[1] = tl.y;
+    trDrawn[1] = tr.y;
+    brDrawn[1] = br.y;
+
     blDrawn[2] = bl.z;
     tlDrawn[2] = tl.z;
     trDrawn[2] = tr.z;
     brDrawn[2] = br.z;
-
-    // get max z coordinate to calculate relative depth
-    double temp = bl.z > tl.z ? bl.z : tl.z;
-    temp = temp > tr.z ? temp : tr.z;
-    double maxZ = temp > br.z ? temp : br.z;
-
-    // set the relative z coordinate based on max z
-    blDrawn[2] -= maxZ;
-    tlDrawn[2] -= maxZ;
-    trDrawn[2] -= maxZ;
-    brDrawn[2] -= maxZ;
 
     // STEP 6: find centroids for the two sets of points (cube = A, drawn = B)
     double centA[3], centB[3];
@@ -487,14 +501,6 @@ void ModelingWindowStyle::Snap() {
     cv::SVD::compute(h,s,u,vt);
     cv::Mat r = vt.t() * u.t();
 
-    // calculate the translation vector (t = -R*centA + centB)
-    cv::Mat negCentroidA = (cv::Mat_<double>(3,1) << -centA[0], -centA[1], -centA[2]);
-    cv::Mat centroidB = (cv::Mat_<double>(3,1) << centB[0], centB[1], centB[2]);
-    cv::Mat t = (r * negCentroidA) + centroidB;
-
-    double tX = *t.ptr<double>(0);
-    double tY = *t.ptr<double>(1);
-
     // STEP 11: now that we have the optimal rotation matrix, apply it to the cube
     // convert matrix of uchar data to double data
     cv::Mat rDouble;
@@ -522,7 +528,8 @@ void ModelingWindowStyle::Snap() {
     // reset idx for iterating through array
     idx = 0;
 
-    // use r matrix to fill out 4x4 matrix (last column --> 0 0 0 1)
+    // use r matrix to fill out 4x4 matrix (NOTE: use negative values for the z column to
+    // avoid reflection issue)
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             // check if the last row is reached
@@ -533,12 +540,16 @@ void ModelingWindowStyle::Snap() {
                 matrix->SetElement(i, 2, 0);
                 matrix->SetElement(i, 3, 1);
                 break;
+            } else if (j == 2) {
+                // use negative value to reflect against the XY plane (see note)
+                matrix->SetElement(i, j, -rData[idx]);
+                idx++;
             } else if (j == 3) { // check for last column to set translation vector
                 // set element depending on which row we're on
                 if (i == 0) {
-                    matrix->SetElement(i, j, tX);
+                    matrix->SetElement(i, j, 0);
                 } else if (i == 1) {
-                    matrix->SetElement(i, j, tY);
+                    matrix->SetElement(i, j, 0);
                 } else {
                     matrix->SetElement(i, j, 0);
                 }
@@ -554,8 +565,13 @@ void ModelingWindowStyle::Snap() {
     vtkSmartPointer<vtkTransform> transform =
         vtkSmartPointer<vtkTransform>::New();
 
-    // concatenate matrix
+    // get the center of the object for rotation
+    double *cent = currentPose->objects[0]->cubeSource->GetCenter();
+
+    // translate to/from the center, and concatenate matrix
+    transform->Translate(cent[0], cent[1], cent[2]);
     transform->Concatenate(matrix);
+    transform->Translate(-cent[0], -cent[1], -cent[2]);
 
     // set up transform filter
     vtkSmartPointer<vtkTransformFilter> filter =
@@ -596,6 +612,7 @@ void ModelingWindowStyle::Snap() {
     }
 
     // update window
+    this->CurrentRenderer->ResetCamera();
     this->Interactor->Render();
 }
 
@@ -1018,17 +1035,17 @@ vtkSmartPointer<vtkTransform> ModelingWindowStyle::GetTransform(ObjectData *data
     // scale with appropriate values
     transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
 
+    // check if snapping has been applied
+    if (data->snapMatrix) {
+        // if so, concat matrix before translating back to center
+        transform->Concatenate(data->snapMatrix);
+    }
+
     // apply final translation
     transform->Translate(-center[0], -center[1], -center[2]);
 
-    // set to post multiply to append potential transformation matrices
+    // set to post multiply to append matrix for potential pose change
     transform->PostMultiply();
-
-    // check if snapping has been applied
-    if (data->snapMatrix) {
-        // if so, concat matrix
-        transform->Concatenate(data->snapMatrix);
-    }
 
     // check pose number for initial pose
     if (currentPose->poseNum != 0) {
@@ -1609,7 +1626,7 @@ void ModelingWindowStyle::DeselectActor() {
 vtkSmartPointer<vtkMatrix4x4> ModelingWindowStyle::GetMatrix(std::string fileName) {
     // vars to read text files
     std::string line;
-    ifstream file (fileName);
+    ifstream file(fileName.c_str());
 
     // vars to represent t vector and r matrix
     double tVector[3];

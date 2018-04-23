@@ -18,7 +18,7 @@ ModelingWindow::ModelingWindow(int numImages) {
     int size[2] = {1350, 700};
 
     // create vector of PNG readers to store images
-    std::vector<vtkSmartPointer<vtkPNGReader>> readers = GetReaders(numImages);
+    std::vector<vtkSmartPointer<vtkPNGReader> > readers = GetReaders(numImages);
 
     // create render window, set size and number of layers
     vtkSmartPointer<vtkRenderWindow> renderWindow =
@@ -194,9 +194,9 @@ ModelingWindow::ModelingWindow(int numImages) {
     renderWindowInteractor->Start();
 }
 
-std::vector<vtkSmartPointer<vtkPNGReader>> ModelingWindow::GetReaders(int numImages) {
+std::vector<vtkSmartPointer<vtkPNGReader> > ModelingWindow::GetReaders(int numImages) {
     // create vector of PNG readers to store images
-    std::vector<vtkSmartPointer<vtkPNGReader>> readers;
+    std::vector<vtkSmartPointer<vtkPNGReader> > readers;
 
     // loop through each image to get the reader and add to vector
     for (unsigned int i = 0; i <= numImages; i++) {
