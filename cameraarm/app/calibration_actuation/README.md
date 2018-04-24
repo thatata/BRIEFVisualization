@@ -41,6 +41,7 @@ TODO
 - The r and z values of the slice about the axis are passed and shifted to get a new origin at the base of the lower motor pivot
 - From there a new set of polar points are created to ensure that r is within bounds and min and max theta angles
 - Diagram can be found on screencast
+![Valid Poses](valid_poses.png)
 
 ##### Description of Various supporting Scripts
 - getImage.sh
