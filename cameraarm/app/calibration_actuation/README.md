@@ -37,8 +37,10 @@ TODO
 ![Motor Details](motor_information.JPG)
 
 ##### Logic behind Valid Pose
-TODO
-- Upload diagrams
+- The rotation about the turntable is determined converting to polar and using the theta and the difference between
+- The r and z values of the slice about the axis are passed and shifted to get a new origin at the base of the lower motor pivot
+- From there a new set of polar points are created to ensure that r is within bounds and min and max theta angles
+- Diagram can be found on screencast
 
 ##### Description of Various supporting Scripts
 - getImage.sh
