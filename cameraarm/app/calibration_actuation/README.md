@@ -34,7 +34,7 @@ TODO
     - 1 step = 2.23 degrees
 
 #### Supporting Images for Min and Max Angles
-TODO
+![Motor Details](motor_information.JPG)
 
 ##### Logic behind Valid Pose
 TODO
