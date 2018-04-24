@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.5.0, 2018-04-24T14:34:57. -->
+<!-- Written by QtCreator 4.5.0, 2018-04-24T14:38:43. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -68,14 +68,8 @@
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <valuelist type="QVariantList" key="CMake.Configuration">
      <value type="QString">CMAKE_BUILD_TYPE:STRING=Debug</value>
-     <value type="QString">CMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
-     <value type="QString">CMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}</value>
-     <value type="QString">CMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}</value>
-     <value type="QString">PCL_DIR:PATH=/home/thatata/workplace/source/sd/pcl-1.8</value>
-     <value type="QString">QT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}</value>
-     <value type="QString">VTK_DIR:PATH=/home/thatata/workplace/source/sd/VTK-6.3</value>
     </valuelist>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/build</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/thatata/workplace/source/sd/sd-18-hatata_magnan/cameraarm/app/modeling_static/ModelingWindow/build</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.AdditionalArguments"></value>
@@ -171,10 +165,10 @@
      <value type="int">14</value>
     </valuelist>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguation.Title">ModelingWindow</value>
-    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments">75</value>
+    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments">44</value>
     <value type="bool" key="CMakeProjectManager.CMakeRunConfiguration.UseTerminal">true</value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory"></value>
-    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory.default">/home/thatata/workplace/source/sd/sd-18-hatata_magnan/modeling_gui/ModelingWindow/build</value>
+    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory.default">/home/thatata/workplace/source/sd/sd-18-hatata_magnan/cameraarm/app/modeling_static/ModelingWindow/build</value>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">ModelingWindow</value>
