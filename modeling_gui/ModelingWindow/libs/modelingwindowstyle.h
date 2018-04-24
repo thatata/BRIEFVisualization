@@ -48,6 +48,9 @@ struct ObjectData {
     // transformation matrix from snapping
     vtkSmartPointer<vtkMatrix4x4> snapMatrix;
 
+    // flag for whether or not object was snapped
+    bool snap;
+
     // constructor to initialize transformation values
     ObjectData() {
         // scale values start at 1

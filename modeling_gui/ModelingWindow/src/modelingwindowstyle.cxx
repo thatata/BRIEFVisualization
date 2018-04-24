@@ -593,8 +593,9 @@ void ModelingWindowStyle::Snap() {
     // save transform filter in ObjectData object
     currentPose->objects[0]->filter = filter;
 
-    // save snapping transformation matrix
+    // save snapping transformation matrix and change snap flag
     currentPose->objects[0]->snapMatrix = matrix;
+    currentPose->objects[0]->snap = true;
 
     // remove drawn points from the window
     for (int i = 0; i < 4; i++) {
@@ -1035,8 +1036,8 @@ vtkSmartPointer<vtkTransform> ModelingWindowStyle::GetTransform(ObjectData *data
     // scale with appropriate values
     transform->Scale(data->scaleX, data->scaleY, data->scaleZ);
 
-    // check if snapping has been applied
-    if (data->snapMatrix) {
+    // check flag to see if snapping has been applied
+    if (data->snap) {
         // if so, concat matrix before translating back to center
         transform->Concatenate(data->snapMatrix);
     }
@@ -1426,26 +1427,29 @@ void ModelingWindowStyle::CreateNewPose(int newPose) {
     // set current matrix of new pose
     pose->matrix = GetMatrix(newPoseFile.str().c_str());
 
-    // find PoseData object of right pose
-    PoseData *oldPose;
+    // check if multiple poses have been requested
+    if (poses.size() > 1) {
+        // find PoseData object of right pose
+        PoseData *oldPose;
 
-    // loop through poses vector
-    for (unsigned int i = 0; i < poses.size(); i++) {
-        // if rightPoseIdx matches pose #, break
-        if (poses[i]->poseNum == rightPoseIdx) {
-            oldPose = poses[i];
-            break;
+        for (unsigned int i = 0; i < poses.size(); i++) {
+            // if rightPoseIdx matches pose #, break to remove old actors
+            if (poses[i]->poseNum == rightPoseIdx) {
+                oldPose = poses[i];
+                break;
+            }
         }
+
+        // check if pose was found
+        if (oldPose) {
+            // if so, loop through each object in this pose
+            for (unsigned int i = 0; i < oldPose->objects.size(); i++) {
+                // remove actor from the right pose renderer (idx = 10)
+                attributes->rendererMap[10]->RemoveActor(oldPose->objects[i]->actor);
+            }
+        } else return; // otherwise, do nothing
     }
 
-    // check if pose was found
-    if (oldPose) {
-        // if so, loop through each object in this pose
-        for (unsigned int i = 0; i < oldPose->objects.size(); i++) {
-            // remove actor from the right pose renderer (idx = 10)
-            attributes->rendererMap[10]->RemoveActor(oldPose->objects[i]->actor);
-        }
-    } else return; // otherwise, do nothing
 
     // transform entities to reflect new pose
     TransformEntities(pose);
@@ -1480,6 +1484,15 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
         data->scaleX = lastPose->objects[i]->scaleX;
         data->scaleY = lastPose->objects[i]->scaleY;
         data->scaleZ = lastPose->objects[i]->scaleZ;
+
+        // if object has been snapped, copy the snap matrix and change flag
+        if (lastPose->objects[i]->snap) {
+            data->snap = true;
+            data->snapMatrix = lastPose->objects[i]->snapMatrix;
+        } else {
+            // otherwise, set flag to false
+            data->snap = false;
+        }
 
         // initialize actor to be placed in right pose renderer
         data->actor = vtkSmartPointer<vtkActor>::New();
@@ -1517,6 +1530,12 @@ void ModelingWindowStyle::TransformEntities(PoseData *pose) {
 
         // scale with appropriate values
         transform->Scale(lastPose->objects[i]->scaleX, lastPose->objects[i]->scaleY, lastPose->objects[i]->scaleZ);
+
+        // check if object has been snapped
+        if (data->snap) {
+            // if so, concat the snap matrix
+            transform->Concatenate(data->snapMatrix);
+        }
 
         // apply final translation
         transform->Translate(-center[0], -center[1], -center[2]);

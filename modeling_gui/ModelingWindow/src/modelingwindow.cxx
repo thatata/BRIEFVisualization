@@ -184,10 +184,7 @@ ModelingWindow::ModelingWindow(int numImages) {
     style->SetRendererMap(rendererMap);
     style->SetReaders(readers);
 
-    // render the window to figure out where image camera is
-    renderWindow->Render();
-
-    // re-render to reflect camera change
+    // render the window and start interactor
     renderWindow->Render();
 
     // start interactor
