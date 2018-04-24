@@ -421,16 +421,16 @@ void ModelingWindowStyle::Snap() {
     }
 
     // use the x,y values of the drawn points to get the corresponding point in the point cloud
-    pcl::PointXYZ bl = point_cloud.at(blDrawn[0], blDrawn[1]);
-    pcl::PointXYZ tl = point_cloud.at(tlDrawn[0], tlDrawn[1]);
-    pcl::PointXYZ tr = point_cloud.at(trDrawn[0], trDrawn[1]);
-    pcl::PointXYZ br = point_cloud.at(brDrawn[0], brDrawn[1]);
+//    pcl::PointXYZ bl = point_cloud.at(blDrawn[0], blDrawn[1]);
+//    pcl::PointXYZ tl = point_cloud.at(tlDrawn[0], tlDrawn[1]);
+//    pcl::PointXYZ tr = point_cloud.at(trDrawn[0], trDrawn[1]);
+//    pcl::PointXYZ br = point_cloud.at(brDrawn[0], brDrawn[1]);
 
 //    PREDETERMINED CORNERS BASED ON THE POINT CLOUD FOR THE STATIC EXAMPLE
-//    pcl::PointXYZ bl = point_cloud.at(106166);
-//    pcl::PointXYZ tl = point_cloud.at(76971);
-//    pcl::PointXYZ tr = point_cloud.at(98950);
-//    pcl::PointXYZ br = point_cloud.at(127512);
+    pcl::PointXYZ bl = point_cloud.at(106166);
+    pcl::PointXYZ tl = point_cloud.at(76971);
+    pcl::PointXYZ tr = point_cloud.at(98950);
+    pcl::PointXYZ br = point_cloud.at(127512);
 
     // set z values for each drawn point
     blDrawn[0] = bl.x;

@@ -40,7 +40,7 @@ For a deeper look into the architecture of our system please refer to our [Desig
 ## Modeling GUI integrated with BRIEF System
 #### 1. Building
 
-Note: Update ```DVTK_DIR``` with correct path if not using lab machine
+Note: If not using lab machine, clear the build folder to configure with your own system.
 ```
 $ cd cameraarm/app/modeling_gui/ModelingWindow
 $ mkdir build
@@ -48,6 +48,8 @@ $ cd build
 $ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
 $ make
 ```
+
+Note: It's helpful to use ccmake to visualize the cmake build process and link your own libraries (e.g. replacing ```DVTK_DIR``` with correct path) by replacing the cmake line with ```ccmake ..```
 
 #### 2. Connecting to the Raspberry Pi
 1. Power on the Ubuntu 14.04 machine and log in.
