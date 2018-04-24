@@ -51,11 +51,11 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/include/opencv"
   "../libs"
   "../src"
-  "/home/thatata/Qt5.10.0/5.10.0/gcc_64/include"
-  "/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtWidgets"
-  "/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtGui"
-  "/home/thatata/Qt5.10.0/5.10.0/gcc_64/include/QtCore"
-  "/home/thatata/Qt5.10.0/5.10.0/gcc_64/./mkspecs/linux-g++"
+  "/usr/include/x86_64-linux-gnu/qt5"
+  "/usr/include/x86_64-linux-gnu/qt5/QtWidgets"
+  "/usr/include/x86_64-linux-gnu/qt5/QtGui"
+  "/usr/include/x86_64-linux-gnu/qt5/QtCore"
+  "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64"
   )
 
 # Targets to which this target links.

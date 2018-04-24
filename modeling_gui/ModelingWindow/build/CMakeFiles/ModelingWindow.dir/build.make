@@ -381,9 +381,9 @@ ModelingWindow: /usr/lib/x86_64-linux-gnu/libfreetype.so
 ModelingWindow: /usr/lib/x86_64-linux-gnu/libGL.so
 ModelingWindow: /usr/lib/x86_64-linux-gnu/libvtkImagingColor-6.2.so.6.2.0
 ModelingWindow: /usr/lib/x86_64-linux-gnu/libvtkRenderingVolume-6.2.so.6.2.0
-ModelingWindow: /home/thatata/Qt5.10.0/5.10.0/gcc_64/lib/libQt5Widgets.so.5.10.0
-ModelingWindow: /home/thatata/Qt5.10.0/5.10.0/gcc_64/lib/libQt5Gui.so.5.10.0
-ModelingWindow: /home/thatata/Qt5.10.0/5.10.0/gcc_64/lib/libQt5Core.so.5.10.0
+ModelingWindow: /usr/lib/x86_64-linux-gnu/libQt5Widgets.so.5.5.1
+ModelingWindow: /usr/lib/x86_64-linux-gnu/libQt5Gui.so.5.5.1
+ModelingWindow: /usr/lib/x86_64-linux-gnu/libQt5Core.so.5.5.1
 ModelingWindow: /usr/lib/x86_64-linux-gnu/libvtkRenderingCore-6.2.so.6.2.0
 ModelingWindow: /usr/lib/x86_64-linux-gnu/libvtkCommonColor-6.2.so.6.2.0
 ModelingWindow: /usr/lib/x86_64-linux-gnu/libvtkFiltersExtraction-6.2.so.6.2.0

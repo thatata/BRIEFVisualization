@@ -27,7 +27,7 @@ class ModelingWindow {
         WindowStyleAttributes *attributes;
 
     private:
-        std::vector<vtkSmartPointer<vtkPNGReader>> GetReaders(int numImages);
+        std::vector<vtkSmartPointer<vtkPNGReader> > GetReaders(int numImages);
         vtkSmartPointer<vtkRenderer> CreateImageRenderer(vtkSmartPointer<vtkPNGReader> reader);
         vtkSmartPointer<vtkRenderer> CreateOperationsRenderer();
         vtkSmartPointer<vtkRenderer> CreateTitleRenderer();
