@@ -730,9 +730,6 @@ bool calibration_actuation::write_intrinsics( string name ) {
 
   cout << endl << "Writing intrinsics data values to the txt file" << endl;
 
-  // Call script to cd to file with images
-  system("../src/ChangeToImageDirectory.sh");
-
   ofstream outStream;
   outStream.open(name.c_str());
 
@@ -764,8 +761,6 @@ bool calibration_actuation::write_intrinsics( string name ) {
 
     outStream.close();
 
-    // Call script to move file change directories back
-    // system("../src/ChangeToSRCDirectory.sh");
     return true;
   }
   return false;
@@ -1120,9 +1115,6 @@ bool calibration_actuation::write_intrinsics( string name ) {
    system("rm *.txt");
    system("rm *.png");
    system("cp ../photos/* .");
-
-   // Start Server
-   // system("../src/load_server.sh");
  }
 
  // Constructor
