@@ -49,7 +49,7 @@ $ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
 $ make
 ```
 
-Note: It's helpful to use ccmake to visualize the cmake build process and link your own libraries (e.g. replacing ```DVTK_DIR``` with correct path) by replacing the cmake line with ```ccmake ..```
+Note: It's helpful to use ccmake to visualize the cmake build process and link your own libraries (e.g. replacing ```DVTK_DIR``` with correct path) by replacing the cmake line with ```ccmake ..``` If not already installed, run ```sudo apt-get install cmake-curses-gui``` to install.
 
 #### 2. Connecting to the Raspberry Pi
 1. Power on the Ubuntu 14.04 machine and log in.

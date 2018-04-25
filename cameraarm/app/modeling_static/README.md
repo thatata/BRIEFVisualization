@@ -10,6 +10,8 @@ cameraarm/app/modeling_static/
 
 #### Project Structure
 
+##### Refer to design document, and .cxx files for commented and more detailed descriptions of each function
+
 ##### ModelingMain
 
 Main method to run the modeling GUI. User runs the ```ModelingWindow``` executable with an integer argument for the number of static images in the build folder. Creates a ModelingWindow object passing in the number of images, which starts the window.
@@ -24,23 +26,48 @@ Object that is responsible for handling all interaction on the render window. Us
 
 ### Overview of Manipulation Tools
 
-##### Draw: after selecting the draw button followed by the object (e.g. cube, point, sphere), click on the scene to place that object in the scene.
+#### Draw
+
+Select the Draw button followed by the object's button (e.g. cube, point, sphere), click on the scene to place that object in the scene.
+
 Note: if cube is selected, user will be prompted to "snap" the cube into place.
 
-##### Zoom: select Zoom, and in the console enter either 0 or 1 to zoom on the left and right pose, respectively.
+#### Zoom
 
-##### Scale: with an object in the scene selected, use the up and down arrow keys to scale larger and smaller, respectively.
+Select Zoom, and in the console enter either 0 or 1 to zoom on the left and right pose, respectively.
 
-##### Stretch: with an object in the scene selected, use the arrow keys to stretch the object in the appropriate direction. To stretch about the z axis, press the z key and use the left and right arrow keys.
+#### Scale
 
-##### Rotate: with an object in the scene selected, use the arrow keys to rotate the object in the appropriate direction. To rotate about the z axis, press the z key and use the left and right arrow keys.
+With an object in the scene selected (highlighted in red), use the up and down arrow keys to scale larger and smaller, respectively.
 
-##### Move: with an object in the scene selected, click and drag the object to move the object in the scene.*
+#### Stretch
 
-##### Request: select Request, and in the console enter the pose number to pop up a new rendering window.
+With an object in the scene selected (highlighted in red), use the arrow keys to stretch the object in the appropriate direction. To stretch about the z axis, press the z key and use the left and right arrow keys.
 
-##### Toggle: use the left and right arrow buttons on the bottom of the window to toggle between requested poses (if they exist).
+#### Rotate
 
-##### Output: upon clicking the Output button, user will be prompted to select the desired output format and whether they'd like to output each object separately or combined into one model.
+With an object in the scene selected (highlighted in red), use the arrow keys to rotate the object in the appropriate direction. To rotate about the z axis, press the z key and use the left and right arrow keys.
 
-*Note: there's an underlying issue where a placed object seems inverted or intersects with the background image during manipulation. To resolve, move the object using the "Move" operation, and the object will snap itself into the appropriate place.
+#### Move
+
+With an object in the scene selected (highlighted in red), click and drag the object to move the object in the scene.
+
+Note: there's an underlying issue where a placed object seems inverted or intersects with the background image during manipulation. To resolve this issue, use the Move tool to move the object slightly, and the object will pop itself into the appropriate place in front of the background image.
+
+#### Request New Pose
+
+Select Request, and either enter (1) the pose number (based on the PNG name) to retrieve in a static environment, or (2) the pose position to tell the calibration & actuation API to capture the new pose in the integrated system. Filenames of PNGs are passed into the function, new pose images are updated, and existing objects are transformed based on the pose info from the associated text file to reflect the pose change.
+
+#### Toggle
+
+Use the left and right arrow buttons on the bottom of the window to toggle between requested poses (if they exist).
+
+#### Output
+
+Click the Output button, and user will be prompted to select the desired output format (0 for .ply, 1 for .xyz, or 2 for .stl) and whether they'd like to output each object separately or combined into one model. Model(s) will be outputted to the build folder by utilizing a ```vtkSimplePointsWriter```, ```vtkPLYWriter```, ```vtkSTLWriter``` object to output the desired file format, and the window will close itself.
+
+### Other Key Algorithm
+
+#### "Snapping" Algorithm
+
+Used to attempt to "snap" a cube into its appropriate orientation based on the point cloud (.PCD) associated with the given pose. User clicks on the Draw followed by the Cube button, and selects the snap option. User then draws a bounding box around the object (right now only a cube) by clicking and dragging around the object. User then identifies a plane on the object and selects the four corners of the plane in order bottom left → top left → top right → bottom right. Each corner will be retrieved from the point cloud using the screen coordinates, and the object will initially be drawn centered in the bounding box to grab the corresponding corners on the model. These sets of points are then used in the ``Kabsch Algorithm`` to retrieve the optimal rotation matrix to transform one sets of points to the others (in this case, rotate the model to reflect the orientation of the object in the point cloud), which is applied to the model to “snap” the object.

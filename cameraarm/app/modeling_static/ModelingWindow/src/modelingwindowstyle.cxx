@@ -40,9 +40,6 @@
 #include "modelingwindow.h"
 #include "modelingwindowstyle.h"
 
-//using namespace cv;
-typedef pcl::PointXYZ PointType;
-
 ModelingWindowStyle::ModelingWindowStyle() {
     // initialize struct for attributes
     attributes = new WindowStyleAttributes();
@@ -2188,6 +2185,9 @@ void ModelingWindowStyle::OutputSelected() {
 
     // call output
     Output();
+
+    // promtp user that model successfully outputted
+    std::cout << "\n--------Final 3D Model Outputted!--------" << std::endl;
 
     // close the window
     Interactor->TerminateApp();
