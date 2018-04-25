@@ -12,7 +12,7 @@ cameraarm/app/modeling_gui/
 
 Note: If not using lab machine, remove the build folder entirely to configure with your own system and follow these instructions:
 ```
-$ cd cameraarm/app/modeling_gui/ModelingWindow
+$ cd cameraarm/app/modeling_static/ModelingWindow
 $ mkdir build
 $ cd build
 $ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
