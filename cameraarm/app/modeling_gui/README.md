@@ -85,4 +85,4 @@ Use the left and right arrow buttons on the bottom of the window to toggle betwe
 Click the Output button, and user will be prompted to select the desired output format (0 for .ply, 1 for .xyz, or 2 for .stl) and whether they'd like to output each object separately or combined into one model. Model(s) will be outputted to the build folder by utilizing a ```vtkSimplePointsWriter```, ```vtkPLYWriter```, ```vtkSTLWriter``` object to output the desired file format, and the window will close itself.
 
 ###### For more info on communication with Calibration & Actuation API
-Refer to README outside of the ```cameraarm\``` folder.
+Refer to main README.
