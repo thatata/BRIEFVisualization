@@ -3,23 +3,21 @@
 Here is a basic overview of the functionality related specifically to the Modeling GUI
 
 **Note:**
-Code for most up-to-date modeling gui in a static environment can be found in:
+Code for the modeling gui implemented in the integrated system can be found in:
 ```
-cameraarm/app/modeling_static/
+cameraarm/app/modeling_gui/
 ```
 
 ## Building the project
 
 Note: If not using lab machine, remove the build folder entirely to configure with your own system and follow these instructions:
 ```
-$ cd cameraarm/app/modeling_gui/ModelingWindow
+$ cd cameraarm/app/modeling_static/ModelingWindow
 $ mkdir build
 $ cd build
 $ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
 $ make
 ```
-
-Note: It's helpful to use ccmake to visualize the cmake build process and link the necessary libraries yourself (e.g. replacing ```DVTK_DIR``` with correct path to VTK install, same with OpenCV_DIR, etc.) by replacing the cmake line with ```ccmake ..``` If not already installed, run ```sudo apt-get install cmake-curses-gui``` to install.
 
 ## Running the GUI
 ```
@@ -84,5 +82,8 @@ Use the left and right arrow buttons on the bottom of the window to toggle betwe
 
 Click the Output button, and user will be prompted to select the desired output format (0 for .ply, 1 for .xyz, or 2 for .stl) and whether they'd like to output each object separately or combined into one model. Model(s) will be outputted to the build folder by utilizing a ```vtkSimplePointsWriter```, ```vtkPLYWriter```, ```vtkSTLWriter``` object to output the desired file format, and the window will close itself.
 
-###### For more info on communication with Calibration & Actuation API
-Refer to main README.
+### Other Key Algorithm
+
+#### "Snapping"
+
+Used to attempt to "snap" a cube into its appropriate orientation based on the point cloud (.PCD) associated with the given pose. User clicks on the Draw followed by the Cube button, and selects the snap option. User then draws a bounding box around the object (right now only a cube) by clicking and dragging around the object. User then identifies a plane on the object and selects the four corners of the plane in order bottom left → top left → top right → bottom right. Each corner will be retrieved from the point cloud using the screen coordinates, and the object will initially be drawn centered in the bounding box to grab the corresponding corners on the model. These sets of points are then used in the [Kabsch Algorithm](https://en.wikipedia.org/wiki/Kabsch_algorithm) to retrieve the optimal rotation matrix to transform one sets of points to the others (in this case, rotate the model to reflect the orientation of the object in the point cloud), which is applied to the model to “snap” the object.

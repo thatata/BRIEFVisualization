@@ -1,0 +1,13 @@
+TVector
+ 1.5
+ 1.5
+-0.3
+
+RMatrix
+1 0 0
+0 1 0
+0 0 1
+
+Camera Intrinsics: focal height width
+575.816 480 640
+

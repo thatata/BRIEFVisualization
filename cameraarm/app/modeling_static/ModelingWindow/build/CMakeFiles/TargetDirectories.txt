@@ -1,0 +1,3 @@
+/home/thatata/workplace/source/sd/sd-18-hatata_magnan/cameraarm/app/modeling_static/ModelingWindow/build/CMakeFiles/edit_cache.dir
+/home/thatata/workplace/source/sd/sd-18-hatata_magnan/cameraarm/app/modeling_static/ModelingWindow/build/CMakeFiles/rebuild_cache.dir
+/home/thatata/workplace/source/sd/sd-18-hatata_magnan/cameraarm/app/modeling_static/ModelingWindow/build/CMakeFiles/ModelingWindow.dir
