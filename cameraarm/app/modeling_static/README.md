@@ -5,7 +5,7 @@ Here is a basic overview of the functionality related specifically to the Modeli
 **Note:**
 Code for the modeling gui implemented in the integrated system can be found in:
 ```
-cameraarm/app/modeling_static/
+cameraarm/app/modeling_gui/
 ```
 
 ## Building the project

@@ -3,7 +3,7 @@
 Here is a basic overview of the functionality related specifically to the Modeling GUI
 
 **Note:**
-Code for the modeling gui implemented in the integrated system can be found in:
+Code for most up-to-date modeling gui in a static environment can be found in:
 ```
 cameraarm/app/modeling_static/
 ```
