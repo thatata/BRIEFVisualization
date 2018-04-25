@@ -8,13 +8,29 @@ Code for the modeling gui implemented in the integrated system can be found in:
 cameraarm/app/modeling_static/
 ```
 
+## Building the project
+
+Note: If not using lab machine, remove the build folder entirely to configure with your own system and follow these instructions:
+```
+$ cd cameraarm/app/modeling_gui/ModelingWindow
+$ mkdir build
+$ cd build
+$ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
+$ make
+```
+
+## Running the GUI
+```
+$ ./ModelingWindow 44
+```
+
 ## Project Structure
 
 ###### Refer to design document, and .cxx files for commented and more detailed descriptions of each function
 
 #### ModelingMain
 
-Main method to run the modeling GUI. User runs the ```ModelingWindow``` executable with an integer argument for the number of static images in the build folder. Creates a ModelingWindow object passing in the number of images, which starts the window.
+Main method to run the modeling GUI. User runs the ```ModelingWindow``` executable with an integer argument for the number of static images in the build folder (e.g. 44). Creates a ModelingWindow object passing in the number of images, which starts the window.
 
 #### ModelingWindow
 
@@ -68,6 +84,6 @@ Click the Output button, and user will be prompted to select the desired output 
 
 ### Other Key Algorithm
 
-#### "Snapping" Algorithm
+#### "Snapping"
 
 Used to attempt to "snap" a cube into its appropriate orientation based on the point cloud (.PCD) associated with the given pose. User clicks on the Draw followed by the Cube button, and selects the snap option. User then draws a bounding box around the object (right now only a cube) by clicking and dragging around the object. User then identifies a plane on the object and selects the four corners of the plane in order bottom left → top left → top right → bottom right. Each corner will be retrieved from the point cloud using the screen coordinates, and the object will initially be drawn centered in the bounding box to grab the corresponding corners on the model. These sets of points are then used in the [Kabsch Algorithm](https://en.wikipedia.org/wiki/Kabsch_algorithm) to retrieve the optimal rotation matrix to transform one sets of points to the others (in this case, rotate the model to reflect the orientation of the object in the point cloud), which is applied to the model to “snap” the object.
