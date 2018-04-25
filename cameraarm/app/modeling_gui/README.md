@@ -10,7 +10,7 @@ cameraarm/app/modeling_static/
 
 ## Building the project
 
-Note: If not using lab machine, remove the build folder entirely to configure with your own system and follow these instructions:
+Note: If not using lab machine, remove the build folder entirely (along with the CMakeLists.txt.user file in ```ModelingWindow/```) to configure with your own system and follow these instructions:
 ```
 $ cd cameraarm/app/modeling_gui/ModelingWindow
 $ mkdir build

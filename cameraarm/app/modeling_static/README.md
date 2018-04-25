@@ -10,7 +10,7 @@ cameraarm/app/modeling_gui/
 
 ## Building the project
 
-Note: If not using lab machine, remove the build folder entirely to configure with your own system and follow these instructions:
+Note: If not using lab machine, remove the build folder entirely (along with the CMakeLists.txt.user file in ```ModelingWindow/```) to configure with your own system and follow these instructions:
 ```
 $ cd cameraarm/app/modeling_static/ModelingWindow
 $ mkdir build
@@ -18,6 +18,8 @@ $ cd build
 $ cmake -DVTK_DIR:PATH=/home/workstation5/workplace/source/VTK5.10.1/build ..
 $ make
 ```
+
+Note: It's helpful to use ccmake to visualize the cmake build process and link the necessary libraries yourself (e.g. replacing ```DVTK_DIR``` with correct path to VTK install, same with OpenCV_DIR, etc.) by replacing the cmake line with ```ccmake ..``` If not already installed, run ```sudo apt-get install cmake-curses-gui``` to install.
 
 ## Running the GUI
 ```
