@@ -1,6 +1,6 @@
 # BRIEF Modeling GUI
 
-### Here is a basic overview of the functionality related specifically to the Modeling GUI
+Here is a basic overview of the functionality related specifically to the Modeling GUI
 
 **Note:**
 Code for the modeling gui implemented in the integrated system can be found in:
@@ -8,19 +8,19 @@ Code for the modeling gui implemented in the integrated system can be found in:
 cameraarm/app/modeling_static/
 ```
 
-#### Project Structure
+## Project Structure
 
-##### Refer to design document, and .cxx files for commented and more detailed descriptions of each function
+###### Refer to design document, and .cxx files for commented and more detailed descriptions of each function
 
-##### ModelingMain
+#### ModelingMain
 
 Main method to run the modeling GUI. User runs the ```ModelingWindow``` executable with an integer argument for the number of static images in the build folder. Creates a ModelingWindow object passing in the number of images, which starts the window.
 
-##### ModelingWindow
+#### ModelingWindow
 
 Object that builds the render window, and holds the ```vtkRenderWindowInteractor``` object responsible for starting the render window, or ```vtkRenderWindow``` object. Responsible for creating a ```ModelingWindowStyle``` object that handles interaction in the render window. Each front-end element on the window (e.g. buttons, images) are represented by a ```vtkRenderer``` object that handles it's own interaction. Each renderer is mapped, as well as the static pose PNG's in the build folder, and passed into the ```ModelingWindowStyle``` to handle interaction.
 
-##### ModelingWindowStyle
+#### ModelingWindowStyle
 
 Object that is responsible for handling all interaction on the render window. User will interact with the window to build and manipulate 3D models. The ```ModelingWindowStyle``` object is responsible for all of the operations listed below, and quits the render window upon outputting the final model to the build folder.
 
@@ -70,4 +70,4 @@ Click the Output button, and user will be prompted to select the desired output 
 
 #### "Snapping" Algorithm
 
-Used to attempt to "snap" a cube into its appropriate orientation based on the point cloud (.PCD) associated with the given pose. User clicks on the Draw followed by the Cube button, and selects the snap option. User then draws a bounding box around the object (right now only a cube) by clicking and dragging around the object. User then identifies a plane on the object and selects the four corners of the plane in order bottom left → top left → top right → bottom right. Each corner will be retrieved from the point cloud using the screen coordinates, and the object will initially be drawn centered in the bounding box to grab the corresponding corners on the model. These sets of points are then used in the ``Kabsch Algorithm`` to retrieve the optimal rotation matrix to transform one sets of points to the others (in this case, rotate the model to reflect the orientation of the object in the point cloud), which is applied to the model to “snap” the object.
+Used to attempt to "snap" a cube into its appropriate orientation based on the point cloud (.PCD) associated with the given pose. User clicks on the Draw followed by the Cube button, and selects the snap option. User then draws a bounding box around the object (right now only a cube) by clicking and dragging around the object. User then identifies a plane on the object and selects the four corners of the plane in order bottom left → top left → top right → bottom right. Each corner will be retrieved from the point cloud using the screen coordinates, and the object will initially be drawn centered in the bounding box to grab the corresponding corners on the model. These sets of points are then used in the [Kabsch Algorithm](https://en.wikipedia.org/wiki/Kabsch_algorithm) to retrieve the optimal rotation matrix to transform one sets of points to the others (in this case, rotate the model to reflect the orientation of the object in the point cloud), which is applied to the model to “snap” the object.
